@@ -681,7 +681,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	// rhs for variances
 	static double *A_mem = new double[nvar*nvar];
 	Afunc(phi, t, Theta, A_mem);
-	static MA2 A(A_mem, shape(nvar,nvar), deleteDataWhenDone, ColumnMajorArray<2>());
+	static MA2 A(A_mem, shape(nvar,nvar), neverDeleteData, ColumnMajorArray<2>());
 
 #ifdef DEBUG
 	cout << "A " << endl << A << endl;
