@@ -59,7 +59,7 @@ public:
 			const SS_FLAG SS_flag, outputStruct &output, const Vector &tspan,
 			const Array<int,1> &varObs, const double *merr);
 
-	int check_flag(void *flagvalue, char *funcname, int opt);
+	int check_flag(void *flagvalue, const char *funcname, int opt);
 
 	// CVODEs function types must be static!
 	static int fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data);
@@ -104,9 +104,9 @@ private:
 	 	 *ySout_1, // first order
 	 	 *ySout_2;
 
-	 int flag, flagr, iout;
-	 int rootsfound[2];
-	 realtype reltol, tout;
+	 int flag, iout; //flagr,
+//	 int rootsfound[2];
+	 realtype reltol; //, tout;
 	 realtype *abstol_vec, *abstol_vec1, *abstol_vec2;
 
 };

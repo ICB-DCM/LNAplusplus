@@ -52,6 +52,10 @@ using namespace std;
 #define ATOL RCONST(1e-6)
 #define ATOLS RCONST(1e-6)
 
+void **myUserData_ptr;
+void *myUserData;
+
+#include "cvodes/cvodes_impl.h"
 
 int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 		const double *_Theta, const bool computeSens, const bool computeSens2,
@@ -292,6 +296,7 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 		}
 		// reinitialize with the new initial conditions vector
 		CVodeReInit(cvode_mem, t1, I);
+//		assert(((CVodeMem)cvode_mem)->cv_user_data == myUserData_ptr);
 
 		if (computeSens || computeSens2) {
 			// reinitialize with the new sensitivity vector
@@ -409,9 +414,6 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 		SigmaBlocks(all,all,i,i) 	= Sigma_t(all,all,i);
 		SigmaBlocks_ii 				= Sigma_t(all,all,i);
 
-#ifdef DEBUG
-		cout << SigmaBlocks_ii;
-#endif
 		// off diagonal elements
 		for (int ii=i+1; ii<N; ii++) {
 			// get the fundamental matrix from time i to time ii
@@ -419,25 +421,9 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 
 			firstIndex a; secondIndex b; thirdIndex c;
 			SigmaBlocks_i_ii = sum(SigmaBlocks_ii(a,c)*Fund_i_ii(b,c),c); // transpose!
-
-#ifdef DEBUG
-			cout << "SigmaBlocks(" << i << ", " << i << ")" << endl;
-			cout << SigmaBlocks_ii;
-
-			cout << "Fund(" << i << ", " << ii << ")" << endl;
-			cout << Fund_i_ii;
-
-			cout << "SigmaBlocks(" << i << ", " << ii << "): " << endl;
-			cout << SigmaBlocks_i_ii;
-#endif
 			SigmaBlocks(all,all,i,ii) = SigmaBlocks_i_ii;
 		}
 	}
-
-#ifdef DEBUG
-	cout << "SigmaBlocks " << endl;
-	cout << SigmaBlocks;
-#endif
 
 	// tensor views
 	static MA2 dSigmaBlocks_ii_r(nvar,nvar), dSigmaBlocks_i_ii_r(nvar,nvar),
@@ -538,15 +524,14 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 	}
 
 	for (int lVar1 = 0; lVar1<NvarObs; lVar1++) {
+		int var1=varObs(lVar1);
 		for (int lVar2 = 0; lVar2<NvarObs; lVar2++) {
+			int var2=varObs(lVar2);
+
 			for (int i=0; i<N; i++) {
 				for (int ii=i; ii<N; ii++) {
-					int var1=varObs(lVar1), var2=varObs(lVar2);
 					Sigma( lVar1, lVar2, i, ii) = SigmaBlocks(var1, var2, i, ii);
-#ifdef DEBUG
-					cout << "SigmaBlocks(" << var1 << ", " << var2 << ") " << SigmaBlocks(var1, var2, i, ii) << endl;
-					cout << "Sigma(" << lVar1 << ", " << lVar2 << ") " << Sigma( lVar1, lVar2, i, ii) << endl;
-#endif
+
 					if ((lVar1 == lVar2) && (i==ii))
 						Sigma(lVar1,lVar2,i,ii) += merr[lVar1]; // add measurement error to variances
 					if (ii>i)
@@ -621,7 +606,7 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 }
 
 
-int LNA::check_flag(void *flagvalue, char *funcname, int opt)
+int LNA::check_flag(void *flagvalue, const char *funcname, int opt)
 {
 	int *errflag;
 
@@ -650,7 +635,7 @@ int LNA::check_flag(void *flagvalue, char *funcname, int opt)
 
 int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	parameters *par = (parameters*)user_data;
-	static const int nvar 		= par->nvar, npar=par->npar;
+	static const int nvar 		= par->nvar;
 	const double 	*Theta 	= par->Theta;
 	// stoichiometric matrix
 	static MA2   S	= par->S->copy();
@@ -745,7 +730,7 @@ int LNA::Jac(long int N, realtype t,
 		N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
 
 	parameters *par = (parameters*)user_data;
-	int nvar 		= par->nvar, npar=par->npar;
+	int nvar 		= par->nvar;
 	const double 	*Theta 	= par->Theta;
 
 
@@ -779,7 +764,7 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 	// inv(M)*r
 
 	parameters *par = (parameters*)user_data;
-	int nvar 		= par->nvar, npar=par->npar;
+	int nvar 		= par->nvar; //, npar=par->npar;
 	const double 	*Theta 	= par->Theta;
 	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
 
@@ -820,7 +805,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	const double 	*Theta 	= par->Theta;
 	// stoichiometric matrix
 	static MA2   S	= par->S->copy();
-	const bool computeSens = par->computeSens, computeSens2 = par->computeSens2;
+	const bool computeSens2 = par->computeSens2;
 
 	const TinyVector<int,2> Sdim = S.shape();
 
@@ -856,8 +841,8 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	static double *A_mem = new double[nvar*nvar];
 
 	Afunc(phi, t, Theta, A_mem);
-//	static MA2 A(A_mem, shape(nvar, nvar), deleteDataWhenDone, ColumnMajorArray<2>());
-	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
+	static MA2 A(A_mem, shape(nvar, nvar), deleteDataWhenDone, ColumnMajorArray<2>());
+//	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
 
 	// explicit derivative of reaction flux f on theta
 	static double *dFdTheta_mem = new double[Nreact*npar];
@@ -1073,7 +1058,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		d2EdTheta2_tot +=	myd2EdTheta2(i,j,k,l);
 
 		// Variance
-		Range all = Range::all();
+//		Range all = Range::all();
 		vvvpp = d2AdTheta2_tot(i,k,l,m)*V(k,j);
 //		cout << "tmp5 j=0" << endl << tmp5(all,all,all,all,0) << endl;
 		Sens2_Var_dot 	=	sum(vvvpp(i,j,m,k,l),m);			// d2AdTheta_l_m * V
@@ -1438,14 +1423,14 @@ void LNA::initCVODES() {
 		NV_Ith_S(abstol,i) = ATOL;
 
 	/* Call CVodeCreate to create the solver memory and specify the
-	 * Backward Differentiation Formula and the use of a Newton iteration */
+	 * Backward Differentiation Formula and the use of a Newton iteration
 	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
 	if (check_flag((void *)cvode_mem, "CVodeCreate", 0))
 		throw runtime_error("CVodeCreate");
 
-	/* Call CVodeInit to initialize the integrator memory and specify the
+	 Call CVodeInit to initialize the integrator memory and specify the
 		 * user's right hand side function in y'=f(t,y), the inital time t0, and
-		 * the initial dependent variable vector y. */
+		 * the initial dependent variable vector y.
 	realtype t0=0.0; // gets reinitialized when computeLinearNoise() is called.
 	flag = CVodeInit(cvode_mem, &fundRHS, t0, y);
 	if (check_flag(&flag, "CVodeInit", 1))
@@ -1455,11 +1440,11 @@ void LNA::initCVODES() {
 	CVodeSetMaxConvFails(cvode_mem, 10);
 
 
-	/* Call CVodeSVtolerances to specify the scalar relative tolerance
-	 * and vector absolute tolerances */
+	 Call CVodeSVtolerances to specify the scalar relative tolerance
+	 * and vector absolute tolerances
 	flag = CVodeSVtolerances(cvode_mem, reltol, abstol);
 	if (check_flag(&flag, "CVodeSVtolerances", 1))
-		throw runtime_error("CVodeSVtolerances");
+		throw runtime_error("CVodeSVtolerances");*/
 
 	// SPECIFY THE LINEAR SOLVER
 
@@ -1505,15 +1490,48 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 
 	/* Reinitialize the ODE solver with the correct initial conditions,
 	 * parameters, and starting time*/
-	flag = CVodeReInit(cvode_mem, t0, y);
-	if(check_flag(&flag, "CVodeReInit", 1))
-		throw runtime_error("CVodeReInit");
+
+	if (cvode_mem != 0)
+		CVodeFree(&cvode_mem);
+
+	/* Call CVodeCreate to create the solver memory and specify the
+		 * Backward Differentiation Formula and the use of a Newton iteration */
+	// begin
+	cvode_mem = CVodeCreate(CV_BDF, CV_NEWTON);
+	if (check_flag((void *)cvode_mem, "CVodeCreate", 0))
+		throw runtime_error("CVodeCreate");
+
+	/* Call CVodeInit to initialize the integrator memory and specify the
+		 * user's right hand side function in y'=f(t,y), the inital time t0, and
+		 * the initial dependent variable vector y. */
+//	realtype t0=0.0; // gets reinitialized when computeLinearNoise() is called.
+	flag = CVodeInit(cvode_mem, &fundRHS, t0, y);
+	if (check_flag(&flag, "CVodeInit", 1))
+		throw runtime_error("CVodeInit");
+
+		// max number of convergence failures?
+	CVodeSetMaxConvFails(cvode_mem, 10);
+
+
+	/* Call CVodeSVtolerances to specify the scalar relative tolerance
+	 * and vector absolute tolerances */
+	flag = CVodeSVtolerances(cvode_mem, reltol, abstol);
+	if (check_flag(&flag, "CVodeSVtolerances", 1))
+		throw runtime_error("CVodeSVtolerances");
+	// end
+//
+//	flag = CVodeReInit(cvode_mem, t0, y);
+//	if(check_flag(&flag, "CVodeReInit", 1))
+//		throw runtime_error("CVodeReInit");
 
 	/* Attach User Data (theta etc)*/
 	flag = CVodeSetUserData(cvode_mem, (void*)&pars);
 	if (check_flag(&flag, "CVodeSetUserData", 1))
 		throw runtime_error("CVodeSetUserData");
 
+	myUserData_ptr = &((CVodeMem)cvode_mem)->cv_user_data;
+	myUserData = ((CVodeMem)cvode_mem)->cv_user_data;
+//	void *tmp = &((CVodeMem)cvode_mem)->cv_user_data;
 	/* Use the Krylov subspace GMRES method */
 	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
 	if (check_flag(&flag, "CVSpgmr", 1))
@@ -1531,142 +1549,29 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 
 	/* initialize sensitivity solver */
 	if (pars.computeSens2) {
-		if (!computeSens2) {
-			// computing 2nd order sensitivty but before were not
-			if (yS0 != yS0_2) {
-				// clear memory and reinit
-				if (yS0 != NULL)
-					CVodeSensFree(cvode_mem);
-
-				yS0 		= yS0_2;
-				abstol_vec 	= abstol_vec2;
-				ySout		= ySout_2;
-				flag = CVodeSensInit(cvode_mem, npar*(npar+1), CV_SIMULTANEOUS, &sensRhs, yS0);
-				if (check_flag(&flag, "CVodeSensInit", 1))
-					throw runtime_error("CVodeSensInit");
-				// set the tolerances
-				flag = CVodeSensSStolerances(cvode_mem, reltol, abstol_vec);
-				if(check_flag(&flag, "CVodeSensSStolerances", 1))
-					throw runtime_error("Error in CVodeSensSStolerances");
-			}
-		}
-	} else if (pars.computeSens) {
-		// was not previously enabled
-		if (yS0 != yS0_1) {
-			if (yS0 != NULL)
-				CVodeSensFree(cvode_mem);
-
-			yS0 		= yS0_1;
-			abstol_vec 	= abstol_vec1;
-			ySout		= ySout_1;
-			flag = CVodeSensInit(cvode_mem, npar, CV_SIMULTANEOUS, &sensRhs, yS0);
-			if (check_flag(&flag, "CVodeSensInit", 1))
-				throw runtime_error("CVodeSensInit");
-
-			flag = CVodeSensSStolerances(cvode_mem, reltol, abstol_vec);
-			if(check_flag(&flag, "CVodeSensSStolerances", 1))
-				throw runtime_error("Error in CVodeSensSStolerances");
-		}
-	} else if ( computeSens | computeSens2 ){
-		CVodeSensToggleOff(cvode_mem);
-	}
-/*
-
-	if ( (pars.computeSens && !computeSens ) || (pars.computeSens2 && !computeSens2) )
-	{
-		// now we are computing the sensitivities; before we were not
-		if ( pars.computeSens2 && (yS0 == yS0_2)) {
-			// now we are computing second order sens
-			// and this was also the case before, so just turn it back on again
-			flag = CVodeSensReInit(cvode_mem, CV_SIMULTANEOUS, yS0);
-			if (check_flag(&flag, "CVodeSensReInit", 1))
-				throw runtime_error("CVodeSensReInit");
-		} else if ( pars.computeSens2 && (yS0 == yS0_1)) {
-			// now we are computing second order sens
-			// but previously it was first order sens
-			// so clear the memory and initialize again
-			yS0 		= yS0_2;
-			abstol_vec 	= abstol_vec2;
-			ySout		= ySout_2;
-
-			CVodeSensFree(cvode_mem);
-			flag = CVodeSensInit(cvode_mem, npar*(npar+1), CV_SIMULTANEOUS, &sensRhs, yS0);
-			if (check_flag(&flag, "CVodeSensInit", 1))
-				throw runtime_error("CVodeSensInit");
-		} else if ( pars.computeSens2 && (yS0 == NULL) ) {
-			// previously was not comput sensitivities at all
-			// need to intialize
-			yS0 		= yS0_2;
-			abstol_vec 	= abstol_vec2;
-			ySout		= ySout_2;
-
-			flag = CVodeSensInit(cvode_mem, npar*(npar+1), CV_SIMULTANEOUS, &sensRhs, yS0);
-			if (check_flag(&flag, "CVodeSensInit", 1))
-				throw runtime_error("CVodeSensInit");
-
-		}
-		else if ( yS0==yS0_2 ) {
-			// not computing second order sensitivities
-			// but previously were, so need to free the memory and
-			// reinitialize
-			yS0 		= yS0_1;
-			abstol_vec 	= abstol_vec1;
-			ySout		= ySout_1;
-
-			CVodeSensFree(cvode_mem);
-			flag = CVodeSensInit(cvode_mem, npar, CV_SIMULTANEOUS, &sensRhs, yS0);
-			if (check_flag(&flag, "CVodeSensInit", 1))
-				throw runtime_error("CVodeSensInit");
-
-		} else if ( yS0 == yS0_1 ){
-			// computing first order sensitivities
-			// and was previously as well, just need to reinitialize
-			flag = CVodeSensReInit(cvode_mem, CV_SIMULTANEOUS, yS0);
-			if (check_flag(&flag, "CVodeSensReInit", 1))
-				throw runtime_error("CVodeSensReInit");
-		} else if ( yS0 == NULL) {
-			// never computed sensitivities before
-			// need to initialize
-			yS0 		= yS0_1;
-			abstol_vec 	= abstol_vec1;
-			ySout		= ySout_1;
-			flag = CVodeSensInit(cvode_mem, npar, CV_SIMULTANEOUS, &sensRhs, yS0);
-			if (check_flag(&flag, "CVodeSensInit", 1))
-				throw runtime_error("CVodeSensInit");
-		}
-		// yS0 is just the pointer to the memory for the sensitivity computation
-		// it will be populated inside the main computeLinearNoise() loop
-
+		yS0 		= yS0_2;
+		abstol_vec 	= abstol_vec2;
+		ySout		= ySout_2;
+		flag = CVodeSensInit(cvode_mem, npar*(npar+1), CV_SIMULTANEOUS, &sensRhs, yS0);
+		if (check_flag(&flag, "CVodeSensInit", 1))
+			throw runtime_error("CVodeSensInit");
 		// set the tolerances
 		flag = CVodeSensSStolerances(cvode_mem, reltol, abstol_vec);
 		if(check_flag(&flag, "CVodeSensSStolerances", 1))
-			throw runtime_error("Error in CVodeSensSStolerances");;
+			throw runtime_error("Error in CVodeSensSStolerances");
+	} else if (pars.computeSens) {
+		yS0 		= yS0_1;
+		abstol_vec 	= abstol_vec1;
+		ySout		= ySout_1;
+
+		flag = CVodeSensInit(cvode_mem, npar, CV_SIMULTANEOUS, &sensRhs, yS0);
+		if (check_flag(&flag, "CVodeSensInit", 1))
+			throw runtime_error("CVodeSensInit");
+
+		flag = CVodeSensSStolerances(cvode_mem, reltol, abstol_vec);
+		if(check_flag(&flag, "CVodeSensSStolerances", 1))
+			throw runtime_error("Error in CVodeSensSStolerances");
 	}
-
-	if (!pars.computeSens2 && computeSens2) {
-		if (!pars.computeSens) {
-			// no sensitivities
-			CVodeSensToggleOff(cvode_mem);
-		} else {
-			// switching to first order sensitivity
-			yS0 		= yS0_1;
-			abstol_vec 	= abstol_vec1;
-			ySout		= ySout_1;
-
-			CVodeSensFree(cvode_mem);
-			flag = CVodeSensInit(cvode_mem, npar, CV_SIMULTANEOUS, &sensRhs, yS0);
-			if (check_flag(&flag, "CVodeSensInit", 1))
-				throw runtime_error("CVodeSensInit");
-		}
-	}
-
-
-	if (!pars.computeSens && computeSens) {
-		// we were previously computing the sensitivities, but now they
-		// are disabled
-		CVodeSensToggleOff(cvode_mem);
-	}
-*/
 
 	/* update the state of the sensitivity computations for future calls */
 	computeSens 	= pars.computeSens;
@@ -1676,8 +1581,6 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 void LNA::setupSens(SS_FLAG SS_flag, MA3 &Sens_MRE, MA4 &Sens_Var, const parameters &pars) {
 	// initialize the first order sensitivity of the system
 	// sets up Sens_MRE and Sens_Var
-
-	const bool computeSens 		= pars.computeSens, computeSens2 = pars.computeSens2;
 	const double *Theta 		= pars.Theta;
 
 	int k;
@@ -1688,7 +1591,8 @@ void LNA::setupSens(SS_FLAG SS_flag, MA3 &Sens_MRE, MA4 &Sens_Var, const paramet
 	{
 		/* the initial conditions were specified, so the initial
 		sensitivities of the MRE are zero */
-		memset(S_0, 0.0, sizeof(double)*nvar*npar);
+//		for ()
+		memset(S_0, 0, sizeof(double)*nvar*npar);
 		for (int i=0; i<nvar; i++)
 			for (int j=0; j<nvar; j++)
 				Sens_MRE(j,npar-nvar+i,0) = (i==j); // sens of init cond wrt init cond is 1
@@ -1706,13 +1610,13 @@ void LNA::setupSens(SS_FLAG SS_flag, MA3 &Sens_MRE, MA4 &Sens_Var, const paramet
 			k++;
 		}
 	}
-	delete S_0;
+	delete[] S_0;
 
 	/* initial first order sensitivities of the variance 			*/
 	double *SV_0 = new double[ nvar*(nvar+1)/2 * npar];
 	if ( (SS_flag==SS_Y0) || (SS_flag==SS_NONE) ) {
 		// variance was specified explicitly, so sensitivity is zero at t=0
-		memset(SV_0, 0.0, sizeof(double)*nvar*(nvar+1)/2 * npar);
+		memset(SV_0, 0, sizeof(double)*nvar*(nvar+1)/2 * npar);
 	} else {
 		// assume steady state variance
 		SV0(Theta, SV_0);
@@ -1728,7 +1632,7 @@ void LNA::setupSens(SS_FLAG SS_flag, MA3 &Sens_MRE, MA4 &Sens_Var, const paramet
 					Sens_Var(lVar1,lVar2,0,lPar) = SV_0[k]; // symmetric
 				k++;
 			}
-	delete SV_0;
+	delete[] SV_0;
 
 	iout = 0;  //tout = tspan[1];
 }
@@ -1763,7 +1667,7 @@ void LNA::setupSens2(SS_FLAG SS_flag, MA4 &Sens2_MRE, MA5 &Sens2_Var, const para
 				Sens2_MRE(lVar,lPar1,lPar2,0) = S2_0[k];
 				k++;
 			}
-	delete S2_0;
+	delete[] S2_0;
 
 	// initial second order sensitivities of the variance
 	double *S2V_0 = new double[ nvar*(nvar+1)/2 *npar*npar];
@@ -1788,7 +1692,7 @@ void LNA::setupSens2(SS_FLAG SS_flag, MA4 &Sens2_MRE, MA5 &Sens2_Var, const para
 						Sens2_Var(lVar1,lVar2,0,lPar1,lPar2) 	= S2V_0[k]; // symmetric
 					k++;
 				}
-	delete S2V_0;
+	delete[] S2V_0;
 
 	iout = 0;  //tout = tspan[1];
 

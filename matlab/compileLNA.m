@@ -25,7 +25,7 @@ eval(cmd_compile)
 %% compile CPP code
 disp('Compiling LNA code')
 % 
-cmd_compile_cpp = ['mex -c ../C++/computeLinearNoise.cpp ../C++/LNA_Onset.cpp -Imodels/' model '/C '];
+cmd_compile_cpp = ['mex -c ../C++/computeLinearNoise.cpp ../C++/LNA_Onset.cpp -Imodels/' model '/C -I/usr/local/include'];
 %disp(cmd_compile_cpp)
 eval( cmd_compile_cpp )
 
