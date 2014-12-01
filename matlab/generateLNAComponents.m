@@ -12,7 +12,7 @@ function output = generateLNAComponents(modelName, S, reactionFlux, phi, Theta)
 %UsageMsg = 'Usage: ...';
 
 %% create directories to store the outputted scripts
-dirName = ['models/' modelName];
+dirName = modelName;
 if ~exist(dirName, 'dir')
     mkdir(dirName)
 end

@@ -8,8 +8,8 @@ module1 = Extension('birthDeathLNA',
 					'/opt/local/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/numpy/core/include/'], # '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/'],
                     libraries = ['stdc++.6', 'sundials_cvodes', 'blitz', 'sundials_nvecserial','python3.4'],
                     library_dirs = ['/usr/local/lib','/opt/local/Library/Frameworks/Python.framework/Versions/3.4/lib/'],
-                    #sources = ['../C++/LNAModule.cpp', '../C++/computeLinearNoise.cpp','../C++/main.cpp']+glob('C/*.c'),
-                    sources = ['../C++/computeLinearNoise.cpp','../C++/pyBirthDeath.cpp']+glob('C/*.c'), #'../C++/LNAModule.cpp', 
+                    #sources = ['../src/LNAModule.cpp', '../src/computeLinearNoise.cpp','../src/main.cpp']+glob('C/*.c'),
+                    sources = ['../src/computeLinearNoise.cpp','../src/pyBirthDeath.cpp']+glob('C/*.c'), #'../src/LNAModule.cpp', 
 					runtime_library_dirs=['/usr/local/lib'])
 
 

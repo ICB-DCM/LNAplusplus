@@ -35,7 +35,7 @@ Cobj = dir([model '/C/*.o']);
 
 % libstdcpp = ' /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libstdc++.dylib';
 cmd_link = [ sprintf('mex -cxx -output %s/%s_LNA_mex  computeLinearNoise.o LNA_Onset.o %s', ...
-    model, model, strjoin(fullfile(model, 'C', {Cobj.name}'))) ... libstdcpp ...
+    model, model, model, strjoin(fullfile('C', {Cobj.name}'))) ... libstdcpp ...
     ' -lsundials_cvodes -lsundials_nvecserial -lblitz -lstdc++']; 
     
 % disp(cmd_link);
@@ -91,10 +91,10 @@ wrapper_str = sprintf([
 '    varargout = {Y, Sigma};                                                                                \n'...
 'end                                                                                                        \n'...
 '                                                                                                           \n'], ...
-    model, model, model, model, model);
+    model, model, model, model, model, model);
 
 % write wrapper to a file
-f = fopen(sprintf('%s/%s_LNA.m',model,model), 'w');
+f = fopen([model '_LNA.m'], 'w');
 
 fprintf(f, '%s', wrapper_str);
 fclose(f);

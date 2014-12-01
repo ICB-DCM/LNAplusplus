@@ -12,7 +12,7 @@ module1 = Extension('myModuleLNA',
                     libraries = ['stdc++', 'sundials_cvodes', 'blitz', 'sundials_nvecserial'], #,'python3.4'],
                     library_dirs = ['/usr/local/lib', '/usr/lib/x86_64-linux-gnu/'],
                     sources = ['../src/computeLinearNoise.cpp', 'myModule/myModule_LNA.cpp']\
-						+ glob('myModule/C/*.c'), 
+						+ glob('models/myModule/C/*.c'), 
 					runtime_library_dirs=['/usr/local/lib'])
 					
 
