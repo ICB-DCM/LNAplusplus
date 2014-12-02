@@ -725,6 +725,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 
 }
 
+// system Jacobian df/dy
 int LNA::Jac(long int N, realtype t,
 		N_Vector y, N_Vector fy, DlsMat J, void *user_data,
 		N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
@@ -741,16 +742,18 @@ int LNA::Jac(long int N, realtype t,
 
 	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
 
-	double jac_mem[RHS_SIZE*RHS_SIZE];
+	double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
 	systemJacobian(phi,t,Theta,jac_mem);
 
-	MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone, ColumnMajorArray<2>());
+	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), neverDeleteData);
 
 	//	MA2 Jacobian(RHS_SIZE,RHS_SIZE,jac_mem);
 
 	for (int i=0; i<RHS_SIZE; i++)
 		for (int j=0; j<RHS_SIZE; j++)
 			DENSE_ELEM(J, i, j) = Jacobian(i,j);
+
+	delete[] jac_mem;
 
 	return 0;
 }
@@ -1532,15 +1535,28 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 	myUserData_ptr = &((CVodeMem)cvode_mem)->cv_user_data;
 	myUserData = ((CVodeMem)cvode_mem)->cv_user_data;
 //	void *tmp = &((CVodeMem)cvode_mem)->cv_user_data;
+
+	// Use the Dense Linear Solver
+	//flag = CVDense(cvode_mem, RHS_SIZE);
+	//if (check_flag(&flag, "CVDense", 1))
+	//	throw runtime_error("CVDense");
+
+	//// Specify the Jacobian function
+	//flag = CVDlsSetDenseJacFn(cvode_mem, &Jac);
+	//if (check_flag(&flag, "CVDlsSetDenseJacFn", 1))
+	//	throw runtime_error("CVDlsSetDenseJacFn");
+
+
+
 	/* Use the Krylov subspace GMRES method */
-	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
+	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
 	if (check_flag(&flag, "CVSpgmr", 1))
 		throw runtime_error("CVSpgmr");
-
-	/* Set the preconditioner matrix */
-	flag = CVSpilsSetPreconditioner(cvode_mem, NULL, Preconditioner);
-	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
-		throw runtime_error("CVSpilsSetPreconditioner");
+//
+//	/* Set the preconditioner matrix */
+//	flag = CVSpilsSetPreconditioner(cvode_mem, NULL, Preconditioner);
+//	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
+//		throw runtime_error("CVSpilsSetPreconditioner");
 
 	/* check if the state of the sensitivity computations changed
 	 * since the last time the solver was called.
