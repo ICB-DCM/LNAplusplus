@@ -61,7 +61,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta):
 	S2V0 = jacobian(SV0, Theta)
 
 	"subsitute steady state values"
-	subsPairs =  [(key, Y0[key]) for key in Y0]
+	subsPairs =  zip(list(Y0.keys()), list(Y0.values()))
 	V0 = V0.subs(subsPairs)
 	SV0 = SV0.subs(subsPairs)
 	S2V0 = S2V0.subs(subsPairs)
