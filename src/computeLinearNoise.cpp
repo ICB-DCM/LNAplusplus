@@ -38,8 +38,8 @@ extern "C" {
 #include "d2EdTheta2.h"
 #include "d2EdThetadPhi.h"
 #include "d2EdPhidTheta.h"
-#include "systemJacobian.h"
-#include "MI.h"
+//#include "systemJacobian.h"
+//#include "MI.h"
 #include "MODEL_DEF.h"
 }
 
@@ -730,6 +730,7 @@ int LNA::Jac(long int N, realtype t,
 		N_Vector y, N_Vector fy, DlsMat J, void *user_data,
 		N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
 
+	/*
 	parameters *par = (parameters*)user_data;
 	int nvar 		= par->nvar;
 	const double 	*Theta 	= par->Theta;
@@ -754,7 +755,7 @@ int LNA::Jac(long int N, realtype t,
 			DENSE_ELEM(J, i, j) = Jacobian(i,j);
 
 	delete[] jac_mem;
-
+	*/
 	return 0;
 }
 
@@ -765,7 +766,7 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 
 	// compute the preconditioner matix P as M=I-gamma*J, and then solve for z by computing
 	// inv(M)*r
-
+	/*
 	parameters *par = (parameters*)user_data;
 	int nvar 		= par->nvar; //, npar=par->npar;
 	const double 	*Theta 	= par->Theta;
@@ -791,6 +792,7 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 
 	for (int i=0; i<RHS_SIZE; i++)
 		NV_Ith_S(z,i) = myZ(i);
+	*/
 
 	return 0;
 

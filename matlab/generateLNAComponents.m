@@ -128,7 +128,7 @@ matlabFunction(d2AdPhidTheta, 'file', [dirName '/matlab/d2AdPhidTheta'], 'vars',
 matlabFunction(d2AdThetadPhi, 'file', [dirName '/matlab/d2AdThetadPhi'], 'vars', {phi, t, Theta});
 
 %% generate the C library
-disp('Compiling C objects')
+disp('Generating C source')
 % add the codegen tags to all the generated m files
 codegenify( [dirName '/matlab'] );
 
