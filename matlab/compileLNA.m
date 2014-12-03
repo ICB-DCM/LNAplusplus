@@ -40,7 +40,7 @@ cmd_link = [ sprintf('mex -cxx -output %s/%s_LNA_mex  computeLinearNoise.o LNA_O
     
 % disp(cmd_link);
 eval(cmd_link)
-eval('delete *.o')
+% eval('delete *.o')
 disp('Done')
 %% generate wrapper
 disp('Generating wrapper function')
