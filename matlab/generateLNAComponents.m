@@ -68,7 +68,7 @@ if isempty(Y0)
 end
 % [V0 systemJacobian MI] = solveSS_var(A,E,F,S,phi,Theta,sym(Y0));
 % [V0 systemJacobian] = solveSS_var(A,E,F,S,phi,Theta,Y0);
-V0 = solveSS_var(A,E,F,S,phi,Theta,Y0);
+V0 = solveSS_var(A,E,F,S,phi,Theta,phi0);
 %% initial sensitivities
 disp('computing initial sensitivities')
 

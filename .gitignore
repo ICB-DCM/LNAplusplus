@@ -1,0 +1,6 @@
+models/*
+*.a
+*.m
+*.pyc
+*.o
+*.mexmaci64
