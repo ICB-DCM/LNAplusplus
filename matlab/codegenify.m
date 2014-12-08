@@ -19,7 +19,7 @@ for i=1:N
             end
         end
         fprintf(f2, '%s\n', l);
-        fprintf('%s\n', l);
+%         fprintf('%s\n', l);
     end
     fclose(f);
     fclose(f2);

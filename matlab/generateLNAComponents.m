@@ -1,4 +1,4 @@
-function output = generateLNAComponents(modelName, S, reactionFlux, phi, Theta) 
+function output = generateLNAComponents(modelName, S, reactionFlux, phi, Theta, varargin) 
 % generate all of the necessary components for the LNA model for the model
 % with the given stoichiometric matrix S, and reactino flux vector
 % reactionFlux
@@ -9,7 +9,36 @@ function output = generateLNAComponents(modelName, S, reactionFlux, phi, Theta)
 %   given state and parameters
 %  phi: symbolic vector containing the macroscopic state variables
 %  Theta: the model parameters (symbolic)
+% optional arguments:
+%  computeSS: Can be 'Both' (default), 'Y0', 'V0', or 'None'.  
+%   'Y0': attempt to compute the steady state solution to the MRE
+%   'V0': attempt to compute the steady state solution to the Variance
+%   'Both': compute both (default)
+%   'None': do not attempt to compute the steady states.
 
+%% parse input
+if nargin > 5
+    computeSS = varargin{1};
+    switch computeSS
+        case 'Y0'
+            COMPUTE_Y0 = true;
+            COMPUTE_V0 = false;
+        case 'V0'
+            COMPUTE_Y0 = false;
+            COMPUTE_V0 = true;
+        case 'BOTH'
+            COMPUTE_Y0 = true;
+            COMPUTE_V0 = true;
+        case 'NONE'
+            COMPUTE_Y0 = false;
+            COMPUTE_V0 = false;
+        otherwise
+            error('computeSS must be either ''Y0'', ''V0'', ''BOTH'' or ''NONE''')
+    end
+else
+    COMPUTE_V0 = true;
+    COMPUTE_Y0 = true;        
+end
 %% create directories to store the outputted scripts
 dirName = modelName;
 if ~exist(dirName, 'dir')
@@ -62,28 +91,52 @@ dEdPhi      = Jacobian(E, phi);
 d2EdPhi2    = Jacobian(dEdPhi, phi);
 
 %% solve for the initial steady state 
-Y0 = solveSS_mre(S,F,phi,phi0);
-if isempty(Y0)
-    Y0 = @(Theta) error('Could not compute symbolic steady state.  Please supply initial condition');
+nvar = length(phi);
+npar = length(Theta)+nvar;
+
+if COMPUTE_Y0
+    Y0 = solveSS_mre(S,F,phi,phi0);
+    if isempty(Y0)
+        error('Could not compute symbolic steady state.  Please supply initial condition');
+    end
+else
+    Y0 = zeros(1,nvar); % placeholder
 end
 % [V0 systemJacobian MI] = solveSS_var(A,E,F,S,phi,Theta,sym(Y0));
 % [V0 systemJacobian] = solveSS_var(A,E,F,S,phi,Theta,Y0);
-V0 = solveSS_var(A,E,F,S,phi,Theta,phi0);
+
+if COMPUTE_V0
+    V0 = solveSS_var(A,E,F,S,phi,Theta,phi0);
+    if isempty(V0)
+        error('Could not compute symbolic steady state.  Please supply initial condition');
+    end
+else
+    V0 = zeros(1, nvar*(nvar+1)/2); % placeholder
+end
 %% initial sensitivities
 disp('computing initial sensitivities')
 
-% dY/dTheta
-S0  = Jacobian(Y0, Theta);
-% d2Y/dTheta2
-S20 = Jacobian(S0, Theta);
+if COMPUTE_Y0
+    % dY/dTheta
+    S0  = Jacobian(Y0, Theta);
+    % d2Y/dTheta2
+    S20 = Jacobian(S0, Theta);
+else
+   S0   = zeros(1,nvar*npar); % placeholder
+   S20  = zeros(1,nvar*npar*npar); % placeholder
+end
 
-% dV/dTheta
-SV0 = Jacobian(V0, Theta);
-% d2V/dTheta2
-S2V0 = Jacobian(SV0, Theta);
-
+if COMPUTE_V0
+    % dV/dTheta
+    SV0 = Jacobian(V0, Theta);
+    % d2V/dTheta2
+    S2V0 = Jacobian(SV0, Theta);
+else
+    SV0     = zeros(1,nvar*(nvar+1)/2*npar); % placeholder
+    S2V0    = zeros(1,nvar*(nvar+1)/2*npar*npar); % placeholder
+end
 %% mixed second derivatives
-
+disp('Computing Mixed Second Derivatives')
 d2AdPhidTheta = Jacobian(dAdPhi, Theta);
 d2AdThetadPhi = Jacobian(dAdTheta, phi);
 
@@ -138,7 +191,7 @@ olddir = cd([dirName '/matlab']);
 
 %     ' d2EdTheta -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
 
-codegen_cmd = sprintf(['codegen -config:lib -d %s '...
+codegen_cmd = sprintf(['codegen -c -config:lib -d %s '...
     ' reactionFlux -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' J -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' dFdTheta -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
@@ -165,10 +218,36 @@ codegen_cmd = sprintf(['codegen -config:lib -d %s '...
     ' V0 -args {zeros(1,NPAR)}' ... ' systemJacobian -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' -I /usr/include/c++/4.2.1/ -I /usr/include'], ...
     '../C');
+
 codegen_cmd = strrep(codegen_cmd, 'NVAR', int2str(length(phi)));
 codegen_cmd = strrep(codegen_cmd, 'NPAR', int2str(length(Theta)));
 
-eval(codegen_cmd);
+eval(codegen_cmd)
+% 
+% NVAR = int2str(length(phi));
+% NPAR = int2str(length(Theta));
+% 
+% objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
+%     'dAdPhi', 'd2AdPhi2', 'd2AdTheta2', 'd2AdThetadPhi', 'd2AdPhidTheta', ...
+%     'd2AdPhidTheta', 'Efunc', 'dEdTheta', 'd2EdTheta2', 'd2EdThetadPhi', ...
+%     'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2'};
+% 
+% for o=objs1
+%     fprintf('%s ', o{:})
+%     tic
+%     eval(sprintf('codegen -c -d ../C %s -args {zeros(1,%s),0,zeros(1,%s)}', o{:}, NVAR, NPAR))
+%     t=toc;
+%     fprintf('%0.3f\n', t);
+% end
+% 
+% objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
+% for o = objs2
+%     fprintf('%s ', o{:});
+%     tic
+%     eval(sprintf('codegen -c -d ../C %s -args {zeros(1,%s)}', o{:}, NPAR))
+%     t=toc;
+%     fprintf('%0.3f\n', t);
+% end
 
 %% generate MODEL_DEF file
 f = fopen('../C/MODEL_DEF.h', 'w');
@@ -176,6 +255,13 @@ fprintf(f, '#define STOICH_MAT %s\n', strjoin(cellfun(@num2str,num2cell(reshape(
 fprintf(f, '#define NVAR %d\n', length(phi));
 fprintf(f, '#define NPAR %d\n', length(Theta)-length(phi));
 fprintf(f, '#define NREACT %d\n', size(S,2));
+if COMPUTE_Y0
+    fprintf(f, '#define COMPUTE_Y0\n');
+end
+if COMPUTE_V0
+    fprintf(f, '#define COMPUTE_V0\n');
+end
+
 fclose(f);
 
 cd(olddir)
