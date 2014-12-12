@@ -36,7 +36,7 @@ Cobj = dir([model '/C/*.o']);
 % libstdcpp = ' /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libstdc++.dylib';
 cmd_link = [ sprintf('mex -cxx -output %s/%s_LNA_mex  computeLinearNoise.o LNA_Onset.o %s', ...
     model, model, strjoin(fullfile(model, 'C', {Cobj.name}'))) ... libstdcpp ...
-    ' -lsundials_cvodes -lsundials_nvecserial -lblitz -lstdc++']; 
+    ' -lsundials_cvodes -lsundials_nvecserial -lblitz -lstdc++ -lgsl -lgslcblas']; 
     
 % disp(cmd_link);
 eval(cmd_link)

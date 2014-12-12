@@ -113,6 +113,25 @@ if COMPUTE_V0
 else
     V0 = zeros(1, nvar*(nvar+1)/2); % placeholder
 end
+
+%% system Jacobian
+sysVar = phi;
+V = sym('V', [nvar nvar]);
+V = sym(V, 'real');
+for i=1:length(phi)
+    for j=1:i
+        sysVar = [sysVar, V(i,j)];
+    end
+end
+% fundamental matrix
+Phi = sym('Phi', [numel(phi), numel(phi)]);
+Phi = sym(Phi,'real');
+sysVar = [sysVar reshape(Phi,1,[])];
+dVdt = A*V + V*A' + subs(E*E.');
+RHS = [S*F'; dVdt(find(triu(ones(size(dVdt))))); reshape(A*Phi,[],1)];
+
+systemJacobian = Jacobian(RHS, sysVar);
+
 %% initial sensitivities
 disp('computing initial sensitivities')
 
@@ -160,8 +179,7 @@ matlabFunction(dEdTheta, 'file', [dirName '/matlab/dEdTheta'], 'vars', {phi, t, 
 matlabFunction(d2EdTheta2, 'file', [dirName '/matlab/d2EdTheta2'], 'vars', {phi, t, Theta});
 matlabFunction(dEdPhi, 'file', [dirName '/matlab/dEdPhi'], 'vars', {phi, t, Theta});
 matlabFunction(d2EdPhi2, 'file', [dirName '/matlab/d2EdPhi2'], 'vars', {phi, t, Theta});
-
-% matlabFunction(systemJacobian, 'file', [dirName '/matlab/systemJacobian'], 'vars', {phi, t, Theta});
+matlabFunction(systemJacobian, 'file', [dirName '/matlab/systemJacobian'], 'vars', {phi, t, Theta});
 
 gamma=sym('gamma','real');
 % matlabFunction(MI, 'file', [dirName '/matlab/MI'], 'vars', {phi, t, Theta, gamma});
@@ -215,7 +233,8 @@ codegen_cmd = sprintf(['codegen -c -config:lib -d %s '...
     ' SV0 -args {zeros(1,NPAR)}' ...
     ' S2V0 -args {zeros(1,NPAR)}' ...      
     ' Y0 -args {zeros(1,NPAR)}' ...    
-    ' V0 -args {zeros(1,NPAR)}' ... ' systemJacobian -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
+    ' V0 -args {zeros(1,NPAR)}' ... 
+    ' systemJacobian -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' -I /usr/include/c++/4.2.1/ -I /usr/include'], ...
     '../C');
 

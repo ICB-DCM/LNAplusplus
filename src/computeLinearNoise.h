@@ -17,6 +17,8 @@
 #include "cvodes/cvodes_dense.h"
 #include "cvodes/cvodes_spgmr.h"
 
+#include "gsl/gsl_matrix.h"
+
 class LNA
 {
 
@@ -45,6 +47,8 @@ public:
 
 		delete[] abstol_vec1;
 		delete[] abstol_vec2;
+
+		gsl_matrix_free(myJ);
 	}
 
 	enum SS_FLAG {
@@ -69,6 +73,9 @@ public:
 	static int Preconditioner(realtype t, N_Vector y, N_Vector fg, N_Vector r, N_Vector z,
 			realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp);
 
+	static int PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
+			realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
+
 	static int sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 			N_Vector *yS, N_Vector *yS_dot,
 			void *user_data, N_Vector tmp1, N_Vector tmp2);
@@ -91,6 +98,8 @@ private:
 
 	const int nvar, npar, RHS_SIZE;
 	const MA2 S;
+
+	static gsl_matrix *myJ; // system Jacobian
 
 	bool computeSens, computeSens2;
 

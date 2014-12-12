@@ -10,6 +10,10 @@
 #include <algorithm>
 #include <blitz/array.h>
 #include <blitz/tv2fastiter.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix_double.h>
+#include <gsl/gsl_blas.h>
+
 using namespace blitz;
 
 
@@ -38,7 +42,7 @@ extern "C" {
 #include "d2EdTheta2.h"
 #include "d2EdThetadPhi.h"
 #include "d2EdPhidTheta.h"
-//#include "systemJacobian.h"
+#include "systemJacobian.h"
 //#include "MI.h"
 #include "MODEL_DEF.h"
 }
@@ -56,6 +60,8 @@ void **myUserData_ptr;
 void *myUserData;
 
 #include "cvodes/cvodes_impl.h"
+
+gsl_matrix *LNA::myJ;
 
 int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 		const double *_Theta, const bool computeSens, const bool computeSens2,
@@ -666,7 +672,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	// rhs for variances
 	static double *A_mem = new double[nvar*nvar];
 	Afunc(phi, t, Theta, A_mem);
-	static MA2 A(A_mem, shape(nvar,nvar), neverDeleteData, ColumnMajorArray<2>());
+	static MA2 A(A_mem, shape(nvar,nvar), deleteDataWhenDone, ColumnMajorArray<2>());
 
 #ifdef DEBUG
 	cout << "A " << endl << A << endl;
@@ -730,7 +736,6 @@ int LNA::Jac(long int N, realtype t,
 		N_Vector y, N_Vector fy, DlsMat J, void *user_data,
 		N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
 
-	/*
 	parameters *par = (parameters*)user_data;
 	int nvar 		= par->nvar;
 	const double 	*Theta 	= par->Theta;
@@ -746,7 +751,7 @@ int LNA::Jac(long int N, realtype t,
 	double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
 	systemJacobian(phi,t,Theta,jac_mem);
 
-	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), neverDeleteData);
+	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
 
 	//	MA2 Jacobian(RHS_SIZE,RHS_SIZE,jac_mem);
 
@@ -754,8 +759,6 @@ int LNA::Jac(long int N, realtype t,
 		for (int j=0; j<RHS_SIZE; j++)
 			DENSE_ELEM(J, i, j) = Jacobian(i,j);
 
-	delete[] jac_mem;
-	*/
 	return 0;
 }
 
@@ -766,37 +769,117 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 
 	// compute the preconditioner matix P as M=I-gamma*J, and then solve for z by computing
 	// inv(M)*r
-	/*
+
 	parameters *par = (parameters*)user_data;
 	int nvar 		= par->nvar; //, npar=par->npar;
 	const double 	*Theta 	= par->Theta;
 	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
 
-	static double *MI_mem = new double[RHS_SIZE*RHS_SIZE];
+//	static double *MI_mem = new double[RHS_SIZE*RHS_SIZE];
 
 	double phi[nvar];
 	static MA2 V(nvar,nvar), Phi(nvar,nvar);
 
 	LNA::unpackYDot(y, phi, V, Phi);
-	MI(phi,t,Theta,gamma, MI_mem);
+//	MI(phi,t,Theta,gamma, MI_mem);
 
-	static MA2 myMI(MI_mem, shape(RHS_SIZE,RHS_SIZE), deleteDataWhenDone, ColumnMajorArray<2>());
+	// construct M
+	gsl_matrix *M = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE),
+			*MI = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
+	gsl_matrix_set_identity(M);
 
-	Vector myR(N_VGetArrayPointer_Serial(r), shape(RHS_SIZE), duplicateData);
+	gsl_matrix_scale(myJ, gamma);
+	gsl_matrix_sub(M,myJ); // M = I-gamma*J
 
-	firstIndex a;
-	secondIndex b;
-
-	static Vector myZ(RHS_SIZE);
-	myZ = sum( myMI(a,b)*myR(b), b);
+	// gsl residuals vector
+	gsl_vector *g_r = gsl_vector_alloc(RHS_SIZE);
+	double *r_data 	= NV_DATA_S(r);
 
 	for (int i=0; i<RHS_SIZE; i++)
-		NV_Ith_S(z,i) = myZ(i);
-	*/
+		gsl_vector_set(g_r, i, r_data[i]);
+
+	gsl_vector *g_y = gsl_vector_alloc(RHS_SIZE);
+	gsl_vector_set_all(g_y, 0.0);
+
+	// blas solve/vector  inv(M)*r
+
+	// invert M via LU decomposition
+	// allocate permutation matrix
+
+	gsl_permutation *P 	= gsl_permutation_alloc(RHS_SIZE);
+
+	int signum;
+	gsl_linalg_LU_decomp(M, P, &signum); // LU decomposition
+	gsl_linalg_LU_invert(M, P, MI); // inverse
+
+	// compute y=inv(M)*r
+	gsl_blas_dgemv(CblasNoTrans, 1.0, MI, g_r, 0.0, g_y);
+
+	// set N_VECTOR z
+	double *z_data = NV_DATA_S(z);
+	for (int i=0; i<RHS_SIZE; i++)
+	{
+		z_data[i] = gsl_vector_get(g_y, i);
+	}
+
+	// clean up
+	gsl_matrix_free(M);
+	gsl_matrix_free(MI);
+	gsl_vector_free(g_r);
+	gsl_vector_free(g_y);
+
+//	static MA2 myMI(MI_mem, shape(RHS_SIZE,RHS_SIZE), deleteDataWhenDone, ColumnMajorArray<2>());
+//
+//	Vector myR(N_VGetArrayPointer_Serial(r), shape(RHS_SIZE), duplicateData);
+//
+//	firstIndex a;
+//	secondIndex b;
+//
+//	static Vector myZ(RHS_SIZE);
+//	myZ = sum( myMI(a,b)*myR(b), b);
+//
+//	for (int i=0; i<RHS_SIZE; i++)
+//		NV_Ith_S(z,i) = myZ(i);
 
 	return 0;
 
 
+}
+
+int LNA::PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
+		realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
+/* compute the jacobian again if necessary for use in the preconditioner */
+
+	if (jok)
+	{
+		*jcurPtr = FALSE; // reused
+		return 0; // don't need to recompute the jacobian
+	}
+
+	parameters *par = (parameters*)user_data;
+	int nvar 		= par->nvar;
+	const double 	*Theta 	= par->Theta;
+
+
+	double phi[nvar];
+	static MA2 V(nvar,nvar), Phi(nvar,nvar);
+
+	LNA::unpackYDot(y, phi, V, Phi);
+
+	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
+
+	static double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
+	systemJacobian(phi,t,Theta,jac_mem);
+
+	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
+
+	// construct gsl matrix for Jacobian
+	for (int i=0; i<RHS_SIZE; i++)
+		for (int j=0; j<RHS_SIZE; j++)
+			gsl_matrix_set(myJ, i, j, Jacobian(i,j));
+
+	*jcurPtr = TRUE; // recomputed
+	return 0;
 }
 
 /* rhs to the sensitivity equations */
@@ -1488,6 +1571,10 @@ void LNA::initCVODES() {
 	for (int i=0; i<(npar*(npar+1)); i++)
 		abstol_vec2[i] = ATOLS;
 
+
+	// create the gsl matrix for the jacobian
+	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
+	myJ = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
 }
 
 
@@ -1538,27 +1625,29 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 	myUserData = ((CVodeMem)cvode_mem)->cv_user_data;
 //	void *tmp = &((CVodeMem)cvode_mem)->cv_user_data;
 
-	// Use the Dense Linear Solver
-	//flag = CVDense(cvode_mem, RHS_SIZE);
-	//if (check_flag(&flag, "CVDense", 1))
-	//	throw runtime_error("CVDense");
-
-	//// Specify the Jacobian function
-	//flag = CVDlsSetDenseJacFn(cvode_mem, &Jac);
-	//if (check_flag(&flag, "CVDlsSetDenseJacFn", 1))
-	//	throw runtime_error("CVDlsSetDenseJacFn");
+//	// Use the Dense Linear Solver
+//	flag = CVDense(cvode_mem, RHS_SIZE);
+//	if (check_flag(&flag, "CVDense", 1))
+//		throw runtime_error("CVDense");
+//
+//	// Specify the Jacobian function
+//	flag = CVDlsSetDenseJacFn(cvode_mem, &Jac);
+//	if (check_flag(&flag, "CVDlsSetDenseJacFn", 1))
+//		throw runtime_error("CVDlsSetDenseJacFn");
 
 
 
 	/* Use the Krylov subspace GMRES method */
-	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
+	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
+//	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
+
 	if (check_flag(&flag, "CVSpgmr", 1))
 		throw runtime_error("CVSpgmr");
 //
-//	/* Set the preconditioner matrix */
-//	flag = CVSpilsSetPreconditioner(cvode_mem, NULL, Preconditioner);
-//	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
-//		throw runtime_error("CVSpilsSetPreconditioner");
+	/* Set the preconditioner matrix */
+	flag = CVSpilsSetPreconditioner(cvode_mem, &PreconditionerSetup, Preconditioner);
+	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
+		throw runtime_error("CVSpilsSetPreconditioner");
 
 	/* check if the state of the sensitivity computations changed
 	 * since the last time the solver was called.
