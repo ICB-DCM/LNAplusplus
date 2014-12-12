@@ -929,8 +929,8 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	static double *A_mem = new double[nvar*nvar];
 
 	Afunc(phi, t, Theta, A_mem);
-	static MA2 A(A_mem, shape(nvar, nvar), deleteDataWhenDone, ColumnMajorArray<2>());
-//	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
+	// static MA2 A(A_mem, shape(nvar, nvar), deleteDataWhenDone, ColumnMajorArray<2>());
+	MA2 A(A_mem, shape(nvar, nvar), duplicateData); // TODO: clean up A somehow
 
 	// explicit derivative of reaction flux f on theta
 	static double *dFdTheta_mem = new double[Nreact*npar];
@@ -1638,16 +1638,16 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 
 
 	/* Use the Krylov subspace GMRES method */
-	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
-//	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
+//	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
+	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
 
 	if (check_flag(&flag, "CVSpgmr", 1))
 		throw runtime_error("CVSpgmr");
 //
 	/* Set the preconditioner matrix */
-	flag = CVSpilsSetPreconditioner(cvode_mem, &PreconditionerSetup, Preconditioner);
-	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
-		throw runtime_error("CVSpilsSetPreconditioner");
+//	flag = CVSpilsSetPreconditioner(cvode_mem, &PreconditionerSetup, Preconditioner);
+//	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
+//		throw runtime_error("CVSpilsSetPreconditioner");
 
 	/* check if the state of the sensitivity computations changed
 	 * since the last time the solver was called.
