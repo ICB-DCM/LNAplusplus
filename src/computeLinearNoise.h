@@ -72,6 +72,8 @@ public:
 			N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
 	static int Preconditioner(realtype t, N_Vector y, N_Vector fg, N_Vector r, N_Vector z,
 			realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp);
+	static int Preconditioner_diag(realtype t, N_Vector y, N_Vector fg, N_Vector r, N_Vector z,
+			realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp);
 
 	static int PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
 			realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);

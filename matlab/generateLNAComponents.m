@@ -1,4 +1,4 @@
-function output = generateLNAComponents(modelName, S, reactionFlux, phi, Theta, varargin) 
+function output = generateLNAComponents(modelName, S, F, phi, Theta, varargin) 
 % generate all of the necessary components for the LNA model for the model
 % with the given stoichiometric matrix S, and reactino flux vector
 % reactionFlux
@@ -61,33 +61,33 @@ phi0 = sym(phi0, 'real');
 
 Theta = [Theta, phi0]; % necessary for sensitivities wrt initial conditions
 
-F = reactionFlux(phi, t, Theta);
+reactionFlux = F(phi, t, Theta);
 
 % jacobian of flux vector
-J           = Jacobian(F, phi);
+J           = Jacobian(reactionFlux, phi);
 
 % df/dtheta
-dFdTheta    = Jacobian(F, Theta);
+dFdTheta    = Jacobian(reactionFlux, Theta);
 
 % d2f/dtheta2
 d2fdTheta2  = Jacobian(dFdTheta, Theta);
 
 % A
-A           = S*J;
+Afunc           = S*J;
 
 % sensitivities of A
-dAdTheta    = Jacobian(A, Theta);
-dAdPhi      = Jacobian(A,phi);
+dAdTheta    = Jacobian(Afunc, Theta);
+dAdPhi      = Jacobian(Afunc,phi);
 d2AdTheta2  = Jacobian(dAdTheta, Theta);
 d2AdPhi2    = Jacobian(dAdPhi, phi);
 
 % E
-E           = S*sqrt(diag(F));
+Efunc           = S*sqrt(diag(reactionFlux));
 
 % sensitivities of E
-dEdTheta    = Jacobian(E, Theta);
+dEdTheta    = Jacobian(Efunc, Theta);
 d2EdTheta2   = Jacobian(dEdTheta, Theta);
-dEdPhi      = Jacobian(E, phi);
+dEdPhi      = Jacobian(Efunc, phi);
 d2EdPhi2    = Jacobian(dEdPhi, phi);
 
 %% solve for the initial steady state 
@@ -95,7 +95,7 @@ nvar = length(phi);
 npar = length(Theta)+nvar;
 
 if COMPUTE_Y0
-    Y0 = solveSS_mre(S,F,phi,phi0);
+    Y0 = solveSS_mre(S,reactionFlux,phi,phi0);
     if isempty(Y0)
         error('Could not compute symbolic steady state.  Please supply initial condition');
     end
@@ -106,7 +106,7 @@ end
 % [V0 systemJacobian] = solveSS_var(A,E,F,S,phi,Theta,Y0);
 
 if COMPUTE_V0
-    V0 = solveSS_var(A,E,F,S,phi,Theta,phi0);
+    V0 = solveSS_var(Afunc,Efunc,reactionFlux,S,phi,Theta,phi0);
     if isempty(V0)
         error('Could not compute symbolic steady state.  Please supply initial condition');
     end
@@ -127,10 +127,11 @@ end
 Phi = sym('Phi', [numel(phi), numel(phi)]);
 Phi = sym(Phi,'real');
 sysVar = [sysVar reshape(Phi,1,[])];
-dVdt = A*V + V*A' + subs(E*E.');
-RHS = [S*F'; dVdt(find(triu(ones(size(dVdt))))); reshape(A*Phi,[],1)];
+dVdt = Afunc*V + V*Afunc' + subs(Efunc*Efunc.');
+RHS = [S*reactionFlux'; dVdt(find(triu(ones(size(dVdt))))); reshape(Afunc*Phi,[],1)];
 
 systemJacobian = Jacobian(RHS, sysVar);
+systemJacobian_diag = diag(systemJacobian); % just the diagonal
 
 %% initial sensitivities
 disp('computing initial sensitivities')
@@ -165,23 +166,24 @@ d2EdThetadPhi = Jacobian(dEdTheta, phi);
 %% generate the matlab functions based on these symbolic functions
 disp('Generating m-files')
 clear t, t=sym('t','real');
-matlabFunction(F, 'file', [dirName '/matlab/reactionFlux'], 'vars', {phi, t, Theta});
+matlabFunction(reactionFlux, 'file', [dirName '/matlab/reactionFlux'], 'vars', {phi, t, Theta});
 matlabFunction(J, 'file', [dirName '/matlab/J'], 'vars', {phi, t, Theta});
 matlabFunction(dFdTheta, 'file', [dirName '/matlab/dFdTheta'], 'vars', {phi, t, Theta});
 matlabFunction(d2fdTheta2, 'file', [dirName '/matlab/d2fdTheta2'], 'vars', {phi, t, Theta});
-matlabFunction(A, 'file', [dirName '/matlab/Afunc'], 'vars', {phi, t, Theta});
+matlabFunction(Afunc, 'file', [dirName '/matlab/Afunc'], 'vars', {phi, t, Theta});
 matlabFunction(dAdTheta, 'file', [dirName '/matlab/dAdTheta'], 'vars', {phi, t, Theta});
 matlabFunction(dAdPhi, 'file', [dirName '/matlab/dAdPhi'], 'vars', {phi, t, Theta});
 matlabFunction(d2AdTheta2, 'file', [dirName '/matlab/d2AdTheta2'], 'vars', {phi, t, Theta});
 matlabFunction(d2AdPhi2, 'file', [dirName '/matlab/d2AdPhi2'], 'vars', {phi, t, Theta});
-matlabFunction(E, 'file', [dirName '/matlab/Efunc'], 'vars', {phi, t, Theta});
+matlabFunction(Efunc, 'file', [dirName '/matlab/Efunc'], 'vars', {phi, t, Theta});
 matlabFunction(dEdTheta, 'file', [dirName '/matlab/dEdTheta'], 'vars', {phi, t, Theta});
 matlabFunction(d2EdTheta2, 'file', [dirName '/matlab/d2EdTheta2'], 'vars', {phi, t, Theta});
 matlabFunction(dEdPhi, 'file', [dirName '/matlab/dEdPhi'], 'vars', {phi, t, Theta});
 matlabFunction(d2EdPhi2, 'file', [dirName '/matlab/d2EdPhi2'], 'vars', {phi, t, Theta});
 matlabFunction(systemJacobian, 'file', [dirName '/matlab/systemJacobian'], 'vars', {phi, t, Theta});
+matlabFunction(systemJacobian_diag, 'file', [dirName '/matlab/systemJacobian_diag'], 'vars', {phi, t, Theta});
 
-gamma=sym('gamma','real');
+% gamma=sym('gamma','real');
 % matlabFunction(MI, 'file', [dirName '/matlab/MI'], 'vars', {phi, t, Theta, gamma});
 
 matlabFunction(sym(Y0), 'file', [dirName '/matlab/Y0'], 'vars', {Theta});
@@ -203,13 +205,13 @@ disp('Generating C source')
 % add the codegen tags to all the generated m files
 codegenify( [dirName '/matlab'] );
 
-% TODO: use the codegen configuration object to dynamically specify
-% dimensions of input arguments phi and theta
+% % TODO: use the codegen configuration object to dynamically specify
+% % dimensions of input arguments phi and theta
 olddir = cd([dirName '/matlab']);
 
 %     ' d2EdTheta -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
 
-codegen_cmd = sprintf(['codegen -c -config:lib -d %s '...
+codegen_cmd = sprintf(['codegen -config:lib -d %s '...
     ' reactionFlux -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' J -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' dFdTheta -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
@@ -234,6 +236,7 @@ codegen_cmd = sprintf(['codegen -c -config:lib -d %s '...
     ' S2V0 -args {zeros(1,NPAR)}' ...      
     ' Y0 -args {zeros(1,NPAR)}' ...    
     ' V0 -args {zeros(1,NPAR)}' ... 
+    ' systemJacobian_diag -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' systemJacobian -args {zeros(1,NVAR),0,zeros(1,NPAR)}' ...
     ' -I /usr/include/c++/4.2.1/ -I /usr/include'], ...
     '../C');
@@ -243,32 +246,55 @@ codegen_cmd = strrep(codegen_cmd, 'NPAR', int2str(length(Theta)));
 
 eval(codegen_cmd)
 % 
-% NVAR = int2str(length(phi));
-% NPAR = int2str(length(Theta));
+% % NVAR = int2str(length(phi));
+% % NPAR = int2str(length(Theta));
+% % 
+% % objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
+% %     'dAdPhi', 'd2AdPhi2', 'd2AdTheta2', 'd2AdThetadPhi', 'd2AdPhidTheta', ...
+% %     'd2AdPhidTheta', 'Efunc', 'dEdTheta', 'd2EdTheta2', 'd2EdThetadPhi', ...
+% %     'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2'};
+% % 
+% % for o=objs1
+% %     fprintf('%s ', o{:})
+% %     tic
+% %     eval(sprintf('codegen -c -d ../C %s -args {zeros(1,%s),0,zeros(1,%s)}', o{:}, NVAR, NPAR))
+% %     t=toc;
+% %     fprintf('%0.3f\n', t);
+% % end
+% % 
+% % objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
+% % for o = objs2
+% %     fprintf('%s ', o{:});
+% %     tic
+% %     eval(sprintf('codegen -c -d ../C %s -args {zeros(1,%s)}', o{:}, NPAR))
+% %     t=toc;
+% %     fprintf('%0.3f\n', t);
+% % end
+
+% %% generate C code
 % 
+% % requires phi, t, Theta
 % objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
 %     'dAdPhi', 'd2AdPhi2', 'd2AdTheta2', 'd2AdThetadPhi', 'd2AdPhidTheta', ...
 %     'd2AdPhidTheta', 'Efunc', 'dEdTheta', 'd2EdTheta2', 'd2EdThetadPhi', ...
-%     'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2'};
+%     'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2', 'systemJacobian', 'systemJacobian_diag'};
 % 
-% for o=objs1
-%     fprintf('%s ', o{:})
-%     tic
-%     eval(sprintf('codegen -c -d ../C %s -args {zeros(1,%s),0,zeros(1,%s)}', o{:}, NVAR, NPAR))
-%     t=toc;
-%     fprintf('%0.3f\n', t);
-% end
-% 
+% % requires only Theta
 % objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
-% for o = objs2
-%     fprintf('%s ', o{:});
-%     tic
-%     eval(sprintf('codegen -c -d ../C %s -args {zeros(1,%s)}', o{:}, NPAR))
-%     t=toc;
-%     fprintf('%0.3f\n', t);
+% addpath('../../../matlab')
+% for i = 1:length(objs1)
+%     fprintf('Generating %s source...\n', objs1{i})
+%     genCCode(eval(objs1{i}), objs1{i}, {phi, t, Theta});
 % end
+% 
+% for i = 1:length(objs2)
+%     fprintf('Generating %s source...\n', objs2{i})
+%     genCCode(eval(objs2{i}), objs2{i}, {Theta});
+% end    
+
 
 %% generate MODEL_DEF file
+disp('Generating model definition file')
 f = fopen('../C/MODEL_DEF.h', 'w');
 fprintf(f, '#define STOICH_MAT %s\n', strjoin(cellfun(@num2str,num2cell(reshape(S',1,[])), 'UniformOutput', false),','));
 fprintf(f, '#define NVAR %d\n', length(phi));

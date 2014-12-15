@@ -43,6 +43,7 @@ extern "C" {
 #include "d2EdThetadPhi.h"
 #include "d2EdPhidTheta.h"
 #include "systemJacobian.h"
+#include "systemJacobian_diag.h"
 //#include "MI.h"
 #include "MODEL_DEF.h"
 }
@@ -771,17 +772,9 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 	// inv(M)*r
 
 	parameters *par = (parameters*)user_data;
-	int nvar 		= par->nvar; //, npar=par->npar;
-	const double 	*Theta 	= par->Theta;
-	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
+	static const int nvar 		= par->nvar;
 
-//	static double *MI_mem = new double[RHS_SIZE*RHS_SIZE];
-
-	double phi[nvar];
-	static MA2 V(nvar,nvar), Phi(nvar,nvar);
-
-	LNA::unpackYDot(y, phi, V, Phi);
-//	MI(phi,t,Theta,gamma, MI_mem);
+	int RHS_SIZE = nvar*(nvar+3)/2 + nvar*nvar;
 
 	// construct M
 	gsl_matrix *M = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE),
@@ -843,6 +836,34 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 
 	return 0;
 
+
+}
+
+// preconditioner matrix using just the diagonal approximation to the Jacobian
+int LNA::Preconditioner_diag(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vector z,
+		realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp) {
+
+	parameters *par = (parameters*)user_data;
+	int nvar 		= par->nvar;
+	const double 	*Theta 	= par->Theta;
+
+	double phi[nvar];
+	static MA2 V(nvar,nvar), Phi(nvar,nvar);
+
+	LNA::unpackYDot(y, phi, V, Phi);
+
+	const int RHS_SIZE = nvar + (nvar*(nvar+1)/2) + nvar*nvar;
+
+	static double *jac_mem = new double[RHS_SIZE];
+	systemJacobian_diag(phi,t,Theta,jac_mem);
+
+	// M = I - gamma*J = diag(1 - sysJac)
+	// assign the output z = M^{-1}*r
+
+	for (int i=0; i<RHS_SIZE; i++) {
+		NV_Ith_S(z, i) = NV_Ith_S(r,i) /(1.0-gamma*jac_mem[i]);
+	}
+	return 0;
 
 }
 
@@ -929,8 +950,8 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	static double *A_mem = new double[nvar*nvar];
 
 	Afunc(phi, t, Theta, A_mem);
-	// static MA2 A(A_mem, shape(nvar, nvar), deleteDataWhenDone, ColumnMajorArray<2>());
-	MA2 A(A_mem, shape(nvar, nvar), duplicateData); // TODO: clean up A somehow
+	static MA2 A(A_mem, shape(nvar, nvar), deleteDataWhenDone, ColumnMajorArray<2>());
+//	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
 
 	// explicit derivative of reaction flux f on theta
 	static double *dFdTheta_mem = new double[Nreact*npar];
@@ -1635,11 +1656,9 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 //	if (check_flag(&flag, "CVDlsSetDenseJacFn", 1))
 //		throw runtime_error("CVDlsSetDenseJacFn");
 
-
-
 	/* Use the Krylov subspace GMRES method */
-//	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
-	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
+	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
+//	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
 
 	if (check_flag(&flag, "CVSpgmr", 1))
 		throw runtime_error("CVSpgmr");
@@ -1648,6 +1667,11 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 //	flag = CVSpilsSetPreconditioner(cvode_mem, &PreconditionerSetup, Preconditioner);
 //	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
 //		throw runtime_error("CVSpilsSetPreconditioner");
+
+	// preconditioner using diag. approx to Jacobian
+	flag = CVSpilsSetPreconditioner(cvode_mem, NULL, Preconditioner_diag);
+	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
+		throw runtime_error("CVSpilsSetPreconditioner");
 
 	/* check if the state of the sensitivity computations changed
 	 * since the last time the solver was called.
