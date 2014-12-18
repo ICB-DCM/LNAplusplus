@@ -45,7 +45,7 @@ f=f.'; % use transpose of the symbolic object so that it's in the usual matlab c
 
 code = [sprintf('#include \"%s.h\"\n', fName), ...
     sprintf('void %s(%s double varOut[%d])\n{\n', fName, argsList, N), ...
-    sprintf('double A0[%d][%d];\n', size(f,1), size(f,2)), ...
+    sprintf('double (*A0)[%d][%d] = varOut;\n', size(f,1), size(f,2)), ...
     sprintf('memset(A0, 0.0, sizeof(double)*%d);\n', N)];
 
 % c version of the function
@@ -54,8 +54,8 @@ code = [sprintf('#include \"%s.h\"\n', fName), ...
 ccode(f, 'file', sprintf('../C/%s_tmp.c', fName));
 
 lines = fileread(sprintf('../C/%s_tmp.c', fName));
-lines = regexprep(lines, '(t\d+ =)', 'double $1');
-
+lines = regexprep(lines, '(t\d+ =)', 'double $1'); % declare temps
+lines = strrep(lines, 'A0', '(*A0)'); % declare temps
 delete(sprintf('../C/%s_tmp.c', fName));
 % varname = @(x) inputname(1);
 
@@ -74,8 +74,7 @@ code = [code, lines];
 
 
 % copy the result to the output variable
-code = [code, sprintf('\nmemcpy(varOut, A0, sizeof(double)*%d);\n', N), ...
-    '}'];
+code = [code, '}']; %sprintf('\nmemcpy(varOut, A0, sizeof(double)*%d);\n', N), '}'];
 
 % disp(code)
 
