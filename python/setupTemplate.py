@@ -1,6 +1,13 @@
 from distutils.core import setup, Extension
 from glob import glob
 from numpy import get_include
+import sys
+
+# require version 3.0+
+if sys.version_info.major < 3:
+	print('''LNA++: Please build module using Python version 3.0 or greater.
+	Aborting build.''')
+	sys.exit(1)
 
 numpyPath = get_include()
 
