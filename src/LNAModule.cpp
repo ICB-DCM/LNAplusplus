@@ -123,6 +123,23 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 
    LNA::SS_FLAG SS;
 
+   // check that initial conditions were supplied, if they are required i.e. SS was not computed when the model was generated
+   // MRE
+#ifndef COMPUTE_Y0
+   if (_y0 == NULL) {
+	  PyErr_SetString(LNAError, "Initial conditions for MRE must be explicitly supplied");
+	  return NULL;
+   }
+#endif
+
+   // variance
+#ifndef COMPUTE_V0
+   if (_V0 == NULL) {
+	  PyErr_SetString(LNAError, "Initial conditions for variance must be explicitly supplied");
+	  return NULL;
+   }
+#endif
+
    if ( (_y0 == NULL) && (_V0 == NULL)) {
 	SS = LNA::SS_BOTH;
    } else if ((_y0 == NULL) && (_V0 != NULL)) {

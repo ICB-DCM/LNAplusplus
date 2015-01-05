@@ -198,6 +198,11 @@ void mexFunction( int nlhs, mxArray *plhs[],
 			mexErrMsgIdAndTxt("LNA_Onset:Y0", "Incorrect dimensions for Y0");
 		Y0 = (double*)mxGetPr(Y0_Array);
 
+	} else {
+		#ifndef COMPUTE_Y0
+		// if not Y0 was not computed when generating the model, then it has to be specified at run time
+		mexErrMsgIdAndTxt("LNA_Onset:Y0", "Y0 must be explicitly specified");
+		#endif
 	}
 
 	/* V0 */
@@ -210,7 +215,13 @@ void mexFunction( int nlhs, mxArray *plhs[],
 		if (mxGetNumberOfElements(V0_Array) != nvar*(nvar+1)/2)
 			mexErrMsgIdAndTxt("LNA_Onset:V0", "Incorrect dimensions for V0");
 		V0 = (double*)mxGetPr(V0_Array);
+	} else {
+		#ifndef COMPUTE_V0
+		// if not V0 was not computed when generating the model, then it has to be specified at run time
+		mexErrMsgIdAndTxt("LNA_Onset:V0", "V0 must be explicitly specified");
+		#endif
 	}
+
 
 	/* check init. cond SS */
 	if ((Y0 == NULL) && (V0 == NULL))

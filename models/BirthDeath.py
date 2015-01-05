@@ -8,6 +8,7 @@ Created on Sat Aug  2 10:59:39 2014
 from sys import path
 path += ['../python']
 
+import LNA
 from LNA import *
 
 # name of module
@@ -32,11 +33,11 @@ f = lambda phi,t,Theta: \
 tups = generateLNAComponents(model, S, f, phi, Theta)
 
 # generate the C code
-t = Symbol('t', real=True) # symbolic time variable
-convertToC(model, S, tups, phi, t, Theta)
+npar = len(Theta) # number of parameters
+compileLNA(model, S, tups, npar)
 
 ############### run some simulations and show results ############### 
-
+path += ['modules']
 import BirthDeathLNA
 from numpy import arange
 
@@ -74,10 +75,10 @@ MRE,Sigma,dMRE,dSigma  = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True
 
 # compute the mean and temporal auto-covariance matrix specifying the initial conditions for mean and variance
 # compute also the first and second order sensitivities
-MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = birthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True, computeSens2=True)
+MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, obsVar=obsVar, computeSens=True, computeSens2=True)
 
 ## plots
-import matplotlib
+#import matplotlib
 import pylab
 from numpy import squeeze
 

@@ -765,9 +765,9 @@ int LNA::Jac(long int N, realtype t,
 
 
 // preconditioner matrix
-int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vector z,
-		realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp) {
-
+//int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vector z,
+//		realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp) {
+//
 //	// compute the preconditioner matix P as M=I-gamma*J, and then solve for z by computing
 //	// inv(M)*r
 //
@@ -834,10 +834,10 @@ int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vecto
 ////	for (int i=0; i<RHS_SIZE; i++)
 ////		NV_Ith_S(z,i) = myZ(i);
 //
-	return 0;
-
-
-}
+//	return 0;
+//
+//
+//}
 
 // preconditioner matrix using just the diagonal approximation to the Jacobian
 int LNA::Preconditioner_diag(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vector z,
@@ -870,7 +870,6 @@ int LNA::Preconditioner_diag(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_
 int LNA::PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
 		realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
 /* compute the jacobian again if necessary for use in the preconditioner */
-
 //	if (jok)
 //	{
 //		*jcurPtr = FALSE; // reused
@@ -1594,8 +1593,8 @@ void LNA::initCVODES() {
 
 
 	// create the gsl matrix for the jacobian
-	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
-	//myJ = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
+//	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
+//	myJ = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
 }
 
 
