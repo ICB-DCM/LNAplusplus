@@ -42,7 +42,7 @@ extern "C" {
 #include "d2EdTheta2.h"
 #include "d2EdThetadPhi.h"
 #include "d2EdPhidTheta.h"
-#include "systemJacobian.h"
+//#include "systemJacobian.h"
 #include "systemJacobian_diag.h"
 //#include "MI.h"
 #include "MODEL_DEF.h"
@@ -733,35 +733,35 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 }
 
 // system Jacobian df/dy
-int LNA::Jac(long int N, realtype t,
-		N_Vector y, N_Vector fy, DlsMat J, void *user_data,
-		N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
-
-	parameters *par = (parameters*)user_data;
-	int nvar 		= par->nvar;
-	const double 	*Theta 	= par->Theta;
-
-
-	double phi[nvar];
-	static MA2 V(nvar,nvar), Phi(nvar,nvar);
-
-	LNA::unpackYDot(y, phi, V, Phi);
-
-	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
-
-	double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
-	systemJacobian(phi,t,Theta,jac_mem);
-
-	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
-
-	//	MA2 Jacobian(RHS_SIZE,RHS_SIZE,jac_mem);
-
-	for (int i=0; i<RHS_SIZE; i++)
-		for (int j=0; j<RHS_SIZE; j++)
-			DENSE_ELEM(J, i, j) = Jacobian(i,j);
-
-	return 0;
-}
+//int LNA::Jac(long int N, realtype t,
+//		N_Vector y, N_Vector fy, DlsMat J, void *user_data,
+//		N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
+//
+//	parameters *par = (parameters*)user_data;
+//	int nvar 		= par->nvar;
+//	const double 	*Theta 	= par->Theta;
+//
+//
+//	double phi[nvar];
+//	static MA2 V(nvar,nvar), Phi(nvar,nvar);
+//
+//	LNA::unpackYDot(y, phi, V, Phi);
+//
+//	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
+//
+//	double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
+//	systemJacobian(phi,t,Theta,jac_mem);
+//
+//	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
+//
+//	//	MA2 Jacobian(RHS_SIZE,RHS_SIZE,jac_mem);
+//
+//	for (int i=0; i<RHS_SIZE; i++)
+//		for (int j=0; j<RHS_SIZE; j++)
+//			DENSE_ELEM(J, i, j) = Jacobian(i,j);
+//
+//	return 0;
+//}
 
 
 // preconditioner matrix
@@ -867,8 +867,8 @@ int LNA::Preconditioner_diag(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_
 
 }
 
-int LNA::PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
-		realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
+//int LNA::PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
+//		realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
 /* compute the jacobian again if necessary for use in the preconditioner */
 //	if (jok)
 //	{
@@ -899,8 +899,8 @@ int LNA::PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *
 //			gsl_matrix_set(myJ, i, j, Jacobian(i,j));
 //
 //	*jcurPtr = TRUE; // recomputed
-	return 0;
-}
+//return 0;
+//}
 
 /* rhs to the sensitivity equations */
 

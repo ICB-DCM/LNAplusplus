@@ -1,3 +1,6 @@
+from sys import path
+path += ['modules']
+
 import BirthDeathLNA
 from numpy import arange
 
@@ -34,7 +37,7 @@ MRE,Sigma,dMRE,dSigma  = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True
 
 # compute the mean and temporal auto-covariance matrix specifying the initial conditions for mean and variance
 # compute also the first and second order sensitivities
-MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = birthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True, computeSens2=True)
+MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True, computeSens2=True)
 
 ## plots
 import matplotlib
@@ -42,11 +45,11 @@ import pylab
 from numpy import squeeze
 
 # MRE
-pylab.plot(MRE.squeeze())
+pylab.plot(MRE[1,:].squeeze()) # just the protein
 pylab.show()
 
 # covariance matrix
-pylab.matshow(squeeze(Sigma))
+pylab.matshow(squeeze(Sigma[1,1,:,:])) # just the protein
 pylab.show()
 
 # sensitivity w.r.t. first model parameter

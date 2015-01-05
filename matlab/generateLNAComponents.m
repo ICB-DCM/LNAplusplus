@@ -95,7 +95,7 @@ nvar = length(phi);
 npar = length(Theta)+nvar;
 
 if COMPUTE_Y0
-    Y0 = solveSS_mre(S,reactionFlux,phi,phi0);
+    Y0 = solveSS_mre(S,reactionFlux,phi);
     if isempty(Y0)
         error('Could not compute symbolic steady state.  Please supply initial condition');
     end
@@ -315,25 +315,26 @@ disp('Done')
 
 end
 
-function Y0=solveSS_mre(S,F,phi,phi0) %#codegen
+function Y0=solveSS_mre(S,F,phi) %#codegen
 % solve for the steady state with the parameters specified
 
-t=0;
 F = reshape(F,[],1);
+tmp = solve(S*F,phi);
 % set the macroscopic flux to zero
+% fluxCellArray = mat2cell((S*subs(F, num2cell(phi), num2cell(phi0)))',1,ones(size(phi)));
+% phiCellArray  = mat2cell(phi0,1,ones(size(phi0)));
 
-fluxCellArray = mat2cell((S*subs(F, num2cell(phi), num2cell(phi0)))',1,ones(size(phi)));
-phiCellArray  = mat2cell(phi0,1,ones(size(phi0)));
-
-tmp=solve(fluxCellArray{:}, phiCellArray{:});
+% tmp=solve(fluxCellArray{:}, phiCellArray{:});
 
 if isempty(tmp)
     warning('Could not solve for steady state initial conditions.  Please supply the initial condition explicitly.')
     Y0 = [];
     return
 end
+tmp2 = struct2cell(tmp);
+Y0 = [tmp2{:}];
 
-for i=1:length(phi0), Y0(i)=tmp.(char(phi0(i))); end
+% for i=1:length(phi0), Y0(i)=tmp.(char(phi0(i))); end
 
 end
 

@@ -30,7 +30,7 @@ f = lambda phi,t,Theta: \
    [Theta[0], Theta[2]*phi[0], Theta[1]*phi[0], Theta[3]*phi[1]]
 
 # generate the LNA components
-tups = generateLNAComponents(model, S, f, phi, Theta)
+tups = generateLNAComponents(model, S, f, phi, Theta, computeSS='BOTH')
 
 # generate the C code
 npar = len(Theta) # number of parameters

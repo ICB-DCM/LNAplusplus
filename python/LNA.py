@@ -78,6 +78,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     "compute steady state variance"
     if COMPUTE_V0:
         V0 = solveSS_var(A,E,F,S,phi,Theta)
+        V0 = V0.subs(list(zip(phi,phi0)))
         "SS variance sensitivities"
         SV0  = jacobian(V0, Theta)
         S2V0 = jacobian(SV0, Theta)
@@ -176,6 +177,8 @@ def compileLNA(model, S, tups, npar):
     '''generate the C code, for python module'''
 
     # create output directory if necessary
+    if not os.path.isdir(model):
+        os.mkdir(model)
     if not os.path.isdir('%s/C/' % model):
         os.mkdir('%s/C/' % model)
 
@@ -192,15 +195,12 @@ def compileLNA(model, S, tups, npar):
 
     # generate MODEL_DEF.h
     f = open("%s/C/MODEL_DEF.h" % model, 'w')
-    f.writelines('''#define STOICH_MAT %s
-    #define NVAR %d
-    #define NPAR %d
-    #define NREACT %d''' % ( ','.join([str(item) for sublist in S.tolist() for item in sublist]), \
-    S.rows, npar, S.cols))
+    f.writelines(['#define STOICH_MAT %s\n' % ','.join([str(item) for sublist in S.tolist() for item in sublist]),
+	'#define NVAR %d\n' % S.rows, '#define NPAR %d\n' % npar, '#define NREACT %d\n' % S.cols])
 
     global COMPUTE_V0, COMPUTE_Y0
     if COMPUTE_Y0:
-        f.writelines('#define COMPUTE_Y0')
+        f.writelines('#define COMPUTE_Y0\n')
     if COMPUTE_V0:
         f.writelines('#define COMPUTE_V0')
 
