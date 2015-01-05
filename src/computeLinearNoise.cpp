@@ -10,9 +10,9 @@
 #include <algorithm>
 #include <blitz/array.h>
 #include <blitz/tv2fastiter.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_matrix_double.h>
-#include <gsl/gsl_blas.h>
+//#include <gsl/gsl_linalg.h>
+//#include <gsl/gsl_matrix_double.h>
+//#include <gsl/gsl_blas.h>
 
 using namespace blitz;
 
@@ -62,7 +62,7 @@ void *myUserData;
 
 #include "cvodes/cvodes_impl.h"
 
-gsl_matrix *LNA::myJ;
+//gsl_matrix *LNA::myJ;
 
 int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 		const double *_Theta, const bool computeSens, const bool computeSens2,
@@ -768,72 +768,72 @@ int LNA::Jac(long int N, realtype t,
 int LNA::Preconditioner(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_Vector z,
 		realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp) {
 
-	// compute the preconditioner matix P as M=I-gamma*J, and then solve for z by computing
-	// inv(M)*r
-
-	parameters *par = (parameters*)user_data;
-	static const int nvar 		= par->nvar;
-
-	int RHS_SIZE = nvar*(nvar+3)/2 + nvar*nvar;
-
-	// construct M
-	gsl_matrix *M = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE),
-			*MI = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
-	gsl_matrix_set_identity(M);
-
-	gsl_matrix_scale(myJ, gamma);
-	gsl_matrix_sub(M,myJ); // M = I-gamma*J
-
-	// gsl residuals vector
-	gsl_vector *g_r = gsl_vector_alloc(RHS_SIZE);
-	double *r_data 	= NV_DATA_S(r);
-
-	for (int i=0; i<RHS_SIZE; i++)
-		gsl_vector_set(g_r, i, r_data[i]);
-
-	gsl_vector *g_y = gsl_vector_alloc(RHS_SIZE);
-	gsl_vector_set_all(g_y, 0.0);
-
-	// blas solve/vector  inv(M)*r
-
-	// invert M via LU decomposition
-	// allocate permutation matrix
-
-	gsl_permutation *P 	= gsl_permutation_alloc(RHS_SIZE);
-
-	int signum;
-	gsl_linalg_LU_decomp(M, P, &signum); // LU decomposition
-	gsl_linalg_LU_invert(M, P, MI); // inverse
-
-	// compute y=inv(M)*r
-	gsl_blas_dgemv(CblasNoTrans, 1.0, MI, g_r, 0.0, g_y);
-
-	// set N_VECTOR z
-	double *z_data = NV_DATA_S(z);
-	for (int i=0; i<RHS_SIZE; i++)
-	{
-		z_data[i] = gsl_vector_get(g_y, i);
-	}
-
-	// clean up
-	gsl_matrix_free(M);
-	gsl_matrix_free(MI);
-	gsl_vector_free(g_r);
-	gsl_vector_free(g_y);
-
-//	static MA2 myMI(MI_mem, shape(RHS_SIZE,RHS_SIZE), deleteDataWhenDone, ColumnMajorArray<2>());
+//	// compute the preconditioner matix P as M=I-gamma*J, and then solve for z by computing
+//	// inv(M)*r
 //
-//	Vector myR(N_VGetArrayPointer_Serial(r), shape(RHS_SIZE), duplicateData);
+//	parameters *par = (parameters*)user_data;
+//	static const int nvar 		= par->nvar;
 //
-//	firstIndex a;
-//	secondIndex b;
+//	int RHS_SIZE = nvar*(nvar+3)/2 + nvar*nvar;
 //
-//	static Vector myZ(RHS_SIZE);
-//	myZ = sum( myMI(a,b)*myR(b), b);
+//	// construct M
+//	gsl_matrix *M = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE),
+//			*MI = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
+//	gsl_matrix_set_identity(M);
+//
+//	gsl_matrix_scale(myJ, gamma);
+//	gsl_matrix_sub(M,myJ); // M = I-gamma*J
+//
+//	// gsl residuals vector
+//	gsl_vector *g_r = gsl_vector_alloc(RHS_SIZE);
+//	double *r_data 	= NV_DATA_S(r);
 //
 //	for (int i=0; i<RHS_SIZE; i++)
-//		NV_Ith_S(z,i) = myZ(i);
-
+//		gsl_vector_set(g_r, i, r_data[i]);
+//
+//	gsl_vector *g_y = gsl_vector_alloc(RHS_SIZE);
+//	gsl_vector_set_all(g_y, 0.0);
+//
+//	// blas solve/vector  inv(M)*r
+//
+//	// invert M via LU decomposition
+//	// allocate permutation matrix
+//
+//	gsl_permutation *P 	= gsl_permutation_alloc(RHS_SIZE);
+//
+//	int signum;
+//	gsl_linalg_LU_decomp(M, P, &signum); // LU decomposition
+//	gsl_linalg_LU_invert(M, P, MI); // inverse
+//
+//	// compute y=inv(M)*r
+//	gsl_blas_dgemv(CblasNoTrans, 1.0, MI, g_r, 0.0, g_y);
+//
+//	// set N_VECTOR z
+//	double *z_data = NV_DATA_S(z);
+//	for (int i=0; i<RHS_SIZE; i++)
+//	{
+//		z_data[i] = gsl_vector_get(g_y, i);
+//	}
+//
+//	// clean up
+//	gsl_matrix_free(M);
+//	gsl_matrix_free(MI);
+//	gsl_vector_free(g_r);
+//	gsl_vector_free(g_y);
+//
+////	static MA2 myMI(MI_mem, shape(RHS_SIZE,RHS_SIZE), deleteDataWhenDone, ColumnMajorArray<2>());
+////
+////	Vector myR(N_VGetArrayPointer_Serial(r), shape(RHS_SIZE), duplicateData);
+////
+////	firstIndex a;
+////	secondIndex b;
+////
+////	static Vector myZ(RHS_SIZE);
+////	myZ = sum( myMI(a,b)*myR(b), b);
+////
+////	for (int i=0; i<RHS_SIZE; i++)
+////		NV_Ith_S(z,i) = myZ(i);
+//
 	return 0;
 
 
@@ -871,35 +871,35 @@ int LNA::PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *
 		realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3) {
 /* compute the jacobian again if necessary for use in the preconditioner */
 
-	if (jok)
-	{
-		*jcurPtr = FALSE; // reused
-		return 0; // don't need to recompute the jacobian
-	}
-
-	parameters *par = (parameters*)user_data;
-	int nvar 		= par->nvar;
-	const double 	*Theta 	= par->Theta;
-
-
-	double phi[nvar];
-	static MA2 V(nvar,nvar), Phi(nvar,nvar);
-
-	LNA::unpackYDot(y, phi, V, Phi);
-
-	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
-
-	static double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
-	systemJacobian(phi,t,Theta,jac_mem);
-
-	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
-
-	// construct gsl matrix for Jacobian
-	for (int i=0; i<RHS_SIZE; i++)
-		for (int j=0; j<RHS_SIZE; j++)
-			gsl_matrix_set(myJ, i, j, Jacobian(i,j));
-
-	*jcurPtr = TRUE; // recomputed
+//	if (jok)
+//	{
+//		*jcurPtr = FALSE; // reused
+//		return 0; // don't need to recompute the jacobian
+//	}
+//
+//	parameters *par = (parameters*)user_data;
+//	int nvar 		= par->nvar;
+//	const double 	*Theta 	= par->Theta;
+//
+//
+//	double phi[nvar];
+//	static MA2 V(nvar,nvar), Phi(nvar,nvar);
+//
+//	LNA::unpackYDot(y, phi, V, Phi);
+//
+//	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
+//
+//	static double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
+//	systemJacobian(phi,t,Theta,jac_mem);
+//
+//	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
+//
+//	// construct gsl matrix for Jacobian
+//	for (int i=0; i<RHS_SIZE; i++)
+//		for (int j=0; j<RHS_SIZE; j++)
+//			gsl_matrix_set(myJ, i, j, Jacobian(i,j));
+//
+//	*jcurPtr = TRUE; // recomputed
 	return 0;
 }
 
@@ -1595,7 +1595,7 @@ void LNA::initCVODES() {
 
 	// create the gsl matrix for the jacobian
 	const int RHS_SIZE = (nvar*(nvar+3)/2 + nvar*nvar);
-	myJ = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
+	//myJ = gsl_matrix_alloc(RHS_SIZE, RHS_SIZE);
 }
 
 

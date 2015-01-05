@@ -17,7 +17,7 @@
 #include "cvodes/cvodes_dense.h"
 #include "cvodes/cvodes_spgmr.h"
 
-#include "gsl/gsl_matrix.h"
+//#include "gsl/gsl_matrix.h"
 
 class LNA
 {
@@ -48,7 +48,7 @@ public:
 		delete[] abstol_vec1;
 		delete[] abstol_vec2;
 
-		gsl_matrix_free(myJ);
+		//gsl_matrix_free(myJ);
 	}
 
 	enum SS_FLAG {
@@ -101,7 +101,7 @@ private:
 	const int nvar, npar, RHS_SIZE;
 	const MA2 S;
 
-	static gsl_matrix *myJ; // system Jacobian
+	//static gsl_matrix *myJ; // system Jacobian
 
 	bool computeSens, computeSens2;
 
