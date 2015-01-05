@@ -172,7 +172,7 @@ def solveSS_var(A,E,F,S,phi,Theta):
     
     return V0
 
-def convertToC(model, S, tups, phi, t, Theta):
+def compileLNA(model, S, tups, npar):
     '''generate the C code, for python module'''
 
     # create output directory if necessary
@@ -181,7 +181,6 @@ def convertToC(model, S, tups, phi, t, Theta):
 
     for objs,args in tups:
         for x in objs:
-            print("Generating %s source" % objs[x])
             H,C=genCcode(objs[x], x, args)
             f=open("%s/C/%s.h" % (model,x), 'w')
             f.writelines(H)
@@ -197,7 +196,7 @@ def convertToC(model, S, tups, phi, t, Theta):
     #define NVAR %d
     #define NPAR %d
     #define NREACT %d''' % ( ','.join([str(item) for sublist in S.tolist() for item in sublist]), \
-    S.rows, len(Theta), S.cols))
+    S.rows, npar, S.cols))
 
     global COMPUTE_V0, COMPUTE_Y0
     if COMPUTE_Y0:
@@ -260,7 +259,7 @@ void %s(%s, double varOut[%d]);
     code = "#include \"%s.h\"\n" % fName
     code += "void %s(%s, double varOut[%d])\n" % (fName, argsList, N)
     #x = sum(f.reshape(len(f),1).tolist(),[])
-    print(f)
+    #print(f)
     x = sum(f.transpose().reshape(len(f),1).tolist(),[])
 
     code += "{\n"

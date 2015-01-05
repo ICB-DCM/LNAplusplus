@@ -33,11 +33,11 @@ f = lambda phi,t,Theta: \
 tups = generateLNAComponents(model, S, f, phi, Theta)
 
 # generate the C code
-t = Symbol('t', real=True) # symbolic time variable
-convertToC(model, S, tups, phi, t, Theta)
+npar = len(Theta) # number of parameters
+compileLNA(model, S, tups, npar)
 
 ############### run some simulations and show results ############### 
-
+path += ['modules']
 import BirthDeathLNA
 from numpy import arange
 

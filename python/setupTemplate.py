@@ -20,7 +20,9 @@ module1 = Extension('myModuleLNA',
                     library_dirs = ['/usr/local/lib', '/usr/lib/x86_64-linux-gnu/'],
                     sources = ['../src/computeLinearNoise.cpp', 'myModule/myModule_LNA.cpp']\
 						+ glob('myModule/C/*.c'), 
-					runtime_library_dirs=['/usr/local/lib'])
+					runtime_library_dirs=['/usr/local/lib'],
+					extra_compile_args=['-Wno-header-guard','-Wno-parentheses','-Wno-incompatible-pointer-types', '-Wno-unused-variable', 
+					'-Wno-c++11-compat-deprecated-writable-strings', '-Wno-unused-function', '-Wno-reorder'])
 					
 
 setup(name = 'myModuleLNA',
