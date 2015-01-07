@@ -10,6 +10,7 @@
 
 //#include "MultiArray.h"
 #include <blitz/array.h>
+
 using namespace blitz;
 
 typedef Array<double,1> Vector;
@@ -19,6 +20,9 @@ typedef Array<double,4> MA4;
 typedef Array<double,5> MA5;
 typedef Array<double,6> MA6;
 
+
+// will pass an object of type LNA into the usr_data for cvode
+class LNA;
 
 struct outputStruct {
 
@@ -41,11 +45,15 @@ struct outputStruct {
 
 };
 
+// CVODES user data
 typedef struct {
 	const int nvar, npar;
 	const MA2 	*S;
 	const double 	*Theta;
 	const bool computeSens, computeSens2;
+
+	LNA *lna;
+
 } parameters;
 
 #endif /* DATATYPES_H_ */
