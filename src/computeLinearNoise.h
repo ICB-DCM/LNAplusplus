@@ -29,9 +29,36 @@ public:
 	{
 		initCVODES();
 
+		const int Nreact = S.cols();
 		// default: no sensitivity computations
 		computeSens=false;
 		computeSens2=false;
+
+		// allocate memory
+		// fund RHS
+		flux_mem				= new double[Nreact];
+
+
+		// sens RHS
+		A_mem 					= new double[nvar*nvar];
+		dFdTheta_mem 			= new double[Nreact*npar];
+		dAdTheta_mem 			= new double[nvar*nvar*npar];
+		dEdTheta_mem 			= new double[nvar*Nreact*npar];
+		E_mem 					= new double[nvar*Nreact];
+		dAdPhi_mem 				= new double[nvar*nvar*nvar];
+		dEdPhi_mem 				= new double[nvar*Nreact*nvar];
+		d2fdTheta2_mem 			= new double[Nreact*npar*npar];
+
+		d2AdTheta2_mem 			= new double[nvar*nvar*npar*npar];
+		d2AdPhi2_mem 			= new double[nvar*nvar*nvar*nvar];
+		d2AdThetadPhi_mem 		= new double[nvar*nvar*npar*nvar];
+		d2AdPhidTheta_mem 		= new double[nvar*nvar*nvar*npar];
+		d2EdTheta2_mem 			= new double[nvar*Nreact*npar*npar];
+		d2EdPhi2_mem 			= new double[nvar*Nreact*nvar*nvar];
+		d2EdThetadPhi_mem 		= new double[nvar*Nreact*npar*nvar];
+		d2EdPhidTheta_mem		= new double[nvar*Nreact*nvar*npar];
+
+
 	};
 
 	~LNA() {
@@ -48,7 +75,25 @@ public:
 		delete[] abstol_vec1;
 		delete[] abstol_vec2;
 
-		//gsl_matrix_free(myJ);
+
+		delete[] flux_mem;
+		delete[] A_mem; // nvar*nvar
+		delete[] dFdTheta_mem;
+		delete[] dAdTheta_mem;
+		delete[] dEdTheta_mem;
+		delete[] E_mem;
+		delete[] dAdPhi_mem;
+		delete[] dEdPhi_mem;
+		delete[] d2fdTheta2_mem;
+		delete[] d2AdTheta2_mem;
+		delete[] d2AdPhi2_mem;
+		delete[] d2AdThetadPhi_mem;
+		delete[] d2AdPhidTheta_mem;
+		delete[] d2EdTheta2_mem;
+		delete[] d2EdPhi2_mem;
+		delete[] d2EdThetadPhi_mem;
+		delete[] d2EdPhidTheta_mem;
+
 	}
 
 	enum SS_FLAG {
@@ -95,6 +140,28 @@ public:
 	void setupSens2(SS_FLAG SS_flag, MA4 &Sens2_MRE, MA5 &Sens2_Var, const parameters &pars);
 
 
+	// memory for RHS components
+	// fund
+	double* flux_mem;
+
+	// sens
+	double *A_mem; // nvar*nvar
+	double *dFdTheta_mem;
+	double *dAdTheta_mem;
+	double *dEdTheta_mem;
+	double *E_mem;
+	double *dAdPhi_mem;
+	double *dEdPhi_mem;
+	double *d2fdTheta2_mem;
+
+	double *d2AdTheta2_mem;
+	double *d2AdPhi2_mem;
+	double *d2AdThetadPhi_mem;
+	double *d2AdPhidTheta_mem;
+	double *d2EdTheta2_mem;
+	double *d2EdPhi2_mem;
+	double *d2EdThetadPhi_mem;
+	double *d2EdPhidTheta_mem;
 
 private:
 
