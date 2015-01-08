@@ -136,7 +136,6 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 			Theta[npar-nvar+i] = y0[i];
 	}
 
-	// include a reference to the calling LNA instance
 	parameters pars = { nvar, npar, &S, Theta, computeSens, computeSens2, this };
 
 	// copy the initial conditions into the vector y for CVODES
@@ -661,7 +660,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	static const int Nreact 	= Sdim(1);
 
 	// get the reaction fluxes
-	static double* flux_mem = par->lna->flux_mem;
+	double* flux_mem = par->lna->flux_mem;
 	reactionFlux(phi, t,  Theta, flux_mem);
 	static Vector FluxVec(flux_mem, shape(Nreact), neverDeleteData);
 
@@ -753,7 +752,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 //	double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
 //	systemJacobian(phi,t,Theta,jac_mem);
 //
-//	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), neverDeleteData);
+//	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
 //
 //	//	MA2 Jacobian(RHS_SIZE,RHS_SIZE,jac_mem);
 //
@@ -822,7 +821,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 //	gsl_vector_free(g_r);
 //	gsl_vector_free(g_y);
 //
-////	static MA2 myMI(MI_mem, shape(RHS_SIZE,RHS_SIZE), neverDeleteData, ColumnMajorArray<2>());
+////	static MA2 myMI(MI_mem, shape(RHS_SIZE,RHS_SIZE), deleteDataWhenDone, ColumnMajorArray<2>());
 ////
 ////	Vector myR(N_VGetArrayPointer_Serial(r), shape(RHS_SIZE), duplicateData);
 ////
@@ -892,7 +891,7 @@ int LNA::Preconditioner_diag(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_
 //	static double *jac_mem = new double[RHS_SIZE*RHS_SIZE];
 //	systemJacobian(phi,t,Theta,jac_mem);
 //
-//	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), neverDeleteData);
+//	static MA2 Jacobian(jac_mem, shape(RHS_SIZE, RHS_SIZE), deleteDataWhenDone);
 //
 //	// construct gsl matrix for Jacobian
 //	for (int i=0; i<RHS_SIZE; i++)
@@ -947,10 +946,10 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	cout << Sens_Var;
 
 #endif
-	//static double *A_mem = new double[nvar*nvar];
 	double *A_mem = par->lna->A_mem;
 	Afunc(phi, t, Theta, A_mem);
 	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
+//	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
 
 	// explicit derivative of reaction flux f on theta
 	double *dFdTheta_mem = par->lna->dFdTheta_mem;
@@ -1052,12 +1051,11 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 		Sens2_MRE_dot 	= 0;
 		Sens2_Var_dot 	= 0;
-		Xi2_dot 		= 0;
+		Xi2_dot 	= 0;
 
 		double *d2fdTheta2_mem = par->lna->d2fdTheta2_mem;
 		d2fdTheta2(phi,t,Theta, d2fdTheta2_mem);
 		static MA3 myd2fdTheta2(d2fdTheta2_mem, shape(Nreact,npar,npar), neverDeleteData, ColumnMajorArray<3>());
-
 		static MA3 myd2FdTheta2(nvar,npar,npar);
 
 //		myd2FdTheta2=0;
@@ -1095,7 +1093,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		double *d2EdTheta2_mem 		= par->lna->d2EdTheta2_mem;
 		double *d2EdPhi2_mem 		= par->lna->d2EdPhi2_mem;
 		double *d2EdThetadPhi_mem 	= par->lna->d2EdThetadPhi_mem;
-		double *d2EdPhidTheta_mem	= par->lna->d2EdPhidTheta_mem;
+		double *d2EdPhidTheta_mem	= par->lna->d2EdThetadPhi_mem;
 
 		// evaluate functions
 		d2AdTheta2(phi,t,Theta,d2AdTheta2_mem);

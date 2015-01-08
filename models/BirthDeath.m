@@ -53,6 +53,7 @@ tspan = 0:0.1:10;
 
 %%
 % compute solution assuming steady state and no measurement error
+addpath('BirthDeath/')
 tic
 [MRE, Var] = BirthDeath_LNA(Theta, tspan);
 toc

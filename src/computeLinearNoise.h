@@ -75,6 +75,7 @@ public:
 		delete[] abstol_vec1;
 		delete[] abstol_vec2;
 
+//		printf("attempting to free memory\n");
 
 		delete[] flux_mem;
 		delete[] A_mem; // nvar*nvar
@@ -84,15 +85,17 @@ public:
 		delete[] E_mem;
 		delete[] dAdPhi_mem;
 		delete[] dEdPhi_mem;
-		delete[] d2fdTheta2_mem;
-		delete[] d2AdTheta2_mem;
-		delete[] d2AdPhi2_mem;
-		delete[] d2AdThetadPhi_mem;
-		delete[] d2AdPhidTheta_mem;
-		delete[] d2EdTheta2_mem;
-		delete[] d2EdPhi2_mem;
-		delete[] d2EdThetadPhi_mem;
-		delete[] d2EdPhidTheta_mem;
+		//delete[] d2fdTheta2_mem;
+		//delete[] d2AdTheta2_mem;
+//		delete[] d2AdPhi2_mem;
+//		delete[] d2AdThetadPhi_mem;
+//		delete[] d2AdPhidTheta_mem;
+//		delete[] d2EdTheta2_mem;
+//		delete[] d2EdPhi2_mem;
+//		delete[] d2EdThetadPhi_mem;
+//		delete[] d2EdPhidTheta_mem;
+		
+//		printf("Destroyed LNA object\n");
 
 	}
 
