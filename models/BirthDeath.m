@@ -171,10 +171,10 @@ delta=0.01;
 clear FD_MRE FD_Var
 
 for i=1:4
-    [MREa, Vara] = BirthDeath_LNA(tspan, Theta, merr, 2, y0, v0);
+    [MREa, Vara] = BirthDeath_LNA(Theta, tspan, 2,0, y0, v0);
     Thetab = Theta;
     Thetab(i) = Thetab(i)*(1+delta);
-    [MREb, Varb] = BirthDeath_LNA(tspan, Thetab, merr, 2, y0, v0);    
+    [MREb, Varb] = BirthDeath_LNA(Thetab, tspan, 2,0, y0, v0);    
     
     FD_MRE(i,:)     = (MREb-MREa)/(Theta(i)*delta);
     FD_Var(i,:,:)   = (Varb-Vara)/(Theta(i)*delta);
@@ -259,6 +259,9 @@ for i=1:4
 %         ylabel('Time (a.u.)')
         xlabel('Time (a.u.)','FontWeight','bold')
         k=k+1;
+        
+        clims(i,j,1) = min(min(squeeze(Sens2_Var(i,j,:,:))));
+        clims(i,j,2) = max(max(squeeze(Sens2_Var(i,j,:,:))));
     end
 end
 
@@ -268,9 +271,10 @@ clear FD_MRE FD_Var
 % y0 = [5 50];
 Theta = [20 25 10 1];
 y0 = [2 200];
-
-[MREa, Vara] = BirthDeath_LNA(tspan, Theta, merr, 2, y0, v0);
-
+% v0 = [10,1,500];
+merr=0;
+[MREa, Vara] = BirthDeath_LNA(Theta, tspan, 2, merr, y0, v0);
+ 
 deltaVec = 10^-1.3; % produces reasonable results with this perturbation size
 for d=1:length(deltaVec)
     delta=deltaVec(d);
@@ -284,8 +288,8 @@ for d=1:length(deltaVec)
                 Theta_f(i) = Theta(i)*(1+delta);
                 Theta_b(i) = Theta(i)*(1-delta);
 
-                [MRE_f, Var_f] = BirthDeath_LNA(tspan, Theta_f, merr, 2, y0, v0);
-                [MRE_b, Var_b] = BirthDeath_LNA(tspan, Theta_b, merr, 2, y0, v0);    
+                [MRE_f, Var_f] = BirthDeath_LNA(Theta_f, tspan, 2, merr, y0, v0);
+                [MRE_b, Var_b] = BirthDeath_LNA(Theta_b, tspan, 2, merr, y0, v0);    
 
                 FD_MRE(i,i,d,:)     = (MRE_f+MRE_b-2*MREa)/(Theta(i)*delta)^2;
                 FD_Var(i,i,d,:,:)   = (Var_f+Var_b-2*Vara)/(Theta(i)*delta)^2;
@@ -301,13 +305,13 @@ for d=1:length(deltaVec)
                 Theta_0b(j) = Theta(j)*(1-delta);
                 Theta_bb([i j]) = Theta([i j])*(1-delta);
 
-                [MRE_ff, Var_ff] = BirthDeath_LNA(tspan, Theta_ff, merr, 2, y0, v0);
-                [MRE_f0, Var_f0] = BirthDeath_LNA(tspan, Theta_f0, merr, 2, y0, v0);
-                [MRE_0f, Var_0f] = BirthDeath_LNA(tspan, Theta_0f, merr, 2, y0, v0);                
+                [MRE_ff, Var_ff] = BirthDeath_LNA(Theta_ff, tspan, 2, merr, y0, v0);
+                [MRE_f0, Var_f0] = BirthDeath_LNA(Theta_f0, tspan, 2, merr, y0, v0);
+                [MRE_0f, Var_0f] = BirthDeath_LNA(Theta_0f, tspan, 2, merr, y0, v0);                
 
-                [MRE_bb, Var_bb] = BirthDeath_LNA(tspan, Theta_bb, merr, 2, y0, v0);
-                [MRE_b0, Var_b0] = BirthDeath_LNA(tspan, Theta_b0, merr, 2, y0, v0);
-                [MRE_0b, Var_0b] = BirthDeath_LNA(tspan, Theta_0b, merr, 2, y0, v0);
+                [MRE_bb, Var_bb] = BirthDeath_LNA(Theta_bb, tspan, 2, merr, y0, v0);
+                [MRE_b0, Var_b0] = BirthDeath_LNA(Theta_b0, tspan, 2, merr, y0, v0);
+                [MRE_0b, Var_0b] = BirthDeath_LNA(Theta_0b, tspan, 2, merr, y0, v0);
 
                 FD_MRE(i,j,d,:)     = (MRE_ff - MRE_f0 - MRE_0f + 2*MREa - MRE_b0 - MRE_0b + MRE_bb)/(2*Theta(i)*Theta(j)*delta^2);
                 FD_Var(i,j,d,:,:)     = (Var_ff - Var_f0 - Var_0f + 2*Vara - Var_b0 - Var_0b + Var_bb)/(2*Theta(i)*Theta(j)*delta^2);
@@ -342,7 +346,7 @@ k=1;
 for i=1:4
     for j=1:4
         subplot(4,4,k)
-        imagesc(tspan,tspan,squeeze(FD_Var(i,j,1,:,:)))
+        imagesc(tspan,tspan,squeeze(FD_Var(i,j,1,:,:)), squeeze(clims(i,j,:))')
           if i==1
             title(labels{j})
         end        

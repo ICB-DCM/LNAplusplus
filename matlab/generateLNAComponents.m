@@ -133,6 +133,12 @@ RHS = [S*reactionFlux'; dVdt(find(triu(ones(size(dVdt))))); reshape(Afunc*Phi,[]
 systemJacobian = Jacobian(RHS, sysVar);
 systemJacobian_diag = diag(systemJacobian); % just the diagonal
 
+% preconditioner
+% gamma=sym('gamma','real');
+% M=eye(size(systemJacobian))-gamma*systemJacobian;
+
+% MI = pinv(M);
+
 %% initial sensitivities
 disp('computing initial sensitivities')
 
