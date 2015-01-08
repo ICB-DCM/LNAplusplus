@@ -272,7 +272,7 @@ void %s(%s, double varOut[%d]);
                 k += 1
 
     for i in range(N):
-        print(x[i])
+        #print(x[i])
         #xOut = parseString(str(x[i]))
         code += "varOut[%d] = %s;\n" % (i, printing.ccode(x[i]))
 

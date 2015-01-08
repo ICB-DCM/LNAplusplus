@@ -59,9 +59,9 @@ static int assignIntFromPyList(PyObject *inList, int *&outList) {
 }
 
 template <class T>
-static void copyOut(PyObject *obj, T &data_ptr) {
+static void copyOut(PyObject *obj, T *data_ptr) {
 	void *out_data = PyArray_DATA(obj);
-	memcpy( out_data, (void*)data_ptr.data(), sizeof(double) * data_ptr.size());
+	memcpy( out_data, (void*)data_ptr->data(), sizeof(double) * data_ptr->size());
 }
 
 
@@ -326,25 +326,25 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 
 
 	// output variables
-	MA2 Y(nObsVar,N);
-	MA4 Sigma(nObsVar, nObsVar, N, N);
-	MA3 traj_deriv(nObsVar, npar, N);
-	MA5 dSigma(nObsVar, nObsVar, N, N, npar);
+	MA2 *Y 		= new MA2(nObsVar,N);
+	MA4 *Sigma 	= new MA4(nObsVar, nObsVar, N, N);
+	MA3 *traj_deriv	= new MA3(nObsVar, npar, N);
+	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, N, N, npar);
 
 	// second order sens.
-	MA4 Sens2_MRE(nObsVar, npar, npar, N);
-	MA6 Sens2_Var(nObsVar, nObsVar, npar, npar, N, N);
+	MA4 *Sens2_MRE	= new MA4(nObsVar, npar, npar, N);
+	MA6 *Sens2_Var 	= new MA6(nObsVar, nObsVar, npar, npar, N, N);
 
 	// set to zero
-    Y = 0; Sigma=0; traj_deriv=0; dSigma=0; Sens2_MRE=0, Sens2_Var=0;
+    	*Y = 0; *Sigma=0; *traj_deriv=0; *dSigma=0; *Sens2_MRE=0; *Sens2_Var=0;
 
 //	outputStruct os;
-    os.Y 			= &Y;
-    os.traj_deriv 	= &traj_deriv;
-    os.Sigma 		= &Sigma;
-	os.dSigma 		= &dSigma;
-	os.Sens2_MRE 	= &Sens2_MRE;
-	os.Sens2_Var  	= &Sens2_Var;
+    	os.Y 			= Y;
+    	os.traj_deriv 		= traj_deriv;
+    	os.Sigma 		= Sigma;
+	os.dSigma 		= dSigma;
+	os.Sens2_MRE 		= Sens2_MRE;
+	os.Sens2_Var  		= Sens2_Var;
 
 //	/* temporary */
 //	double Theta_tmp[] = { 20., 25., 10., 1., 2., 200.};
@@ -481,16 +481,22 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 		Py_INCREF(d2Sigma_out);
 	}
 	/* clean up */
-//	if (y0 != NULL)
-//		delete[] y0;
-//	if (V0 != NULL)
-//		delete[] V0;
-//	if (merr != NULL)
-//		delete[] merr;
+	if (y0 != NULL)
+		delete[] y0;
+	if (V0 != NULL)
+		delete[] V0;
+	if (merr != NULL)
+		delete[] merr;
 
-//	delete[] Theta; //TODO: restore
+	delete[] Theta; //TODO: restore
 	Py_INCREF(ret);
-
+	delete Y;
+	delete Sigma;
+	delete traj_deriv;
+	delete dSigma;
+	delete Sens2_MRE;
+	delete Sens2_Var;
+	
 	return ret;
 }
 

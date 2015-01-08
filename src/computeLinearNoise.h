@@ -37,14 +37,16 @@ public:
 		// allocate memory
 		// fund RHS
 		flux_mem				= new double[Nreact];
+		A_fund_mem 				= new double[nvar*nvar];
+		E_fund_mem 				= new double[nvar*Nreact];
 
 
 		// sens RHS
-		A_mem 					= new double[nvar*nvar];
+		A_sens_mem 				= new double[nvar*nvar];
 		dFdTheta_mem 			= new double[Nreact*npar];
 		dAdTheta_mem 			= new double[nvar*nvar*npar];
 		dEdTheta_mem 			= new double[nvar*Nreact*npar];
-		E_mem 					= new double[nvar*Nreact];
+		E_sens_mem 				= new double[nvar*Nreact];
 		dAdPhi_mem 				= new double[nvar*nvar*nvar];
 		dEdPhi_mem 				= new double[nvar*Nreact*nvar];
 		d2fdTheta2_mem 			= new double[Nreact*npar*npar];
@@ -58,6 +60,10 @@ public:
 		d2EdThetadPhi_mem 		= new double[nvar*Nreact*npar*nvar];
 		d2EdPhidTheta_mem		= new double[nvar*Nreact*nvar*npar];
 
+		// jacobian
+		int RHS_SIZE = nvar + (nvar*(nvar+1)/2) + nvar*nvar;
+
+		jac_mem 				= new double[RHS_SIZE];
 
 	};
 
@@ -78,11 +84,15 @@ public:
 //		printf("attempting to free memory\n");
 
 		delete[] flux_mem;
-		delete[] A_mem; // nvar*nvar
+		delete[] A_fund_mem;
+		delete[] E_fund_mem;
+
 		delete[] dFdTheta_mem;
 		delete[] dAdTheta_mem;
 		delete[] dEdTheta_mem;
-		delete[] E_mem;
+//
+		delete[] A_sens_mem;
+		delete[] E_sens_mem;
 		delete[] dAdPhi_mem;
 		delete[] dEdPhi_mem;
 		//delete[] d2fdTheta2_mem;
@@ -96,6 +106,8 @@ public:
 //		delete[] d2EdPhidTheta_mem;
 		
 //		printf("Destroyed LNA object\n");
+
+		delete[] jac_mem;
 
 	}
 
@@ -146,13 +158,15 @@ public:
 	// memory for RHS components
 	// fund
 	double* flux_mem;
+	double* A_fund_mem;
+	double* E_fund_mem;
 
 	// sens
-	double *A_mem; // nvar*nvar
+	double *A_sens_mem;
+	double *E_sens_mem;
 	double *dFdTheta_mem;
 	double *dAdTheta_mem;
 	double *dEdTheta_mem;
-	double *E_mem;
 	double *dAdPhi_mem;
 	double *dEdPhi_mem;
 	double *d2fdTheta2_mem;
@@ -165,6 +179,8 @@ public:
 	double *d2EdPhi2_mem;
 	double *d2EdThetadPhi_mem;
 	double *d2EdPhidTheta_mem;
+
+	double *jac_mem;
 
 private:
 

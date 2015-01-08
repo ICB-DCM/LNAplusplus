@@ -40,18 +40,18 @@ MRE,Sigma,dMRE,dSigma  = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True
 MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True, computeSens2=True)
 
 ## plots
-import matplotlib
-import pylab
-from numpy import squeeze
+#import matplotlib
+#import pylab
+#from numpy import squeeze
 
 # MRE
-pylab.plot(MRE[1,:].squeeze()) # just the protein
-pylab.show()
+#pylab.plot(MRE[1,:].squeeze()) # just the protein
+#pylab.show()
 
 # covariance matrix
-pylab.matshow(squeeze(Sigma[1,1,:,:])) # just the protein
-pylab.show()
+#pylab.matshow(squeeze(Sigma[1,1,:,:])) # just the protein
+#pylab.show()
 
 # sensitivity w.r.t. first model parameter
-pylab.matshow(squeeze(dSigma[0,0,:,:,1]))
-pylab.show()
+#pylab.matshow(squeeze(dSigma[0,0,:,:,1]))
+#pylab.show()
