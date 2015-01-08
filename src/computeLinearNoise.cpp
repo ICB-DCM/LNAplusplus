@@ -672,14 +672,14 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	netChangeVec = sum(S(a,b)*FluxVec(b), b);
 
 	// rhs for variances
-	double *A_mem = par->lna->A_mem;
+	double *A_mem = par->lna->A_fund_mem;
 	Afunc(phi, t, Theta, A_mem);
 	static MA2 A(A_mem, shape(nvar,nvar), neverDeleteData, ColumnMajorArray<2>());
 
 #ifdef DEBUG
 	cout << "A " << endl << A << endl;
 #endif
-	double* E_mem = par->lna->E_mem;
+	double* E_mem = par->lna->E_fund_mem;
 	Efunc(phi, t, Theta, E_mem);
 	static MA2 E(E_mem, shape(nvar,Nreact), neverDeleteData, ColumnMajorArray<2>());
 
@@ -855,14 +855,13 @@ int LNA::Preconditioner_diag(realtype t, N_Vector y, N_Vector fy, N_Vector r, N_
 
 	const int RHS_SIZE = nvar + (nvar*(nvar+1)/2) + nvar*nvar;
 
-	static double *jac_mem = new double[RHS_SIZE];
-	systemJacobian_diag(phi,t,Theta,jac_mem);
+	systemJacobian_diag(phi,t,Theta,par->lna->jac_mem);
 
 	// M = I - gamma*J = diag(1 - sysJac)
 	// assign the output z = M^{-1}*r
 
 	for (int i=0; i<RHS_SIZE; i++) {
-		NV_Ith_S(z, i) = NV_Ith_S(r,i) /(1.0-gamma*jac_mem[i]);
+		NV_Ith_S(z, i) = NV_Ith_S(r,i) /(1.0-gamma*par->lna->jac_mem[i]);
 	}
 	return 0;
 
@@ -948,7 +947,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 #endif
 	//static double *A_mem = new double[nvar*nvar];
-	double *A_mem = par->lna->A_mem;
+	double *A_mem = par->lna->A_sens_mem;
 	Afunc(phi, t, Theta, A_mem);
 	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
 
@@ -984,7 +983,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	static MA3 mydEdTheta(dEdTheta_mem, shape(nvar, Nreact, npar), neverDeleteData, ColumnMajorArray<3>());
 
 	// E
-	double *E_mem = par->lna->E_mem;
+	double *E_mem = par->lna->E_sens_mem;
 	Efunc(phi,t,Theta,E_mem);
 	static MA2 E(E_mem, shape(nvar,Nreact), neverDeleteData, ColumnMajorArray<2>());
 
