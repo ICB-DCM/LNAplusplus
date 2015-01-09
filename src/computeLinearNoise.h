@@ -95,15 +95,15 @@ public:
 		delete[] E_sens_mem;
 		delete[] dAdPhi_mem;
 		delete[] dEdPhi_mem;
-		//delete[] d2fdTheta2_mem;
-		//delete[] d2AdTheta2_mem;
-//		delete[] d2AdPhi2_mem;
-//		delete[] d2AdThetadPhi_mem;
-//		delete[] d2AdPhidTheta_mem;
-//		delete[] d2EdTheta2_mem;
-//		delete[] d2EdPhi2_mem;
-//		delete[] d2EdThetadPhi_mem;
-//		delete[] d2EdPhidTheta_mem;
+		delete[] d2fdTheta2_mem;
+		delete[] d2AdTheta2_mem;
+		delete[] d2AdPhi2_mem;
+		delete[] d2AdThetadPhi_mem;
+		delete[] d2AdPhidTheta_mem;
+		delete[] d2EdTheta2_mem;
+		delete[] d2EdPhi2_mem;
+		delete[] d2EdThetadPhi_mem;
+		delete[] d2EdPhidTheta_mem;
 		
 //		printf("Destroyed LNA object\n");
 
