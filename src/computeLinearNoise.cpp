@@ -1093,7 +1093,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		double *d2EdTheta2_mem 		= par->lna->d2EdTheta2_mem;
 		double *d2EdPhi2_mem 		= par->lna->d2EdPhi2_mem;
 		double *d2EdThetadPhi_mem 	= par->lna->d2EdThetadPhi_mem;
-		double *d2EdPhidTheta_mem	= par->lna->d2EdThetadPhi_mem;
+		double *d2EdPhidTheta_mem	= par->lna->d2EdPhidTheta_mem;
 
 		// evaluate functions
 		d2AdTheta2(phi,t,Theta,d2AdTheta2_mem);
