@@ -482,7 +482,7 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 			dSigmaBlocks_ii	= Sens_Var(all,all,i,all); // dVdTheta
 
 			// tensor views
-			static MA3 dFund_i_ii(nvar,nvar,npar), dSigmaBlocks_ii(nvar,nvar,npar);
+			static MA3 dFund_i_ii(nvar,nvar,npar) ;
 			static MA4 d2Fund_i_ii(nvar,nvar,npar,npar), d2SigmaBlocks_ii(nvar,nvar,npar,npar),
 					d2SigmaBlocks_i_ii(nvar,nvar,npar,npar);
 			static MA5 vvvpp(nvar,nvar,nvar,npar,npar);

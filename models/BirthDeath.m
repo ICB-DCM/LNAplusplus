@@ -247,7 +247,11 @@ k=1;
 for i=1:4
     for j=1:4
         subplot(4,4,k)
-        imagesc(tspan,tspan,squeeze(Sens2_Var(i,j,:,:)))
+                
+        clims(i,j,1) = min(min(squeeze(Sens2_Var(i,j,:,:))));
+        clims(i,j,2) = max(max(squeeze(Sens2_Var(i,j,:,:))));
+        
+        imagesc(tspan,tspan,squeeze(Sens2_Var(i,j,:,:))) % squeeze(clims(i,j,:))')
 %         title(sprintf('Sensitivity(%s,%s)', labels{i}, labels{j}))
         if i==1
             title(labels{j})
@@ -260,9 +264,7 @@ for i=1:4
 %         ylabel('Time (a.u.)')
         xlabel('Time (a.u.)','FontWeight','bold')
         k=k+1;
-        
-        clims(i,j,1) = min(min(squeeze(Sens2_Var(i,j,:,:))));
-        clims(i,j,2) = max(max(squeeze(Sens2_Var(i,j,:,:))));
+
     end
 end
 
@@ -276,7 +278,8 @@ y0 = [2 200];
 merr=0;
 [MREa, Vara] = BirthDeath_LNA(Theta, tspan, 2, merr, y0, v0);
  
-deltaVec = 10^-1.3; % produces reasonable results with this perturbation size
+% deltaVec = 10.^-[1:5]; % produces reasonable results with this perturbation size
+deltaVec=10^-1.3;
 for d=1:length(deltaVec)
     delta=deltaVec(d);
 
@@ -344,10 +347,11 @@ legend({'Analytical','Finite Difference'})
 
 figure
 k=1;
+d=3;
 for i=1:4
     for j=1:4
         subplot(4,4,k)
-        imagesc(tspan,tspan,squeeze(FD_Var(i,j,1,:,:)), squeeze(clims(i,j,:))')
+        imagesc(tspan,tspan,squeeze(FD_Var(i,j,1,:,:)))%, squeeze(clims(i,j,:))')
           if i==1
             title(labels{j})
         end        
@@ -362,6 +366,13 @@ for i=1:4
 end
 
 %%
+close all
 
+figure
+plot(squeeze(Sens2_Var(1,3,50,:)))
+hold all
 
+for i=1:size(FD_Var,3)
+    plot(squeeze(FD_Var(1,3,i,50,:)))
+end
 
