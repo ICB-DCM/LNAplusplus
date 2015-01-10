@@ -593,7 +593,8 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 		for (int lVar1 = 0; lVar1<NvarObs; lVar1++)
 			// loop over cols of small covariance
 			for (int lVar2 = 0; lVar2<NvarObs; lVar2++) {
-				int var1=varObs(lVar1), var2=varObs(lVar2);
+				int var1=varObs(lVar1);
+				int var2=varObs(lVar2);
 				// loop over rows of big covariance
 				for (int i=0; i<N; i++)
 					// loop over cols of big covariance
@@ -662,7 +663,7 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	// get the reaction fluxes
 	double* flux_mem = par->lna->flux_mem;
 	reactionFlux(phi, t,  Theta, flux_mem);
-	static Vector FluxVec(flux_mem, shape(Nreact), neverDeleteData);
+	Vector FluxVec(flux_mem, shape(Nreact), neverDeleteData);
 
 	firstIndex a; secondIndex b;
 
@@ -673,14 +674,14 @@ int LNA::fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data) {
 	// rhs for variances
 	double *A_mem = par->lna->A_fund_mem;
 	Afunc(phi, t, Theta, A_mem);
-	static MA2 A(A_mem, shape(nvar,nvar), neverDeleteData, ColumnMajorArray<2>());
+	MA2 A(A_mem, shape(nvar,nvar), neverDeleteData, ColumnMajorArray<2>());
 
 #ifdef DEBUG
 	cout << "A " << endl << A << endl;
 #endif
 	double* E_mem = par->lna->E_fund_mem;
 	Efunc(phi, t, Theta, E_mem);
-	static MA2 E(E_mem, shape(nvar,Nreact), neverDeleteData, ColumnMajorArray<2>());
+	MA2 E(E_mem, shape(nvar,Nreact), neverDeleteData, ColumnMajorArray<2>());
 
 #ifdef DEBUG
 	cout << "E " << endl << E << endl;
@@ -948,13 +949,13 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	//static double *A_mem = new double[nvar*nvar];
 	double *A_mem = par->lna->A_sens_mem;
 	Afunc(phi, t, Theta, A_mem);
-	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
+	MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
 //	static MA2 A(A_mem, shape(nvar, nvar), neverDeleteData, ColumnMajorArray<2>());
 
 	// explicit derivative of reaction flux f on theta
 	double *dFdTheta_mem = par->lna->dFdTheta_mem;
 	dFdTheta(phi, t, Theta, dFdTheta_mem);
-	static MA2 mydfdtheta(dFdTheta_mem, shape(Nreact,npar), neverDeleteData, ColumnMajorArray<2>());
+	MA2 mydfdtheta(dFdTheta_mem, shape(Nreact,npar), neverDeleteData, ColumnMajorArray<2>());
 
 	//	RHS of sensitivities for MRE
 	static firstIndex i; secondIndex j; thirdIndex k;
@@ -975,17 +976,17 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	// dAdTheta
 	double *dAdTheta_mem = par->lna->dAdTheta_mem;
 	dAdTheta(phi, t, Theta, dAdTheta_mem);
-	static MA3 mydAdTheta( dAdTheta_mem, shape(nvar,nvar,npar), neverDeleteData, ColumnMajorArray<3>());
+	MA3 mydAdTheta( dAdTheta_mem, shape(nvar,nvar,npar), neverDeleteData, ColumnMajorArray<3>());
 
 	// dEdTheta
 	double *dEdTheta_mem = par->lna->dEdTheta_mem;
 	dEdTheta(phi,t,Theta,dEdTheta_mem);
-	static MA3 mydEdTheta(dEdTheta_mem, shape(nvar, Nreact, npar), neverDeleteData, ColumnMajorArray<3>());
+	MA3 mydEdTheta(dEdTheta_mem, shape(nvar, Nreact, npar), neverDeleteData, ColumnMajorArray<3>());
 
 	// E
 	double *E_mem = par->lna->E_sens_mem;
 	Efunc(phi,t,Theta,E_mem);
-	static MA2 E(E_mem, shape(nvar,Nreact), neverDeleteData, ColumnMajorArray<2>());
+	MA2 E(E_mem, shape(nvar,Nreact), neverDeleteData, ColumnMajorArray<2>());
 
 #ifdef DEBUG
 	cout << "phi " << phi[0] << " " << phi[1] <<endl;
@@ -1001,11 +1002,11 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 	double *dAdPhi_mem = par->lna->dAdPhi_mem;
 	dAdPhi(phi,t,Theta,dAdPhi_mem);
-	static MA3 mydAdPhi(dAdPhi_mem, shape(nvar,nvar,nvar), neverDeleteData, ColumnMajorArray<3>());
+	MA3 mydAdPhi(dAdPhi_mem, shape(nvar,nvar,nvar), neverDeleteData, ColumnMajorArray<3>());
 
 	double *dEdPhi_mem = par->lna->dEdPhi_mem;
 	dEdPhi(phi,t,Theta,dEdPhi_mem);
-	static MA3 mydEdPhi(dEdPhi_mem, shape(nvar,Nreact,nvar), neverDeleteData, ColumnMajorArray<3>());
+	MA3 mydEdPhi(dEdPhi_mem, shape(nvar,Nreact,nvar), neverDeleteData, ColumnMajorArray<3>());
 
 	/* compute the time derivative of the sensitivity of the covariance matrix */
 
@@ -1055,7 +1056,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 		double *d2fdTheta2_mem = par->lna->d2fdTheta2_mem;
 		d2fdTheta2(phi,t,Theta, d2fdTheta2_mem);
-		static MA3 myd2fdTheta2(d2fdTheta2_mem, shape(Nreact,npar,npar), neverDeleteData, ColumnMajorArray<3>());
+		MA3 myd2fdTheta2(d2fdTheta2_mem, shape(Nreact,npar,npar), neverDeleteData, ColumnMajorArray<3>());
 		static MA3 myd2FdTheta2(nvar,npar,npar);
 
 //		myd2FdTheta2=0;
@@ -1106,14 +1107,14 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		d2EdPhidTheta(phi,t,Theta,d2EdPhidTheta_mem);
 
 		// Array objects
-		static MA4 myd2AdTheta2(d2AdTheta2_mem, shape(nvar,nvar,npar,npar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2AdPhi2(d2AdPhi2_mem, shape(nvar,nvar,nvar,nvar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2AdThetadPhi(d2AdThetadPhi_mem, shape(nvar,nvar,npar,nvar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2AdPhidTheta(d2AdPhidTheta_mem, shape(nvar,nvar,nvar,npar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2EdTheta2(d2EdTheta2_mem, shape(nvar,Nreact,npar,npar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2EdPhi2(d2EdPhi2_mem, shape(nvar,Nreact,nvar,nvar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2EdThetadPhi(d2EdThetadPhi_mem, shape(nvar,Nreact,npar,nvar), neverDeleteData, ColumnMajorArray<4>());
-		static MA4 myd2EdPhidTheta(d2EdPhidTheta_mem, shape(nvar,Nreact,nvar,npar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2AdTheta2(d2AdTheta2_mem, shape(nvar,nvar,npar,npar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2AdPhi2(d2AdPhi2_mem, shape(nvar,nvar,nvar,nvar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2AdThetadPhi(d2AdThetadPhi_mem, shape(nvar,nvar,npar,nvar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2AdPhidTheta(d2AdPhidTheta_mem, shape(nvar,nvar,nvar,npar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2EdTheta2(d2EdTheta2_mem, shape(nvar,Nreact,npar,npar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2EdPhi2(d2EdPhi2_mem, shape(nvar,Nreact,nvar,nvar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2EdThetadPhi(d2EdThetadPhi_mem, shape(nvar,Nreact,npar,nvar), neverDeleteData, ColumnMajorArray<4>());
+		MA4 myd2EdPhidTheta(d2EdPhidTheta_mem, shape(nvar,Nreact,nvar,npar), neverDeleteData, ColumnMajorArray<4>());
 
 		// construct total second derivative of A and E WRT Theta
 		static MA4 d2AdTheta2_tot(nvar,nvar,npar,npar);

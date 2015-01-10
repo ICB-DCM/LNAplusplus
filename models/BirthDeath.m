@@ -25,11 +25,11 @@ S = [1 -1 0 0; % change to mRNA
     0 0 1 -1]; % change to protein
 
 addpath('../matlab')
-%%  define symbolic variables
+%  define symbolic variables
 syms k_m k_p g_m g_p real
 syms m p real
 
-%% define reaction fluxes
+% define reaction fluxes
 f = @(phi,t,Theta) ...
     [ Theta(1), Theta(3)*phi(1), Theta(2)*phi(1), Theta(4)*phi(2)];
 
@@ -37,10 +37,10 @@ phi     = [m,p]; % state vector
 Theta   = [k_m, k_p, g_m, g_p]; % parameter vector
 npar 	= length(Theta); % 4 parameters
 
-%% generate the C code for the components of the LNA model
+% generate the C code for the components of the LNA model
 generateLNAComponents(model, S, f, phi, Theta)
 
-%% compile code
+% compile code
 compileLNA(model, S, npar); 
 
 %%
@@ -117,7 +117,7 @@ title('Protein covariance matrix')
 %% specify initial values, variances
 
 y0 = [2, 200]; % inital values
-v0 = [10, 1, 500]; % variances
+v0 = [0, 0,0 ]; % variances
 % v0 = [variance(mRNA), covariance(mRNA,protein), variance(protein)]
 
 tic

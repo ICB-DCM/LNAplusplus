@@ -42,7 +42,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     dAdTheta    = jacobian(A,Theta)
     dAdPhi      = jacobian(A,phi)
     d2AdTheta2  = jacobian(dAdTheta, Theta)
-    d2AdPhi2    = jacobian(dAdPhi, Theta)
+    d2AdPhi2    = jacobian(dAdPhi, dAdPhi)
 
     "sensitivities of E"
     E           = S*diag(*[sqrt(i[0]) for i in F.tolist()])
@@ -78,6 +78,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     "compute steady state variance"
     if COMPUTE_V0:
         V0 = solveSS_var(A,E,F,S,phi,Theta)
+        V0 = V0.subs(list(zip(phi,phi0)))
         "SS variance sensitivities"
         SV0  = jacobian(V0, Theta)
         S2V0 = jacobian(SV0, Theta)
@@ -176,6 +177,8 @@ def compileLNA(model, S, tups, npar):
     '''generate the C code, for python module'''
 
     # create output directory if necessary
+    if not os.path.isdir(model):
+        os.mkdir(model)
     if not os.path.isdir('%s/C/' % model):
         os.mkdir('%s/C/' % model)
 
@@ -197,7 +200,7 @@ def compileLNA(model, S, tups, npar):
 
     global COMPUTE_V0, COMPUTE_Y0
     if COMPUTE_Y0:
-        f.writelines('#define COMPUTE_Y0')
+        f.writelines('#define COMPUTE_Y0\n')
     if COMPUTE_V0:
         f.writelines('#define COMPUTE_V0')
 
@@ -269,7 +272,7 @@ void %s(%s, double varOut[%d]);
                 k += 1
 
     for i in range(N):
-        print(x[i])
+        #print(x[i])
         #xOut = parseString(str(x[i]))
         code += "varOut[%d] = %s;\n" % (i, printing.ccode(x[i]))
 
