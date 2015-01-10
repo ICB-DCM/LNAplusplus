@@ -263,14 +263,16 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	os.Sens2_MRE 	= Sens2_MRE;
 	os.Sens2_Var  	= Sens2_Var;
 
-	static LNA lna(nvar, npar, S);
+	//static LNA lna(nvar, npar, S);
+	LNA *lna = new LNA(nvar, npar, S);
 
 	if (nlhs==0)
 		return; // no computation necessary
 
 	try {
-		lna.computeLinearNoise(Y0, V0, Theta, computeSens, computeSens2,
+		lna->computeLinearNoise(Y0, V0, Theta, computeSens, computeSens2,
 						SS, os, tspan, varObs, merr);
+		delete lna;
 		}
 	catch (exception &err) {
 		mexPrintf("%s\n", err.what());

@@ -32,7 +32,7 @@ int main(int argc, char **argv ) {
 
 	double merr[] = {0., 0.}; // measurement error
 
-	int N = 101;
+	int N = 2;
 	Vector tspan(N);
 
 	for (int i=0; i<N; i++)

@@ -42,7 +42,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     dAdTheta    = jacobian(A,Theta)
     dAdPhi      = jacobian(A,phi)
     d2AdTheta2  = jacobian(dAdTheta, Theta)
-    d2AdPhi2    = jacobian(dAdPhi, Theta)
+    d2AdPhi2    = jacobian(dAdPhi, phi)
 
     "sensitivities of E"
     E           = S*diag(*[sqrt(i[0]) for i in F.tolist()])
@@ -272,7 +272,7 @@ void %s(%s, double varOut[%d]);
                 k += 1
 
     for i in range(N):
-        print(x[i])
+        #print(x[i])
         #xOut = parseString(str(x[i]))
         code += "varOut[%d] = %s;\n" % (i, printing.ccode(x[i]))
 

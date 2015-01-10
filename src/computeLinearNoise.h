@@ -81,6 +81,7 @@ public:
 		delete[] abstol_vec1;
 		delete[] abstol_vec2;
 
+//		printf("attempting to free memory\n");
 
 		delete[] flux_mem;
 		delete[] A_fund_mem;
@@ -103,6 +104,8 @@ public:
 		delete[] d2EdPhi2_mem;
 		delete[] d2EdThetadPhi_mem;
 		delete[] d2EdPhidTheta_mem;
+		
+//		printf("Destroyed LNA object\n");
 
 		delete[] jac_mem;
 
