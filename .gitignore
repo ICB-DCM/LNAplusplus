@@ -4,3 +4,6 @@ models/*
 *.pyc
 *.o
 *.mexmaci64
+*.sw*
+*.*~
+*.so

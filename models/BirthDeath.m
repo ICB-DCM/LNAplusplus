@@ -365,14 +365,4 @@ for i=1:4
     end
 end
 
-%%
-close all
-
-figure
-plot(squeeze(Sens2_Var(1,3,50,:)))
-hold all
-
-for i=1:size(FD_Var,3)
-    plot(squeeze(FD_Var(1,3,i,50,:)))
-end
 

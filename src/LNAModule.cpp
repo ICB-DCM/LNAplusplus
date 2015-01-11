@@ -15,6 +15,7 @@
 //extern N_Vector *yS0, *ySout;
 
 extern int main(int argc, char **argv );
+static PyObject *LNAError;
 
 static int assignDoubleFromPyList(PyObject *inList, double *&outList) {
 	if (PyList_Check(inList)) {
@@ -22,13 +23,35 @@ static int assignDoubleFromPyList(PyObject *inList, double *&outList) {
 		outList = new double[n];
 
 		for (int i=0; i<n; i++) {
-			outList[i] = PyFloat_AsDouble(PyList_GetItem(inList,i));
+			PyObject *list_item = PyList_GetItem(inList,i);
+			if (PyLong_Check(list_item)) {
+				// is an integer, convert to double
+				outList[i] = PyLong_AsDouble(list_item);
+			} else if (PyFloat_Check(list_item)) {
+				// float type
+				outList[i] = PyFloat_AsDouble(list_item);
+			} else {
+				// incorrect type, throw error
+				PyErr_SetString(LNAError, "Must supply numeric value");
+			}
 		}
 		return n;
 	}
 	else {
-		outList = new double;
-		*outList = PyFloat_AsDouble(inList);
+		// wasn't a list, just a single value
+		if (PyLong_Check(inList)) {
+			// is an integer, convert to double
+			outList = new double;
+			*outList = PyLong_AsDouble(inList);
+		} else if (PyFloat_Check(inList)) {
+			// float type
+			outList = new double;
+			*outList = PyFloat_AsDouble(inList);
+		} else {
+			// incorrect type, throw error
+			PyErr_SetString(LNAError, "Must supply numeric value");
+		}
+
 		return 1;
 	}
 }
@@ -66,20 +89,13 @@ static void copyOut(PyObject *obj, T *data_ptr) {
 
 
 //extern int main(int argc, char **argv );
-static PyObject *LNAError;
 static PyObject *
 LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 {
 	outputStruct os;
 	double S_MAT[NREACT*NVAR] = {STOICH_MAT}; //{1,-1,0,0,0,0,1,-1};
 	MA2 S(S_MAT, shape(NVAR,NREACT), neverDeleteData);
-//	cout << S << endl;
-//	for (int i=0; i<8; i++)
-//		cout << setw(4) << S_MAT[i];
-//	cout << endl;
-//	MA2 S(2,4);
-//	S = 1,-1,0,0,
-//			0,0,1,-1;
+
 	const int Nreact = NREACT, nvar = NVAR;
 	const int npar = NPAR+NVAR; // for the init. conditions
 
@@ -107,6 +123,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
     static char* argnames[] = {"Theta", "time", "Y0", "V0", "merr", "obsVar",
     		"computeSens", "computeSens2", NULL};
 
+    // check input arguments format and parse
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|OOOO$OO", argnames, &_Theta, &_time, &_y0, &_V0, &_merr,
     		 &_obsVar, &_computeSens, &_computeSens2))
     {
@@ -140,6 +157,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
    }
 #endif
 
+   // determine initial conditions based on arguments
    if ( (_y0 == NULL) && (_V0 == NULL)) {
 	SS = LNA::SS_BOTH;
    } else if ((_y0 == NULL) && (_V0 != NULL)) {
@@ -194,7 +212,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
     // time
     if (!PyList_Check(_time)) // no default value
     {
-    	PyErr_SetString(LNAError, "time has wrong type.");
+    	PyErr_SetString(LNAError, "Time must be a list");
 		return NULL;
     } else {
         N = PyList_Size(_time);
@@ -204,6 +222,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
         }
     }
 
+    // observed variables
     if (_obsVar == NULL) {
     	// default all variables
     	varObs.resize(nvar);
@@ -245,44 +264,35 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	    }
 	}
 
-//    /* temporary */
-//    Array<int,1> varObs_tmp(1);
-//    varObs_tmp(0) = 1;
-//    nObsVar = 1;
-////	N = 10;
-//
-//    /*	end	*/
-    // merr. default 0
+
+    // measurement error
 	if (_merr == NULL) {
+		// merr. default 0
 		merr = new double[nObsVar];
     	for (int i=0; i<nObsVar; i++)
     		merr[i] = 0.0;
 
 	} else {
+		// parse measurement error
 		if (!((PyList_Check(_merr) || PyFloat_Check(_merr) || PyLong_Check(_merr) ))) {
 			PyErr_SetString(LNAError, "merr has wrong type.");
 			return NULL;
 		}
-		int n=PyList_Size(_merr);
-		if (n >= 1) {
-			// is a list
-			if (n == nObsVar)
-				assignDoubleFromPyList(_merr,merr);
-			else
-				PyErr_SetString(LNAError, "Number of measurement errors must be the same as the number of observed variables");
-		} else
+		int n;
+		if (PyList_Check(_merr))
+			n=PyList_Size(_merr);
+		else
+			n=1;
+
+		if (n != nObsVar)
 		{
-			// not a list
-			if (nObsVar != 1)
-				PyErr_SetString(LNAError, "Number of measurement errors must be the same as the number of observed variables");
-			else
-			{
-				merr = new double;
-				*merr = PyFloat_AsDouble(_merr);
-			}
+			// was a list but of the wrong length
+			PyErr_SetString(LNAError, "Number of measurement errors must be the same as the number of observed variables");
+			return NULL;
 		}
-
-
+		else {
+			assignDoubleFromPyList(_merr,merr);
+		}
 
 	}
 
@@ -430,7 +440,6 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 //		return(Py_None);
 	// Sigma
 
-//	printf("%d %d\n", nObsVar, N); // TODO: remove
 	long int dims_Sigma[] = {nObsVar, nObsVar, N, N};
 	PyObject *Sigma_out = PyArray_SimpleNew(4, dims_Sigma, NPY_DOUBLE);
 	copyOut(Sigma_out, Sigma);

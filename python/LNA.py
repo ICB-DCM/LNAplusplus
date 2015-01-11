@@ -22,6 +22,16 @@ def triu(X):
         X=Matrix(X)
     return sum([Matrix(X)[i,i:].tolist()[0] for i in range(Matrix(X).rows)],[])
 
+def toLinear(X):
+	"Return the upper triangular portion of X in column-major ordering"
+	if not isinstance(X, Matrix):
+		X=Matrix(X)
+	if X.shape[0] != X.shape[1]:
+		raise(ValueError("Matrix must be square"))
+	return sum([sum(X[0:i+1,i].tolist(),[]) for i in range(X.cols)],[])
+
+	
+
 def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NONE'):
     "Generate all of the symbolic components necessary for the LNA method"
     t = symbols('t', real=True)

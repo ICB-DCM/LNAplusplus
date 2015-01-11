@@ -17,7 +17,7 @@ runTimeMat0      = zeros(7,3);
 runTimeMat1      = zeros(7,3);
 runTimeMat2      = zeros(7,3);
 
-%%
+%% estimate compute and run time for models of with 3-10 species
 for k=1:7
     N=2+k;
     disp(N)

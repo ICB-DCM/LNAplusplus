@@ -94,3 +94,6 @@ pylab.show()
 pylab.matshow(squeeze(dSigma[0,0,:,:,1]))
 pylab.show()
 
+pylab.matshow(squeeze(d2Sigma[0,0,3,3,:,:]))
+pylab.show()
+
