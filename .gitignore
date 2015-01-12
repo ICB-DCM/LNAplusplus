@@ -7,3 +7,5 @@ models/*
 *.sw*
 *.*~
 *.so
+*.cproject
+*.project
