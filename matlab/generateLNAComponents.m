@@ -350,7 +350,7 @@ function [V0] = solveSS_var(A,E,F,S,phi,Theta,Y0) %#codegen
 V = sym('V', [numel(phi), numel(phi)]);
 V = sym(V, 'real');
 V2 = V.';
-V = subs(V2,V2(find(triu(V2,1))),V(find(triu(V,1)))); % symmetrize
+V = subs(V2,V2(find(triu(ones(size(V2)),1))),V(find(triu(ones(size(V)),1)))); % symmetrize
 
 dVdt = A*V + V*A' + subs(E*E.');
 
@@ -370,12 +370,14 @@ f3 = f2(find(triu(ones(size(f2)))));
 tmp1=num2cell(f3);
 tmp2=num2cell(V(find(triu(V))));
 V0 = solve(tmp1{:},tmp2{:});
+tmp= struct2cell(V0);
+V0 =[tmp{:}]'
 
 if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')
     V0 = zeros(nvar*(nvar+1)/2,1);
 else
-    V0 = subs(V(find(triu(V))), V0); 
+    V0 = struct2cell(V0);% subs(V(find(triu(V))), V0); 
 end
 
 % convert to symbolic vector
