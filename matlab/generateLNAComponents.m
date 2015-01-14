@@ -36,8 +36,8 @@ if nargin > 5
             error('computeSS must be either ''Y0'', ''V0'', ''BOTH'' or ''NONE''')
     end
 else
-    COMPUTE_V0 = true;
-    COMPUTE_Y0 = true;        
+    COMPUTE_V0 = false;
+    COMPUTE_Y0 = false;        
 end
 %% create directories to store the outputted scripts
 dirName = modelName;
@@ -325,12 +325,10 @@ function Y0=solveSS_mre(S,F,phi) %#codegen
 % solve for the steady state with the parameters specified
 
 F = reshape(F,[],1);
-tmp = solve(S*F,phi);
-% set the macroscopic flux to zero
-% fluxCellArray = mat2cell((S*subs(F, num2cell(phi), num2cell(phi0)))',1,ones(size(phi)));
-% phiCellArray  = mat2cell(phi0,1,ones(size(phi0)));
-
-% tmp=solve(fluxCellArray{:}, phiCellArray{:});
+% tmp = solve(S*F,phi);
+tmp1=num2cell(S*F);
+tmp2=num2cell(phi);
+tmp = solve(tmp1{:},tmp2{:}); % solve for phi
 
 if isempty(tmp)
     warning('Could not solve for steady state initial conditions.  Please supply the initial condition explicitly.')
@@ -368,7 +366,10 @@ nvar = numel(phi);
 f1 = matlabFunction(dVdt, 'vars', {phi, t, Theta, V}); % function handle to dVdt
 f2 = f1(Y0,t,Theta,V); % matrix of symbols
 f3 = f2(find(triu(ones(size(f2)))));
-V0 = solve(f3, V(find(triu(V))));
+% convert to cell arrays for backwards compatibility
+tmp1=num2cell(f3);
+tmp2=num2cell(V(find(triu(V))));
+V0 = solve(tmp1{:},tmp2{:});
 
 if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')

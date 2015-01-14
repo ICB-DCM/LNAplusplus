@@ -38,7 +38,7 @@ Theta   = [k_m, k_p, g_m, g_p]; % parameter vector
 npar 	= length(Theta); % 4 parameters
 
 % generate the C code for the components of the LNA model
-generateLNAComponents(model, S, f, phi, Theta)
+generateLNAComponents(model, S, f, phi, Theta, 'BOTH')
 
 % compile code
 compileLNA(model, S, npar); 
