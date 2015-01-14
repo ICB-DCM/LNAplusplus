@@ -365,18 +365,19 @@ nvar = numel(phi);
 % 
 %     V0              = solve(VfluxCellArray{:}, VarCellArray{:});
 
-f1 = matlabFunction(dVdt, 'var', {phi, t, Theta, V}); % function handle to dVdt
+f1 = matlabFunction(dVdt, 'vars', {phi, t, Theta, V}); % function handle to dVdt
 f2 = f1(Y0,t,Theta,V); % matrix of symbols
 f3 = f2(find(triu(ones(size(f2)))));
 V0 = solve(f3, V(find(triu(V))));
 
 if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')
-    V0 = zeros(nvar);
+    V0 = zeros(nvar*(nvar+1)/2,1);
+else
+    V0 = subs(V(find(triu(V))), V0); 
 end
 
 % convert to symbolic vector
-V0 = subs(V(find(triu(V))), V0); 
 
 
 % tmp = struct2cell(V0);
