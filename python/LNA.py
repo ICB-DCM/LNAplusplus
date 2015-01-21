@@ -183,7 +183,7 @@ def solveSS_var(A,E,F,S,phi,Theta):
     
     return V0
 
-def compileLNA(model, S, tups, npar):
+def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
     '''generate the C code, for python module'''
 
     # create output directory if necessary
@@ -216,10 +216,10 @@ def compileLNA(model, S, tups, npar):
 
     f.close()
 
-    generateModule(model, S)
+    generateModule(model, S, include_dirs, lib_dirs)
 
 
-def generateModule(model, S):
+def generateModule(model, S, include_dirs=[], lib_dirs=[]):
     '''Create the wrapper functions for the python module'''
     f = open("../src/pyModuleTemplate.cpp", 'r')
     src = f.readlines()
@@ -236,6 +236,16 @@ def generateModule(model, S):
     f.close()
 
     src2 = [l.replace('myModule', model) for l in src]
+
+    if not isinstance(include_dirs,list):
+    	include_dirs=[include_dirs]
+    if not isinstance(lib_dirs,list):
+    	lib_dirs=[lib_dirs]
+
+    src2 = [l.replace('INCLUDE_DIRS',str(include_dirs)) for l in src2]
+    src2 = [l.replace('LIB_DIRS',str(lib_dirs)) for l in src2]
+
+    print(src2)
     setupFile = open("%s/setup.py" % model, 'w')
     setupFile.writelines(src2)
     setupFile.close()
@@ -243,7 +253,7 @@ def generateModule(model, S):
     from distutils.core import run_setup
     if not os.path.isdir('modules'):
         os.mkdir('modules')
-    run_setup('BirthDeath/setup.py',
+    run_setup('%s/setup.py' % model,
         script_args=["build_ext", "install", "--install-lib=modules"])
     print('Finished')
 

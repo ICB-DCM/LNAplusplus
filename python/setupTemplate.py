@@ -14,10 +14,9 @@ numpyPath = get_include()
 module1 = Extension('myModuleLNA',
                     define_macros = [('MAJOR_VERSION', '1'),
                                      ('MINOR_VERSION', '0')],
-                    include_dirs = ['/usr/local/include', '/opt/local/Library/Frameworks/Python.framework/Versions/3.4/include/python3.4m/', 'myModule/C', \
-					'/opt/local/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/numpy/core/include/', '../include', '../src', numpyPath],
+                    include_dirs = ['/usr/local/include', 'myModule/C', '../include', '../src', numpyPath]+INCLUDE_DIRS,
                     libraries = ['stdc++', 'sundials_cvodes', 'blitz', 'sundials_nvecserial'], #,'python3.4'],
-                    library_dirs = ['/usr/local/lib', '/usr/lib/x86_64-linux-gnu/'],
+                    library_dirs = ['/usr/local/lib']+LIB_DIRS,
                     sources = ['../src/computeLinearNoise.cpp', 'myModule/myModule_LNA.cpp']\
 						+ glob('myModule/C/*.c'), 
 					runtime_library_dirs=['/usr/local/lib'],
