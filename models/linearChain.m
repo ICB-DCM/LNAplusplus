@@ -39,7 +39,7 @@ for k=1:7
     disp('Running simulations...')
     tspan       = 0:0.1:2.5;
 
-    for i=1:3
+    parfor i=1:10
         Theta   = rand(1,2*N)*100; %[1 0.5 2 3 4 5];
         Y0      = rand(1,N)*1000;
         

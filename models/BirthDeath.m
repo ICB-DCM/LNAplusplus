@@ -144,6 +144,7 @@ toc
 %% first order sensitivity plots: analytical
 close all
 figure(1)
+set(gcf, 'PaperPosition', [0.25, 2.5, 6,6])
 labels = {'k_m','k_p','g_m','g_p'};
 for i=1:4
     subplot(2,2,i)
@@ -152,19 +153,20 @@ for i=1:4
     xlabel('Time')
     set(gca,'FontSize',20)    
 end
-
+%% First order sensitivity of the variance
 figure(2)
+set(gcf, 'PaperPosition', [0.25, 2.5, 8,6])
 for i=1:4
     subplot(2,2,i)
     imagesc(tspan,tspan,Sens_Var(:,:,i))
     title(['Sensitivity ' labels{i}])
-    xlabel('Time')
-    ylabel('Time')
+%     xlabel('Time (a.u.)')
+%     ylabel('Time (a.u.)')
     set(gca,'FontSize',20)
+    colorbar
 end
-
-%%
-%saveas(gcf, 'FirstOrderVarSensitivityAnalytical.pdf')
+% colorbar
+saveas(gcf, '~/Projects/LNA++/paper/FirstOrderVarSensitivityAnalytical.pdf')
 
 
 %% first order senstivity plots: finite difference approximation
@@ -184,30 +186,36 @@ end
 
 %% comparison of the MRE first order sensitivities
 figure(1)
+% clf
 for i=1:4
     subplot(2,2,i)
     hold all
-    plot(tspan, FD_MRE(i,:), 'o')
+    plot(tspan, FD_MRE(i,:), 'o', 'MarkerSize', 2)
 %     title(['Sensitivity ' labels{i}])
-    xlabel('Time')
+    xlabel('Time (a.u.)')
     set(gca,'FontSize',20)
 end
-
-legend('NorthEast', {'Analytical','Finite Difference'})
-% saveas(gcf, 'FirstOrderMRESensitivityComparison.pdf')
+legend('NorthEast', {'LNA++','F.D.'})
+%%
+saveas(gcf, '~/Projects/LNA++/paper/FirstOrderMRESensitivityComparison.pdf')
+% print('~/Projects/LNA++/paper/FirstOrderMRESensitivityComparison.eps','-depsc')
+saveas(gcf, '~/Projects/LNA++/paper/FirstOrderMRESensitivityComparison.fig')
 
 %% plot finite difference first order var sensitivity
 
 figure
+set(gcf, 'PaperPosition', [0.25, 2.5, 8,6])
 for i=1:4
     subplot(2,2,i)
     imagesc(tspan,tspan,squeeze(FD_Var(i,:,:)))
     title(['Sensitivity ' labels{i}])
-    xlabel('Time')
-    ylabel('Time')
+%     xlabel('Time (a.u.)')
+%     ylabel('Time (a.u.)')
     set(gca,'FontSize',20)
+    colorbar
 end
-%saveas(gcf, 'FirstOrderVarSensitivityFD.pdf')
+
+saveas(gcf, '~/Projects/LNA++/paper/FirstOrderVarSensitivityFD.pdf')
 
 %% second order sensitivities
 
@@ -222,13 +230,14 @@ toc
 close all
 figure
 labels = {'k_m','k_p','g_m','g_p','m_0','p_0'};
+set(gcf,'PaperPosition',[0.25,2.5,6,6])
 k=1;
 for i=1:4
     for j=1:4
         subplot(4,4,k)
         plot(tspan, squeeze(Sens2_MRE(i,j,:)), 'LineWidth', 2)
 
-        xlabel('Time (a.u.)')
+%         xlabel('Time (a.u.)')
         if i==1
             title(labels{j})
         end        
@@ -243,6 +252,7 @@ end
 %% plot second order sensitivity, variance
 close all
 figure
+% set(gcf,'PaperPosition',[0.25,2.5,8,6])
 k=1;
 for i=1:4
     for j=1:4
@@ -256,17 +266,20 @@ for i=1:4
         if i==1
             title(labels{j})
         end        
-        if j==1
-            ylabel({labels{i},'Time (a.u.)'}, 'FontWeight', 'bold');
-        end
+%         if j==1
+%             ylabel({labels{i},'Time (a.u.)'}, 'FontWeight', 'bold');
+%         end
         set(gca,'FontSize',14)
 
 %         ylabel('Time (a.u.)')
-        xlabel('Time (a.u.)','FontWeight','bold')
+%         xlabel('Time (a.u.)','FontWeight','bold')
         k=k+1;
-
+        colorbar
     end
 end
+
+saveas(gcf,'~/Projects/LNA++/paper/Sens2Var.pdf')
+
 
 %% compute second order finite difference 
 clear FD_MRE FD_Var
@@ -335,13 +348,13 @@ for i=1:4
     for j=1:4
         subplot(4,4,k)
         hold all
-        plot(tspan, squeeze(FD_MRE(i,j,:)), 'o', 'MarkerSize', 3)       
+        plot(tspan, squeeze(FD_MRE(i,j,:)), 'o', 'MarkerSize', 1)       
         k=k+1;
     end
 end
 
-legend({'Analytical','Finite Difference'})
-%saveas(gcf,'Sens2MREComparison.pdf')
+legend({'LNA++','F.D.'})
+saveas(gcf,'~/Projects/LNA++/paper/Sens2MREComparison.pdf')
 
 %% Plot Second order F.D. Variance
 
@@ -355,14 +368,15 @@ for i=1:4
           if i==1
             title(labels{j})
         end        
-        if j==1
-            ylabel({labels{i},'Time (a.u.)'}, 'FontWeight', 'bold');
-        end
+%         if j==1
+%             ylabel({labels{i},'Time (a.u.)'}, 'FontWeight', 'bold');
+%         end
         set(gca,'FontSize',14)
-
-        xlabel('Time (a.u.)','FontWeight','bold')
+        colorbar
+%         xlabel('Time (a.u.)','FontWeight','bold')
         k=k+1;
     end
 end
 
+saveas(gcf,'~/Projects/LNA++/paper/Sens2Var_FD.pdf')
 
