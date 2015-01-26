@@ -8,7 +8,6 @@ Created on Sat Aug  2 10:59:39 2014
 from sys import path
 path += ['../python']
 
-import LNA
 from LNA import *
 
 # name of module
