@@ -8,7 +8,7 @@
 %% define the stoichiometric matrix
 clear all
 
-model = 'BirthDeath';
+    model = 'BirthDeath';
 
 % define the stoichiometric matrix
 % the model correspond to the system
@@ -43,26 +43,30 @@ generateLNAComponents(model, S, f, phi, Theta, 'BOTH')
 % compile code
 compileLNA(model, S, npar); 
 
-%%
 %%%%%%%%%%%%%%% run some simulations and show the results %%%%%%%%%%%%%%%     
-% parameters in same order as above
+%% set up the simulations
+
+% define model parameters, in same order as above
 Theta = [20, 25, 10, 1];
 
-% observation times for the simulation
+% define observation times for the simulation
 tspan = 0:0.1:10;
 
-%%
-% compute solution assuming steady state and no measurement error
+% add the path to the mex file
 addpath('BirthDeath/')
+
+%% compute solution assuming steady state and no measurement error
+
+% compute the solution
 tic
 [MRE, Var] = BirthDeath_LNA(Theta, tspan);
 toc
 
 % plot MRE
 close all
-figure
+figure('Name','BirthDeath LNA Simulation: Steady State')
 subplot(121)
-plot(tspan,MRE(2,:)) % just plot protein
+plot(tspan,MRE(2,:),'LineWidth',2) % just plot protein
 xlabel('Time')
 ylabel('Protein')
 title('Protein trajectory')
@@ -72,9 +76,9 @@ subplot(122)
 imagesc(squeeze(Var(2,2,:,:)))
 xlabel('Time')
 ylabel('Time')
-title('Protein covariance matrix')
+title('Protein Autocovariance matrix')
 
-%% specify an observed variable
+%% specify an observed variable (Protein)
 tic
 [MRE, Var] = BirthDeath_LNA(Theta, tspan, 2); % outputs protein (species 2) only
 toc
@@ -84,9 +88,9 @@ tic
 [MRE, Var] = BirthDeath_LNA(Theta, tspan, 2, 50); % mRNA and protein have measurement variance 50
 toc
 
-figure
+figure('Name', 'BirthDeath LNA Simulation: Added Measurement Error')
 subplot(121)
-plot(tspan,MRE)
+plot(tspan,MRE,'LineWidth',2)
 xlabel('Time')
 ylabel('Protein')
 title('Protein trajectory')
@@ -94,7 +98,7 @@ subplot(122)
 imagesc(tspan,tspan, Var)
 xlabel('Time')
 ylabel('Time')
-title('Protein covariance matrix')
+title('Protein Autocovariance matrix')
 
 %% specify measurement error (each separately)
 close all
@@ -102,9 +106,9 @@ tic
 [MRE, Var] = BirthDeath_LNA(Theta, tspan, [1,2], [50, 100]); % measurement error 50 and 100 for mRNA and protein, respectively
 toc
 
-figure
+figure('Name','BirthDeath LNA Simulation: Added Measurement Error for All Species')
 subplot(121)
-plot(tspan,MRE(2,:))
+plot(tspan,MRE(2,:),'LineWidth',2)
 xlabel('Time')
 ylabel('Protein')
 title('Protein trajectory')
@@ -112,21 +116,20 @@ subplot(122)
 imagesc(tspan,tspan, squeeze(Var(2,2,:,:)))
 xlabel('Time')
 ylabel('Time')
-title('Protein covariance matrix')
+title('Protein Autocovariance matrix')
 
 %% specify initial values, variances
 
-y0 = [2, 200]; % inital values
-v0 = [0, 0,0 ]; % variances
-% v0 = [variance(mRNA), covariance(mRNA,protein), variance(protein)]
+y0 = [2, 200]; % inital values [mRNA, Protein]
+v0 = [0, 0, 0 ]; % variances
 
 tic
 [MRE, Var] = BirthDeath_LNA(Theta, tspan, 2, 0, y0, v0);
 toc
 
-figure
+figure('Name', 'BirthDeath LNA Simulation: Specify Initial Conditions')
 subplot(121)
-plot(tspan,MRE)
+plot(tspan,MRE,'LineWidth',2)
 xlabel('Time')
 ylabel('Protein')
 title('Protein trajectory')
@@ -134,16 +137,14 @@ subplot(122)
 imagesc(tspan,tspan, Var)
 xlabel('Time')
 ylabel('Time')
-title('Protein covariance matrix')
+title('Protein Autocovariance matrix')
 
-%% 1st order sensitivities
+%% Compute 1st order sensitivities
 tic
 [MRE, Var, Sens_MRE, Sens_Var] = BirthDeath_LNA(Theta, tspan, 2, 0, y0, v0);
-% [MRE, Var, Sens_MRE, Sens_Var] = BirthDeath_LNA(tspan, Theta, merr, 2);
 toc
-%% first order sensitivity plots: analytical
-close all
-figure(1)
+%% Plot first order sensitivity plots: analytical
+hSens1_MRE = figure('Name','BirthDeath First Order Sensitivities of the MRE');
 labels = {'k_m','k_p','g_m','g_p'};
 for i=1:4
     subplot(2,2,i)
@@ -153,7 +154,7 @@ for i=1:4
     set(gca,'FontSize',20)    
 end
 
-figure(2)
+hSens1_Var = figure('Name','BirthDeath First Order Sensitivities of the Autocovariance');
 for i=1:4
     subplot(2,2,i)
     imagesc(tspan,tspan,Sens_Var(:,:,i))
@@ -167,7 +168,7 @@ end
 %saveas(gcf, 'FirstOrderVarSensitivityAnalytical.pdf')
 
 
-%% first order senstivity plots: finite difference approximation
+%% compute finite difference approximation to first order sensitivities
 delta=0.01;
 clear FD_MRE FD_Var
 
@@ -183,7 +184,7 @@ end
 
 
 %% comparison of the MRE first order sensitivities
-figure(1)
+figure(hSens1_MRE)
 for i=1:4
     subplot(2,2,i)
     hold all
@@ -198,7 +199,7 @@ legend('NorthEast', {'Analytical','Finite Difference'})
 
 %% plot finite difference first order var sensitivity
 
-figure
+figure('Name', 'BirthDeath F.D. First Order Sensitivities of the Autocovariance')
 for i=1:4
     subplot(2,2,i)
     imagesc(tspan,tspan,squeeze(FD_Var(i,:,:)))
@@ -209,18 +210,18 @@ for i=1:4
 end
 %saveas(gcf, 'FirstOrderVarSensitivityFD.pdf')
 
-%% second order sensitivities
+%% compute second order sensitivities
 
 tic
 [MRE, Var, Sens_MRE, Sens_Var, Sens2_MRE, Sens2_Var] = BirthDeath_LNA(Theta, tspan, 2, 0, y0, v0);
 toc
-%% second order sensitivities assuming steady state
+%% compute second order sensitivities assuming steady state
 tic
 [MRE, Var, Sens_MRE, Sens_Var, Sens2_MRE_SS, Sens2_Var_SS] = BirthDeath_LNA(Theta, tspan, 2, 0);
 toc
-%% plot second order sensitivity, MRE
-close all
-figure
+%% plot second order sensitivity of the MRE
+
+hSens2_MRE = figure('Name', 'BirthDeath Second Order Sensitivities of the MRE');
 labels = {'k_m','k_p','g_m','g_p','m_0','p_0'};
 k=1;
 for i=1:4
@@ -240,9 +241,9 @@ for i=1:4
         k=k+1;
     end
 end
-%% plot second order sensitivity, variance
+%% plot second order sensitivity of the Autocovariance
 close all
-figure
+figure('Name', 'BirthDeath Second Order Sensitivities of the Autocovariance')
 k=1;
 for i=1:4
     for j=1:4
@@ -328,7 +329,7 @@ for d=1:length(deltaVec)
 end
 
 %% plot the second order F.D. MRE 
-figure(1)
+figure(hSens2_MRE)
 
 k=1;
 for i=1:4
@@ -345,7 +346,7 @@ legend({'Analytical','Finite Difference'})
 
 %% Plot Second order F.D. Variance
 
-figure
+figure('Name','BirthDeath F.D. Second Order Sensitivities of the Autocovariance')
 k=1;
 d=3;
 for i=1:4

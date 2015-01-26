@@ -376,9 +376,8 @@ V0 =[tmp{:}]'
 if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')
     V0 = zeros(nvar*(nvar+1)/2,1);
-else
-    V0 = struct2cell(V0);% subs(V(find(triu(V))), V0); 
 end
+
 
 % convert to symbolic vector
 

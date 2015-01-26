@@ -65,7 +65,7 @@ for k=1:7
 end
 
 %% save compute and run times
-save('linearChainTimes', 'computeTimeMat', 'runTimeMat0', 'runTimeMat1', 'runTimeMat2')
+save('linearChainTimes_230115', 'computeTimeMat', 'runTimeMat0', 'runTimeMat1', 'runTimeMat2')
 
 %% plot the compute times
 close all
@@ -73,7 +73,7 @@ plot(3:9, computeTimeMat, '.-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 30, 'LineW
 set(gca, 'YScale', 'log', 'FontSize', 14)
 xlabel('Network size', 'FontSize', 20)
 ylabel('Compute time (s)', 'FontSize', 20)
-
+%%
 saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_computeTime.eps')
 
 %% plot the run times
@@ -92,29 +92,70 @@ set(gca, 'YScale', 'log', 'FontSize', 14)
 xlabel('Network size', 'FontSize', 20)
 ylabel('Median Run time (s)', 'FontSize', 20)
 
-legend('northwest', {'LNA', '+ 1st Order Sens.', '+ 2nd Order Sens.'}, 'FontSize', 14)
 
-saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_runTime.eps')
+% # of finite difference necessary to evaluate 
+
+nPar = (3:9)*3;
+% 1st order
+nFD1stOrder = nPar;
+% errorbar(3:9, median(runTimeMat0').*nFD1stOrder, quantile(runTimeMat0', 0.25).*nFD1stOrder, quantile(runTimeMat0', 0.75).*nFD1stOrder,'o--', ...
+%     'MarkerSize', 10, 'LineWidth', 2, 'Color', [0.5 0.5 0.5])
+% 
+% 2nd order
+nFD2ndOrder = 3*nPar.*(nPar-1);
+% plot(3:9, median(runTimeMat0').*nFD2ndOrder, 'ks--', 'MarkerSize', 10, 'LineWidth', 2)
+% 
+% legend('northwest', {'LNA', 'LNA + 1st Order Sens.', 'LNA + 2nd Order Sens.', 'LNA + 1st Order F.D.', 'LNA + 2nd Order F.D.'}, 'FontSize', 14)
 
 %%
-saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_computeTime.png')
+saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_runTime.pdf')
 
-%%
-modelSize0 = @(n) (n + n.*n+1/2 + n.^2);
-modelSize1 = @(n) (n + n.*n+1/2 + n.^2).*(1 + 3*n);
-modelSize2 = @(n) (n + n.*n+1/2 + n.^2).*(1 + 3*n + 9*n.^2);
 
-%% plot normalized run times
+
+%% compute savings
+1-min(mean(runTimeMat1') ./ (mean(runTimeMat0').*nFD1stOrder))
+1-max(mean(runTimeMat1') ./ (mean(runTimeMat0').*nFD1stOrder))
+
+1-min(mean(runTimeMat2') ./ (mean(runTimeMat0').*nFD2ndOrder))
+1-max(mean(runTimeMat2') ./ (mean(runTimeMat0').*nFD2ndOrder))
+
+%% error bars
+addpath('~/Documents/MATLAB/errorbar_groups/')
 close all
-figure, hold on
+errorbar_groups( [median(runTimeMat0'); median(runTimeMat1'); median(runTimeMat0').*nFD1stOrder; median(runTimeMat2'); median(runTimeMat0').*nFD2ndOrder ], ...
+    [quantile(runTimeMat0',0.25); quantile(runTimeMat1',0.25); quantile(runTimeMat0',0.25).*nFD1stOrder; quantile(runTimeMat2',0.25); quantile(runTimeMat0',0.25).*nFD2ndOrder], ...
+    [quantile(runTimeMat0', 0.75); quantile(runTimeMat1',0.75); quantile(runTimeMat0',0.75).*nFD1stOrder; quantile(runTimeMat2',0.75); quantile(runTimeMat0',0.75).*nFD2ndOrder]); %, ...
+%     'optional_errorbar_arguments', {'LineWidth', 2})
 
-plot(3:9, median(runTimeMat0') ./ modelSize0(3:9), '.-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 30, 'LineWidth', 2)
-plot(3:9, median(runTimeMat1') ./ modelSize1(3:9), 'o-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 10, 'LineWidth', 2)
-plot(3:9, median(runTimeMat2') ./ modelSize2(3:9), 's-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 15, 'LineWidth', 2)
+set(gca, 'YScale', 'log', 'FontSize', 14, 'XTickLabel', 3:9)
+c=get(gca,'Children');
+legend(c(10:-1:6), {'LNA', 'LNA + 1st Order Sens.', 'LNA + 1st Order F.D.', 'LNA + 2nd Order Sens.', 'LNA + 2nd Order F.D.'})
 
-set(gca, 'YScale', 'log', 'FontSize', 14, 'YLim', [0.0005, 0.01])
-xlabel('Network size', 'FontSize', 20)
-ylabel('Normalized Median Run time (s)', 'FontSize', 20)
-
-legend('northwest', {'LNA', '+ 1st Order Sens.', '+ 2nd Order Sens.'}, 'FontSize', 14)
-saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_runTime_normalized.eps')
+xlabel('Model Size', 'FontSize', 20)
+ylabel('Runtime (s)', 'FontSize', 20)
+saveas(gcf, '~/Documents/workspace/LNA++/models/runTimes_vs_FD.pdf')
+%%
+% saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_computeTime.png')
+% 
+% %% number of finite difference computations necesseary to approximate
+% 
+% modelSize0 = @(n) (n + n.*n+1/2 + n.^2);
+% modelSize1 = @(n) (n + n.*n+1/2 + n.^2).*(1 + 3*n);
+% modelSize2 = @(n) (n + n.*n+1/2 + n.^2).*(1 + 3*n + 9*n.^2);
+% 
+% %% plot normalized run times
+% close all
+% figure, hold on
+% 
+% plot(3:9, median(runTimeMat0') ./ modelSize0(3:9), '.-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 30, 'LineWidth', 2)
+% plot(3:9, median(runTimeMat1') ./ modelSize1(3:9), 'o-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 10, 'LineWidth', 2)
+% plot(3:9, median(runTimeMat2') ./ modelSize2(3:9), 's-', 'Color', [0.4 0.4 0.4], 'MarkerSize', 15, 'LineWidth', 2)
+% 
+% set(gca, 'YScale', 'log', 'FontSize', 14, 'YLim', [0.0005, 0.01])
+% xlabel('Network size', 'FontSize', 20)
+% ylabel('Normalized Median Run time (s)', 'FontSize', 20)
+% 
+% legend('northwest', {'LNA', '+ 1st Order Sens.', '+ 2nd Order Sens.'}, 'FontSize', 14)
+% 
+% %%
+% saveas(gcf, '~/Documents/Promotion/Papers/LNA++/bioinfo01/Figures/linearChain_runTime_normalized.eps')
