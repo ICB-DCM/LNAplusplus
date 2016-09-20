@@ -6,7 +6,7 @@ Created on Sat Aug  2 10:59:39 2014
 """
 # add python module to search path
 from sys import path
-path += ['../python']
+path.append('../python')
 
 from LNA import *
 
@@ -78,21 +78,21 @@ MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, obs
 
 ## plots
 #import matplotlib
-import pylab
+import matplotlib.pyplot as plt
 from numpy import squeeze
 
 # MRE
-pylab.plot(MRE.squeeze())
-pylab.show()
+plt.plot(MRE.squeeze())
+plt.show()
 
 # covariance matrix
-pylab.matshow(squeeze(Sigma))
-pylab.show()
+plt.matshow(squeeze(Sigma))
+plt.show()
 
 # sensitivity w.r.t. first model parameter
-pylab.matshow(squeeze(dSigma[0,0,:,:,1]))
-pylab.show()
+plt.matshow(squeeze(dSigma[0,0,:,:,1]))
+plt.show()
 
-pylab.matshow(squeeze(d2Sigma[0,0,3,3,:,:]))
-pylab.show()
+plt.matshow(squeeze(d2Sigma[0,0,3,3,:,:]))
+plt.show()
 

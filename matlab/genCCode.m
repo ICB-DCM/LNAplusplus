@@ -1,4 +1,4 @@
-function genCCode(f, fName, args)
+function genCCode(f, fName, args, objType)
 % generate C code from matlab functions
 
 % input:
@@ -14,13 +14,10 @@ argsList = [];
 
 % input arguments
 for i=1:length(args)
-    if length(args{i}) > 1
-        % a vector
+    if strcmp(objType{i},'VECTOR')
         s = sprintf('const double in%d[%d], ', i, length(args{i}));
     else
-        % a scalar
         s = sprintf('const double in%d, ', i);
-
     end
     argsList = [argsList, s];
 end
@@ -46,7 +43,7 @@ f=f.'; % use transpose of the symbolic object so that it's in the usual matlab c
 code = [sprintf('#include \"%s.h\"\n', fName), ...
     sprintf('void %s(%s double varOut[%d])\n{\n', fName, argsList, N), ...
     sprintf('memset(varOut, 0, sizeof(double)*%d);\n', N), ...
-    sprintf('double (*A0)[%d][%d] = varOut;\n', size(f,1), size(f,2))];
+    sprintf('double (*A0)[%d][%d] = &varOut[0];\n', size(f,1), size(f,2))];
 
 % c version of the function
 % c = ccode(f); 
@@ -61,12 +58,16 @@ delete(sprintf('../C/%s_tmp.c', fName));
 
 % get the variable names
 for i=1:numel(args)
-    if length(args{i})==1
-        continue
-    end
-    
-    for j=1:length(args{i})
-        code = [code, sprintf('double %s = in%d[%d];\n', char(args{i}(j)), i, j-1)];
+%     if length(args{i})==1
+%         code = [code, sprintf('double %s = in%d;\n', char(args{i}), i)];
+%     %     continue
+%     else
+    if strcmp(objType{i},'VECTOR')
+        for j=1:length(args{i})
+            code = [code, sprintf('double %s = in%d[%d];\n', char(args{i}(j)), i, j-1)];
+        end
+    else
+        code = [code, sprintf('double %s = in%d;\n', char(args{i}), i)];
     end
 end
 

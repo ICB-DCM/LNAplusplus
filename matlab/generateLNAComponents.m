@@ -57,7 +57,7 @@ t = sym('t', 'real');
 
 %% add initial conditions to the vector of model parameters
 phi0 = sym('phi0', [1, length(phi)]);
-phi0 = sym(phi0, 'real');
+assume(phi0,'real')
 
 Theta = [Theta, phi0]; % necessary for sensitivities wrt initial conditions
 
@@ -117,7 +117,7 @@ end
 %% system Jacobian
 sysVar = phi;
 V = sym('V', [nvar nvar]);
-V = sym(V, 'real');
+assume(V,'real');
 for i=1:length(phi)
     for j=1:i
         sysVar = [sysVar, V(i,j)];
@@ -125,7 +125,7 @@ for i=1:length(phi)
 end
 % fundamental matrix
 Phi = sym('Phi', [numel(phi), numel(phi)]);
-Phi = sym(Phi,'real');
+assume(Phi,'real');
 sysVar = [sysVar reshape(Phi,1,[])];
 dVdt = Afunc*V + V*Afunc' + subs(Efunc*Efunc.');
 RHS = [S*reactionFlux'; dVdt(find(triu(ones(size(dVdt))))); reshape(Afunc*Phi,[],1)];
@@ -290,12 +290,12 @@ objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
 addpath('../../../matlab')
 for i = 1:length(objs1)
     fprintf('Generating %s source...\n', objs1{i})
-    genCCode(eval(objs1{i}), objs1{i}, {phi, t, Theta});
+    genCCode(eval(objs1{i}), objs1{i}, {phi, t, Theta}, {'VECTOR','SCALAR','VECTOR'});
 end
 
 for i = 1:length(objs2)
     fprintf('Generating %s source...\n', objs2{i})
-    genCCode(sym(eval(objs2{i})), objs2{i}, {Theta});  % make sure the zero matrices are symbolic vars
+    genCCode(sym(eval(objs2{i})), objs2{i}, {Theta}, {'VECTOR'});  % make sure the zero matrices are symbolic vars
 end    
 
 
@@ -335,7 +335,12 @@ if isempty(tmp)
     Y0 = [];
     return
 end
-tmp2 = struct2cell(tmp);
+
+if isstruct(tmp)
+    tmp2 = struct2cell(tmp);
+else
+    tmp2 = {tmp};
+end
 Y0 = [tmp2{:}];
 
 % for i=1:length(phi0), Y0(i)=tmp.(char(phi0(i))); end
@@ -348,7 +353,7 @@ function [V0] = solveSS_var(A,E,F,S,phi,Theta,Y0) %#codegen
 
 % dVdt = AV + VA' + EE'
 V = sym('V', [numel(phi), numel(phi)]);
-V = sym(V, 'real');
+assume(V, 'real');
 V2 = V.';
 V = subs(V2,V2(find(triu(ones(size(V2)),1))),V(find(triu(ones(size(V)),1)))); % symmetrize
 
@@ -370,8 +375,12 @@ f3 = f2(find(triu(ones(size(f2)))));
 tmp1=num2cell(f3);
 tmp2=num2cell(V(find(triu(V))));
 V0 = solve(tmp1{:},tmp2{:});
-tmp= struct2cell(V0);
-V0 =[tmp{:}]'
+if isstruct(V0)
+    tmp= struct2cell(V0);
+else
+    tmp={V0};
+end
+V0 =[tmp{:}]';
 
 if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')

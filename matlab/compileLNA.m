@@ -32,7 +32,7 @@ eval(cmd_compile)
 %% compile CPP code
 disp('Compiling LNA code...')
 % 
-cmd_compile_cpp = ['mex CXXFLAGS=''$CXXFLAGS ' Cpp_Flags ''' -c ../src/computeLinearNoise.cpp ../src/mexLNA.cpp -I' model '/C -I/usr/local/include -I../include '];
+cmd_compile_cpp = ['mex CXXFLAGS=''$CXXFLAGS -fPIC' Cpp_Flags ''' -c ../src/computeLinearNoise.cpp ../src/mexLNA.cpp -I' model '/C -I/usr/local/include -I../include '];
 %disp(cmd_compile_cpp)
 eval( cmd_compile_cpp )
 
@@ -42,7 +42,7 @@ Cobj = dir([model '/C/*.o']);
 
 % libstdcpp = ' /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/lib/libstdc++.dylib';
 cmd_link = [ sprintf('mex -cxx -output %s/%s_LNA_mex  computeLinearNoise.o mexLNA.o %s', ...
-    model, model, strjoin(fullfile(model, 'C', {Cobj.name}'))) ... libstdcpp ...
+    model, model, strjoin(fullfile(model, 'C', {Cobj.name}))) ... libstdcpp ...
     ' -lsundials_cvodes -lsundials_nvecserial -lblitz -lstdc++ -lgsl -lgslcblas']; 
     
 % disp(cmd_link);
