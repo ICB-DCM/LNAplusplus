@@ -11,7 +11,7 @@
 %  Npar: the number of model parameters
 % output executable is stored in ./mex directory
 
-function compileLNA(model, S, Npar, varargin)
+function compileLNA(model, varargin)
 p = inputParser;
 addParameter(p, 'Linker_flags', '')
 addParameter(p, 'Cpp_flags', '')

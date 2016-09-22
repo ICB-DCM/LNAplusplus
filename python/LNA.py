@@ -8,8 +8,10 @@
 
 from sympy import symbols, Matrix, solve, sqrt, diag, Symbol, printing, zeros
 from sympy.matrices import *
+from SBML2StoichProp import SBML2StoichProp
 import numpy
 import os
+import ipdb
 
 def jacobian(x,y):
     "Compute the jacobian of x with respect to y"
@@ -31,6 +33,20 @@ def toLinear(X):
 	return sum([sum(X[0:i+1,i].tolist(),[]) for i in range(X.cols)],[])
 
 	
+def generateLNA(fileName, model, computeSS='NONE'):
+    try:
+        S, species, parameters, fHandle = SBML2StoichProp(fileName)
+    except IOError:
+        print("Doing nothing!")
+        return
+        
+    species = symbols(species)
+    parameters = symbols(parameters)
+        
+    tups = generateLNAComponents(model, S, fHandle, species, parameters, computeSS)
+    npar = len(parameters) # number of parameters
+    compileLNA(model, S, tups, npar)
+
 
 def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NONE'):
     "Generate all of the symbolic components necessary for the LNA method"
@@ -38,8 +54,9 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     Nvar        = S.rows
 
     phi0 = symbols('phi0:%d'%Nvar) # symbolic state variables
-    Theta=Theta+phi0 # initial conditions are additional parameters for sensitivities
+    Theta=tuple(Theta)+phi0 # initial conditions are additional parameters for sensitivities
 
+    phi=tuple(phi)
     Npar = len(Theta)
 
     F = Matrix(reactionFlux(phi, t, Theta))
@@ -162,8 +179,11 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
             'S2V0':S2V0,
             'V0':V0,
             'Y0':Y0}
+    
+    argTypes1 = ['VECTOR','SCALAR','VECTOR']
+    argTypes2 = ['VECTOR']
 
-    tups = [(objs, arg1), (objs2,arg2)]
+    tups = [(objs,arg1,argTypes1), (objs2,arg2,argTypes2)]
     return tups
 
 def solveSS_var(A,E,F,S,phi,Theta):
@@ -192,9 +212,9 @@ def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
     if not os.path.isdir('%s/C/' % model):
         os.mkdir('%s/C/' % model)
 
-    for objs,args in tups:
+    for objs,args,argTypes in tups:
         for x in objs:
-            H,C=genCcode(objs[x], x, args)
+            H,C=genCcode(objs[x], x, args, argTypes)
             f=open("%s/C/%s.h" % (model,x), 'w')
             f.writelines(H)
             f.close()
@@ -259,11 +279,20 @@ def generateModule(model, S, include_dirs=[], lib_dirs=[]):
 
 
 
-def genCcode(f, fName, args ):
+def genCcode(f, fName, args, argTypes ):
     '''generate a very simple C program from the matrix function passed in and the
     arguments necessary'''
 
-    argsList = ', '.join([('const double *' if isinstance(q,tuple) else 'const double ') + p for p,q in args])
+    argsList = ''
+    for k in range(len(args)):
+        if argTypes[k] is 'VECTOR':
+            argsList +=  'const double * ' + args[k][0]
+        else:
+            argsList += 'const double ' + args[k][0]
+        if k < len(args)-1:
+            argsList += ','
+            
+#    argsList = ', '.join([('const double *' if isinstance(q,tuple) else 'const double ') + p for p,q in args])
     N = len(f)
 
     "header file"

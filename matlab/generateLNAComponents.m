@@ -127,8 +127,8 @@ end
 Phi = sym('Phi', [numel(phi), numel(phi)]);
 assume(Phi,'real');
 sysVar = [sysVar reshape(Phi,1,[])];
-dVdt = Afunc*V + V*Afunc' + subs(Efunc*Efunc.');
-RHS = [S*reactionFlux'; dVdt(find(triu(ones(size(dVdt))))); reshape(Afunc*Phi,[],1)];
+dVdt = Afunc*V + V*Afunc.' + subs(Efunc*Efunc.');
+RHS = [S*reactionFlux; dVdt(find(triu(ones(size(dVdt))))); reshape(Afunc*Phi,[],1)];
 
 systemJacobian = Jacobian(RHS, sysVar);
 systemJacobian_diag = diag(systemJacobian); % just the diagonal
@@ -283,7 +283,7 @@ olddir = cd([dirName '/matlab']);
 objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
     'dAdPhi', 'd2AdPhi2', 'd2AdTheta2', 'd2AdThetadPhi', 'd2AdPhidTheta', ...
     'd2AdPhidTheta', 'Efunc', 'dEdTheta', 'd2EdTheta2', 'd2EdThetadPhi', ...
-    'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2', 'systemJacobian', 'systemJacobian_diag'};
+    'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2',  'systemJacobian_diag'}; % 'systemJacobian',
 
 % requires only Theta
 objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
