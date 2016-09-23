@@ -357,7 +357,7 @@ assume(V, 'real');
 V2 = V.';
 V = subs(V2,V2(find(triu(ones(size(V2)),1))),V(find(triu(ones(size(V)),1)))); % symmetrize
 
-dVdt = A*V + V*A' + subs(E*E.');
+dVdt = A*V + V*A.' + subs(E*E.');
 
 t = sym('t','real');
 % set the upper triangular components to zero flux!
@@ -380,7 +380,7 @@ if isstruct(V0)
 else
     tmp={V0};
 end
-V0 =[tmp{:}]';
+V0 =[tmp{:}].';
 
 if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')

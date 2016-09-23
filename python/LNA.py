@@ -33,7 +33,7 @@ def toLinear(X):
 	return sum([sum(X[0:i+1,i].tolist(),[]) for i in range(X.cols)],[])
 
 	
-def generateLNA(fileName, model, computeSS='NONE'):
+def generateLNA(fileName, model, computeSS='NONE',include_dirs=[], lib_dirs=[]):
     try:
         S, species, parameters, fHandle = SBML2StoichProp(fileName)
     except IOError:
@@ -45,7 +45,7 @@ def generateLNA(fileName, model, computeSS='NONE'):
         
     tups = generateLNAComponents(model, S, fHandle, species, parameters, computeSS)
     npar = len(parameters) # number of parameters
-    compileLNA(model, S, tups, npar)
+    compileLNA(model, S, tups, npar, include_dirs=include_dirs, lib_dirs=lib_dirs)
 
 
 def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NONE'):

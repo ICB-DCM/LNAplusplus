@@ -20,27 +20,8 @@ model = 'BirthDeath';
 %         g_p
 % protein -->  0
 
-S = [1 -1 0 0; % change to mRNA
-    0 0 1 -1]; % change to protein
-
 addpath('../matlab')
-%  define symbolic variables
-syms k_m k_p g_m g_p real
-syms m p real
-
-% define reaction fluxes
-f = @(phi,t,Theta) ...
-    [ Theta(1), Theta(3)*phi(1), Theta(2)*phi(1), Theta(4)*phi(2)];
-
-phi     = [m,p]; % state vector
-Theta   = [k_m, k_p, g_m, g_p]; % parameter vector
-npar 	= length(Theta); % 4 parameters
-
-% generate the C code for the components of the LNA model
-generateLNAComponents(model, S, f, phi, Theta, 'BOTH')
-
-% compile code
-compileLNA(model, S, npar); 
+generateLNA('BirthDeath/BirthDeath.xml', 'BirthDeath', 'BOTH')
 
 %%%%%%%%%%%%%%% run some simulations and show the results %%%%%%%%%%%%%%%     
 %% set up the simulations
