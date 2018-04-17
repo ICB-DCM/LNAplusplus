@@ -1,5 +1,4 @@
 *.a
-*.m
 *.pyc
 *.o
 *.mexmaci64
@@ -8,3 +7,14 @@
 *.so
 *.cproject
 *.project
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+
