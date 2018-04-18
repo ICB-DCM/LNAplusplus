@@ -383,7 +383,14 @@ LNA++ uses the standard C++ libraries, the CVODES Sundials library for numerical
 Compilation of C++ source code for use as a standalone executable, or with Matlab or Python requires the use of a suitable compiler such as gcc/g++ on Linux-based systems, or clang on mac OS.
 
 \subsubsection*{Blitz++}
-Blitz++ version 0.10 is required. It can be obtained via the included source code in \texttt{./libraries}, or from \href{https://sourceforge.net/projects/blitz/files/blitz/}{https://sourceforge.net/projects/blitz/files/blitz/}.  It is also available via macports on mac OS, and the Ubuntu 16.04 apt repository (libblitz0-dev, libblitz0v5). When using the provided source archive, simply extract it to ../libraries/blitz-0.10. For other versions of Blitz++ in non-default locations you need to adapt 'include_dirs' in 'python/setupTemplate.py'.
+Blitz++ version 1.0.1 is required. It can be obtained via the included source code in \texttt{./libraries}, or from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}.  It is also available via macports on mac OS, and the Ubuntu 16.04 apt repository (libblitz0-dev, libblitz0v5). 
+
+When using the provided source archive, extract it to ../libraries/blitz-1.0.1, change to this folder and run:
+\texttt{./configure --with-pic --prefix=`pwd`/install \\
+make install
+}
+
+For other versions of Blitz++ in non-default locations you need to adapt 'include_dirs' and 'library_dirs' in 'python/setupTemplate.py'.
 
 \subsubsection*{CVODES}
 Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{./libraries}, and is also available from 
@@ -396,9 +403,11 @@ make \\
 sudo make install
 }
 
-This requires administrator privileges.  Otherwise, you can run
+This requires administrator privileges.  Otherwise, you can run from within the cvodes directory:
 
-\texttt{make install --prefix=PATH/TO/INSTALL}
+\texttt{./configure --with-pic  --prefix=`pwd`/install\\
+make install
+}
 
 \textit{Note:} CVODES should be compiled using the \texttt{-fPIC} flag to ensure cross-platform compatibility.  This can be enabled by specifying \texttt{--with-pic} to the configure script.
 
