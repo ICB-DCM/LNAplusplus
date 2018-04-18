@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+This is an LNA++ application example with a simple birth-death process 
+involving a constitutively active DNA, and stochastic production and 
+degradation of mRNA and protein. A detailed model description is provided in 
+documentation/Documentation.pdf.
+
+This example is used for performance testing of LNA++. We 
+1) show how to perform exact simulation of the stochastic process and use LNA++
+to compute the mean and temporal auto-covariance of the proteins, 
+2) compute sensitivities of the mean protein copy number with respect to the model 
+parameters and compare the computed results to a finite difference approximation,
+3) perform multi-start optimization in order to compare parameter inference 
+with and without the analytical sensitivities and 
+4) use LNA++ to evaluate the likelihood landscape for this model.
+
 Created on Sat Aug  2 10:59:39 2014
 
 @author: justinfeigelman
 """
+
 # add python module to search path
 from sys import path
 path.append('../python')
