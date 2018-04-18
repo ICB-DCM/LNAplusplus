@@ -265,7 +265,6 @@ def generateModule(model, S, include_dirs=[], lib_dirs=[]):
     src2 = [l.replace('INCLUDE_DIRS',str(include_dirs)) for l in src2]
     src2 = [l.replace('LIB_DIRS',str(lib_dirs)) for l in src2]
 
-    print(src2)
     setupFile = open("%s/setup.py" % model, 'w')
     setupFile.writelines(src2)
     setupFile.close()
