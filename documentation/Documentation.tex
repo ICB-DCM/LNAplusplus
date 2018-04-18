@@ -450,7 +450,7 @@ the LNA and its sensitivities.  It is therefore possible to generate the C code 
 In this section we describe how to use LNA++ to create Matlab executable models and Python modules. 
 
 \subsection{Overview}
-LNA++ converts a user specified model, provided as an SBML model configuration file, into a set of symbolic functions for the time derivatives of means, temporal cross-covariances, and their sensitivities. These functions are converted to C code which is then compiled together with the core computation engine to generate either Matlab or Python executable files/modules. The system can then be simulated using these executables and user-specified initial conditions and model parameters. 
+LNA++ converts a user specified model, provided as an SBML model configuration file, into a set of symbolic functions for the time derivatives of means, temporal cross-covariances, and their sensitivities. These functions are converted to C++ code which is then compiled together with the core computation engine to generate either Matlab or Python executable files/modules. The system can then be simulated using these executables and user-specified initial conditions and model parameters. 
 
 The stoichiometric matrix and reaction propensity functions are extracted from a user-supplied SBML model file, e.g., see \href{http://sbml.org/SBML_Software_Guide/SBML_Software_Summary}{http://sbml.org/}.
 
@@ -531,7 +531,7 @@ To use LNA++ with Python, call the function generateLNA of the LNA module, with 
 \begin{enumerate}
 \item \texttt{sbmlPath}: the path to the SBML model specification file
 \item \texttt{model}: the desired name of the model 
-\item \texttt{computeSS}:  this argument is optional and can have only one of the values \texttt{`Y0'}, \texttt{`V0?}, \texttt{`BOTH'}, or \texttt{`NONE'}.
+\item \texttt{computeSS}:  this argument is optional and can have only one of the values \texttt{`Y0'}, \texttt{`V0'}, \texttt{`BOTH'}, or \texttt{`NONE'}.
 	\begin{enumerate}
 	\item \texttt{Y0}:  LNA++ will attempt to calculate the steady state value of the MRE of the stochastic system specified. If \texttt{Y0} is not explicitly provided when invoking the model, the computed value will be automatically substituted. 
 	\item \texttt{V0}: LNA++ will attempt to calculate the steady state value of the variance of the stochastic system specified. If \texttt{V0} is not explicitly provided when invoking the model, the computed value will be automatically substituted.
@@ -543,7 +543,7 @@ To use LNA++ with Python, call the function generateLNA of the LNA module, with 
 \textit{Note:} It is recommended to save the model as a script in the \texttt{models} subdirectory of the LNA++ root directory.  This ensures the correct relative path for the subsequent build steps.
 
 \subsubsection*{Creating the Python module}
-After running generateLNA, a Python module is created and placed in the modules subdirectory. The module is named \texttt{modelLNA}, where model is replaced by the name of the model specified. The module can be imported using import, as long as the module is on the Python module path. To add this directory to the module path either modify the value of sys.path or add the modules directory to the \texttt{PYTHONPATH} environmental variable. 
+After running generateLNA, a Python module is created and placed in the modules subdirectory. The module is named \texttt{modelLNA}, where `model' is replaced by the name of the model specified. The module can be imported using \texttt{import}, as long as the module is on the Python module path. To add this directory to the module path either modify the value of \texttt{sys.path} or add the modules directory to the \texttt{PYTHONPATH} environment variable. 
 
 \textit{Note for non-standard library or include paths:}
 If CVODES or Blitz++ are not installed in a standard location (e.g. due to lack of administrator permissions), then custom include and/or library paths can be provided by specifying two additional arguments to \texttt{generateLNA}:
@@ -577,11 +577,11 @@ with \texttt{V\_12 = V\_21}, \texttt{V\_13 = V\_31}, and \texttt{V\_23 = V\_32} 
 If initial conditions are not specified, but were computed using the computeSS flag at the time of the module creation, then the steady state values are automatically used. If the initial conditions were not computed when generating the module, then an error occurs if no initial conditions are specified.  
 
 \item \texttt{computeSens} (optional): a Boolean variable indicating whether the first order sensitivities should be computed.  By default no first order sensitivities are computed.
-\item \texttt{computeSens2}:  a Boolean variable indicating whether the second order sensitivities should be computed.  By default no second order sensitivities are computed.
+\item \texttt{computeSens2} (optional):  a Boolean variable indicating whether the second order sensitivities should be computed.  By default no second order sensitivities are computed.
 \end{enumerate}
 
 \paragraph{Outputs:}
-The LNA function returns between 2 and 6 output arguments.  In the following $N$ is the number of observed variables (\texttt{obsVar}), $T$ is the number of time points specified by \texttt{Time}, and $d$ is the number of model parameters + the number of species. Note that LNA++ computes sensitivities with respect to model parameters and the initial conditions of the MRE, but not currently with respect to the initial variances.
+The LNA function returns between 2 and 6 output arguments.  In the following, $N$ is the number of observed variables (\texttt{obsVar}), $T$ is the number of time points specified by \texttt{Time}, and $d$ is the number of model parameters + the number of species. Note that LNA++ computes sensitivities with respect to model parameters and the initial conditions of the MRE, but not currently with respect to the initial variances.
 \begin{enumerate}
 \item \texttt{MRE}: an $N \times T$ matrix corresponding to the solution of the macroscopic rate equation for all observed variables.  
 \item \texttt{Sigma}: an $N \times N \times T$ array corresponding to the temporal cross-covariance of all observed species at all time points. 
