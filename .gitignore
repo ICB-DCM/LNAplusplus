@@ -17,3 +17,9 @@
 *.synctex.gz
 *.toc
 *.DS_Store
+.pydevproject
+.settings/
+*.backup
+libraries/blitz-1.0.1/
+libraries/cvodes-2.7.0/
+models/modules/
