@@ -101,6 +101,8 @@
 
 \DeclareMathOperator{\cov}{cov}
 
+% Crop figures: for F in `ls S*.pdf`; do pdfcrop $F $F; done
+
 \begin{document}
 
 % \title{LNA++, Feigelman et al.}{Supplementary Materials:  LNA++: a fast C++
@@ -390,7 +392,7 @@ When using the provided source archive, extract it to ../libraries/blitz-1.0.1, 
 make install
 }
 
-For other versions of Blitz++ in non-default locations you need to adapt 'include_dirs' and 'library_dirs' in 'python/setupTemplate.py'.
+For other versions of Blitz++ in non-default locations you need to adapt 'include\_dirs' and 'library\_dirs' in 'python/setupTemplate.py'.
 
 \subsubsection*{CVODES}
 Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{./libraries}, and is also available from 
@@ -459,7 +461,7 @@ To generate the Matlab executable simply call the function generateLNA specifyin
 
 It is recommended to run this command using the \texttt{models} subdirectory of the LNA++ root directory as the working directory.  This ensures the correct relative path for the subsequent build steps.
 
-See \texttt{BirthDeath.m} in \texttt{./models} and the \textbf{Tutorial} for an example of how this is done.
+See \texttt{BirthDeath.m} in \texttt{./models} for an example of how this is done.
 
 \subsubsection*{Paths}
 After running the functions for generating the mex file, the resulting C code, executable file, and wrapper function are placed in a subdirectory with the name of the model as specified.  Make sure that the wrapper function and executable are on the Matlab path, e.g. by changing to the directory of the model or by adding them to the path using \texttt{addpath}.
@@ -672,7 +674,15 @@ compileLNA(model,S,tups,npar)
 %
 \section{Applications}
 \subsection{Birth-death Process}
-To test the performance of LNA++, we implemented a simple birth-death process involving a constitutively active DNA, and stochastic production and degradation of mRNA and protein (see Figure S1A, Table \ref{tab:BirthDeathReactions}).  The mRNA production reaction has a constant propensity $k_m$.  The propensity of production of a molecule of protein depends on the number of mRNAs, and on the rate constant $k_p$.  Lastly, mRNA is degraded with rate constant $\gamma_m$ and protein with rate constant $\gamma_p$.
+To test the performance of LNA++, we implemented a simple birth-death process involving a constitutively active DNA, and stochastic production and degradation of mRNA and protein (see Figure~\ref{fig:birth-death-model}A, Table \ref{tab:BirthDeathReactions}).  The mRNA production reaction has a constant propensity $k_m$.  The propensity of production of a molecule of protein depends on the number of mRNAs, and on the rate constant $k_p$.  Lastly, mRNA is degraded with rate constant $\gamma_m$ and protein with rate constant $\gamma_p$.
+
+\begin{figure}[htb!]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{Figures/S1.pdf}
+\caption{\textbf{LNA accurately approximates a simple Birth-death model.} (A) mRNA and proteins are produced and degraded in a simple birth-death model.  (B) The protein autocovariance matrix, $\cov(P(s),P(t))$, estimated from empirical data. (C) Comparison of the LNA estimate and the empirical protein autocovariance at three time points. Estimates derived from SSA shown as circles, LNA as lines. }
+\label{fig:birth-death-model}
+\end{center}
+\end{figure}
 
 Stochastic simulations of the chemical reaction network were generated using the stochastic simulation algorithm \cite{Gillespie:1977uf} implemented in the StockKit~2.0 simulation framework \cite{Sanft:2011cj}.  For simulation, the parameters were set to $k_m=20$, $k_p=25$, $\gamma_m=10$ and $\gamma_p$=1.
 
@@ -689,13 +699,56 @@ $\mathcal{R}_4:$ & Protein & $\overset{\gamma_p} \longrightarrow $ & $\emptyset$
 \end{table}
 
 
-We performed exact simulation of the stochastic process and used LNA++ to compute the mean and temporal autocovariance of the proteins using the same model parameters.  For simplicity, and to replicate a typical fluorescence microscopy setup, only protein abundance is considered to be known.  The system size is set to $\Omega=1$ so that we can identify molecule numbers with molecular concentrations. For this simple system, the LNA agrees well with the exact stochastic simulations in terms of mean and variance (Figure S1B) and the autocovariance (i.e.\ the cross-covariance of the protein only; Figures S1C and S1D). The autocovariance is shown at three sampled time points $(t=1.0, t=2.0, t=5.0)$, showing good qualitative agreement between the empirical covariance derived from 500 simulated SSA trajectories (Figure S1E  circles), and from the LNA (Figure S1E lines).  In each case, the autocovariance is peaked at zero time lag, and decreases to zero in both directions, i.e. the correlation of fluctuations at a particular time point with future or past fluctuations decreases with increasing absolute time lag.
+We performed exact simulation of the stochastic process and used LNA++ to compute the mean and temporal autocovariance of the proteins using the same model parameters.  For simplicity, and to replicate a typical fluorescence microscopy setup, only protein abundance is considered to be known.  The system size is set to $\Omega=1$ so that we can identify molecule numbers with molecular concentrations. For this simple system, the LNA agrees well with the exact stochastic simulations in terms of mean and variance (Figure~\ref{fig:birth-death-model}B) and the autocovariance (i.e.\ the cross-covariance of the protein only; Figures~\ref{fig:birth-death-model}C and~\ref{fig:birth-death-model}D). The autocovariance is shown at three sampled time points $(t=1.0, t=2.0, t=5.0)$, showing good qualitative agreement between the empirical covariance derived from 500 simulated SSA trajectories (Figure~\ref{fig:birth-death-model}E  circles), and from the LNA (Figure~\ref{fig:birth-death-model}E lines)\todo{Check missing subfigures D,E}.  In each case, the autocovariance is peaked at zero time lag, and decreases to zero in both directions, i.e. the correlation of fluctuations at a particular time point with future or past fluctuations decreases with increasing absolute time lag.
 
-Next, we compute sensitivities of the mean protein copy number with respect to the model parameters using LNA++, and compare the computed results to a finite difference approximation.  We find that the sensitivity of the mean agrees exactly with a finite difference approximation for both first and second order sensitivities, see Figure S2 and S3, respectively.  The first order sensitivity of the autocovariance also shows excellent agreement between the finite difference approximation and the analytical result from LNA++ (Figure S4).  Lastly, the second order sensitivities are difficult to compute robustly using finite differences, for example due to limited accuracy of the ODE solver. While this is generally the case, for this simple model the finite difference approximation still agrees reasonably well with the analytically computed sensitivities from LNA++ (Figure S5).
+Next, we compute sensitivities of the mean protein copy number with respect to the model parameters using LNA++, and compare the computed results to a finite difference approximation.  We find that the sensitivity of the mean agrees exactly with a finite difference approximation for both first and second order sensitivities, see Figures~\ref{fig:mean-first-order-sensitivities} and~\ref{fig:mean-second-order-sensitivities}, respectively.  The first order sensitivity of the autocovariance also shows excellent agreement between the finite difference approximation and the analytical result from LNA++ (Figure~\ref{fig:autocovariance-first-order-sensitivities}).  Lastly, the second order sensitivities are difficult to compute robustly using finite differences, for example due to limited accuracy of the ODE solver. While this is generally the case, for this simple model the finite difference approximation still agrees reasonably well with the analytically computed sensitivities from LNA++ (Figure~\ref{fig:autocovariance-second-order-sensitivities}).
 
-We performed multi-start optimization in order to compare parameter inference with and without the analytical sensitivities. Performing 10 optimizations with randomly (Latin hypercube) chosen initial values for $(\gamma_m, \gamma_p)$ in the range $[1, 100] \times [0.01, 10]$ (the correct values of $k_m$ and $k_p$ are assumed to be known), we see that  the numerical optimization finds a continuum of local optima before terminating (Figure S6A).  These optima have sometimes drastically different log-likelihood values (Figure S3B) and differing values for the locally-optimal model parameters. By contrast, optimization performed using the analytical gradients computed using LNA++ shows excellent convergence to the same global optimum in each of the ten numerical optimizations (Figure S6B).  The model parameters identified coincide with the true model parameters used to simulate the data (Figure S6A), unlike the numerical optimization without sensitivities which shows substantial variation. We thus conclude that the first order sensitivities have provided a clear benefit for robust parameter optimization.
 
-Finally, we used LNA++ to evaluate the likelihood landscape for the simple birth-death model.  We fix the model parameters $k_m$ and $k_p$ to their correct values, and vary the parameters $\gamma_m$ and $\gamma_p$ over a large range encompassing the true parameters used for the stochastic simulations.  We find that the for this simple model, the mRNA and protein degradation rates are identifiable, showing a clear optimum at the true model parameters (Figure S6C). Using the second order sensitivities to compute the 95\% confidence interval via the Laplace approximation~\eqref{eq:ConfidenceInterval}, we confirm that the parameters are indeed highly identifiable.
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics{Figures/S2.pdf}
+\caption{\textbf{Comparison of the analytical first order sensitivity of mean protein concentration with respect to parameters ($\frac{\partial \phi}{\partial \theta_i}$) and the finite difference approximation.}}
+\label{fig:mean-first-order-sensitivities}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=\textwidth]{Figures/S3.pdf}
+\caption{\textbf{Comparison of the analytical second order sensitivity of mean protein concentration with respect to parameters ($\frac{\partial^2 \phi}{\partial \theta_i \partial \theta_j} $) and the the finite difference approximation.}}
+\label{fig:mean-second-order-sensitivities}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics{Figures/S4.pdf}
+\caption{\textbf{Comparison of the analytical  first order sensitivity of the protein autocovariance with respect to model parameters ($\frac{\partial \Sigma}{\partial \theta_i}$) and the finite difference approximation.} (A) Finite difference approximation. (B) Sensitivity analysis.}
+\label{fig:autocovariance-first-order-sensitivities}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{Figures/S5.pdf}
+\caption{\textbf{Comparison of the analytical second order sensitivities of the protein autocovariance with respect to model parameters ($\frac{\partial^2 \Sigma}{\partial \theta_i \partial \theta_j}$) and the finite difference approximation.} (A) Finite difference approximation. (B) Sensitivity analysis.}
+\label{fig:autocovariance-second-order-sensitivities}
+\end{center}
+\end{figure}
+
+
+We performed multi-start optimization in order to compare parameter inference with and without the analytical sensitivities. Performing 10 optimizations with randomly (Latin hypercube) chosen initial values for $(\gamma_m, \gamma_p)$ in the range $[1, 100] \times [0.01, 10]$ (the correct values of $k_m$ and $k_p$ are assumed to be known), we see that  the numerical optimization finds a continuum of local optima before terminating (Figure~\ref{fig:parameter-inference}A).  These optima have sometimes drastically different log-likelihood values (Figure~\ref{fig:parameter-inference}B) and differing values for the locally-optimal model parameters. By contrast, optimization performed using the analytical gradients computed using LNA++ shows excellent convergence to the same global optimum in each of the ten numerical optimizations (Figure~\ref{fig:parameter-inference}B).  The model parameters identified coincide with the true model parameters used to simulate the data (Figure~\ref{fig:parameter-inference}A), unlike the numerical optimization without sensitivities which shows substantial variation. We thus conclude that the first order sensitivities have provided a clear benefit for robust parameter optimization.
+
+\begin{figure}[htbp!]
+\begin{center}
+\includegraphics{Figures/S6.pdf}
+\caption{\textbf{Analytic sensitivities greatly improve robustness of parameter inference.} (A) The MLE estimated using sensitivities. (B) The log-likelihood of the MLE for multiple optimization runs using sensitivities and a finite difference approximation. Optimization runs are sorted by their log-likelihoods. (C) The log-likelihood landscape of the degradation rates for mRNA and protein, estimated using the LNA, shows a clear optimum for the correct model parameters (contours indicated for $\log[-\ell(\bs \Theta)]$).  Using the second order sensitivities, it is possible to estimate the 95\% confidence interval for the model parameters (red).}
+\label{fig:parameter-inference}
+\end{center}
+\end{figure}
+
+Finally, we used LNA++ to evaluate the likelihood landscape for the simple birth-death model.  We fix the model parameters $k_m$ and $k_p$ to their correct values, and vary the parameters $\gamma_m$ and $\gamma_p$ over a large range encompassing the true parameters used for the stochastic simulations.  We find that the for this simple model, the mRNA and protein degradation rates are identifiable, showing a clear optimum at the true model parameters (Figure~\ref{fig:parameter-inference}C). Using the second order sensitivities to compute the 95\% confidence interval via the Laplace approximation~\eqref{eq:ConfidenceInterval}, we confirm that the parameters are indeed highly identifiable.
 
 \subsection{Linear Chain}
 To test the scaling performance of the LNA++ code, we implemented a series of models of increasing complexity.  Each model consists of a series of linear interconversions between species.  The simplest model consists of $n=3$ species $X_1$, $X_2$, and $X_3$, and the $2n$ reactions:
@@ -710,7 +763,15 @@ To test the scaling performance of the LNA++ code, we implemented a series of mo
 \end{aligned}
 \end{equation}
 
-In the same way we constructed models for $n=4\ldots 9$. In each case we assessed the ``offline cost'', i.e.\ the time necessary to compute the components of the LNA symbolically (a one time cost), and the ``online cost'', i.e.\ the time to evaluate the solution of the LNA (evaluated at each step of the optimization). We find that the offline cost grows with the model size, as many more equations needs to be solved (Figure S7A); offline costs include solving for components necessary for first and second order sensitivities.  We also estimate the online cost for the LNA solution both with and without sensitivities. The simulations were repeated 10 times each for different parameter sets with each individual parameter chosen randomly from the interval $[0,100]$, and initial conditions for each species chosen randomly from the interval $[0,1000]$, see Figure S7B. In each simulation, the same number of time points are used. Simulations were performed on a MacBook Pro laptop with a four core, 2.5GHz Intel i7 processor, and 16GB of RAM.  The run time grows quickly, especially when computing the second order sensitivities.  However, even with 9 species the run time without sensitivities is still a fraction of a second, and the run time including first order sensitivities approximately 1-2 seconds on average, thus suitable for parameter inference.
+In the same way we constructed models for $n=4\ldots 9$. In each case we assessed the ``offline cost'', i.e.\ the time necessary to compute the components of the LNA symbolically (a one time cost), and the ``online cost'', i.e.\ the time to evaluate the solution of the LNA (evaluated at each step of the optimization). We find that the offline cost grows with the model size, as many more equations needs to be solved (Figure~\ref{fig:computation-time-vs-model-size}A); offline costs include solving for components necessary for first and second order sensitivities.  We also estimate the online cost for the LNA solution both with and without sensitivities. The simulations were repeated 10 times each for different parameter sets with each individual parameter chosen randomly from the interval $[0,100]$, and initial conditions for each species chosen randomly from the interval $[0,1000]$, see Figure~\ref{fig:computation-time-vs-model-size}B. In each simulation, the same number of time points are used. Simulations were performed on a MacBook Pro laptop with a four core, 2.5GHz Intel i7 processor, and 16GB of RAM.  The run time grows quickly, especially when computing the second order sensitivities.  However, even with 9 species the run time without sensitivities is still a fraction of a second, and the run time including first order sensitivities approximately 1-2 seconds on average, thus suitable for parameter inference.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics{Figures/S7.pdf}
+\caption[labelInTOC]{\textbf{LNA++ offline and online computation cost versus model size.}  (A) The time to generate the Matlab executable (``offline cost''). (B) The median (1st and 3rd quantile) simulation run time (``online cost'') with randomly chosen model parameters ($n=10$). First and second order sensitivities computed using LNA++, and estimated for finite differences using a constant factor of $3n$ and $6n(3n-1)$ times the online cost of the LNA for network size $N$, for first order and second order finite differences, respectively.}
+\label{fig:computation-time-vs-model-size}
+\end{center}
+\end{figure}
 
 We compare the run time of the first and second order sensitivities to the estimated run time using finite differences.  Approximating the sensitivities using a forward difference scheme requires the evaluation of the function one additional time for each parameter (see Section \ref{sec:FirstOrderFD}). In the case of the linear chain model with $n$ species, there are $2n$ reactions rates and $n$ initial conditions (one for each species), leading to an additional $3n$ simulations necessary to approximate all first order sensitivities using finite differences. To approximate the second order sensitivities, an additional 4 evaluations of the function are necessary for each pair of model parameter/initial conditions (see Section \ref{sec:SecondOrderFD}), leading to a total of $4 \frac{N(N-1)}{2}$ additional evaluations of $f$ where $N$ is the number of parameters/initial conditions with respect to which to compute the second order sensitivities. As for the first order case $N=3n$, such that the second order finite difference requires a total of $2N(N-1) = 6n(3n-1)$ evaluations of $f$ in addition to those required by the first order finite difference approximation. Compared to the finite difference computation, the computation of the first order sensitivity computed using LNA++ was between 1.5 and 2.9 times faster, and the computation of the second order sensitivity between 11.4 and 20.5 times faster. Lastly, the sensitivities computed using the analytical expressions do not require \textit{a priori} knowledge of the length scale necessary for a robust finite difference approximation of the gradient, and are thus generally more robust and accurate. Run times for the finite difference approximation are estimated by multiplying the measured run times for the LNA without sensitivities by the factors $3n$ and $6n(3n-1)$ for the first and second order sensitivities, respectively.
 
@@ -720,66 +781,5 @@ In summary, LNA++ facilitates the automatic construction of LNAs and the corresp
 %
 \bibliographystyle{unsrt}
 \bibliography{Documentation.bib}
-
-%
-%
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics{Figures/S1.pdf}
-\caption{\textbf{LNA accurately approximates a simple Birth-death model.} (A) mRNA and proteins are produced and degraded in a simple birth-death model.  (B) The protein autocovariance matrix, $\cov(P(s),P(t))$, estimated from empirical data. (C) Comparison of the LNA estimate and the empirical protein autocovariance at three time points. Estimates derived from SSA shown as circles, LNA as lines. }
-\label{default}
-\end{center}
-\end{figure}
-
-\begin{figure}[h]
-\begin{center}
-\includegraphics{Figures/S2.pdf}
-\caption{\textbf{Comparison of the analytical first order sensitivity of mean protein concentration with respect to parameters ($\frac{\partial \phi}{\partial \theta_i}$) and the finite difference approximation.}}
-\label{default}
-\end{center}
-\end{figure}
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics{Figures/S3.pdf}
-\caption{\textbf{Comparison of the analytical second order sensitivity of mean protein concentration with respect to parameters ($\frac{\partial^2 \phi}{\partial \theta_i \partial \theta_j} $) and the the finite difference approximation.}}
-\label{default}
-\end{center}
-\end{figure}
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics{Figures/S4.pdf}
-\caption{\textbf{Comparison of the analytical  first order sensitivity of the protein autocovariance with respect to model parameters ($\frac{\partial \Sigma}{\partial \theta_i}$) and the finite difference approximation.} (A) Finite difference approximation. (B) Sensitivity analysis.}
-\label{default}
-\end{center}
-\end{figure}
-
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics{Figures/S5.pdf}
-\caption{\textbf{Comparison of the analytical second order sensitivities of the protein autocovariance with respect to model parameters ($\frac{\partial^2 \Sigma}{\partial \theta_i \partial \theta_j}$) and the finite difference approximation.} (A) Finite difference approximation. (B) Sensitivity analysis.}
-\label{default}
-\end{center}
-\end{figure}
-
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics{Figures/S6.pdf}
-\caption{\textbf{Analytic sensitivities greatly improve robustness of parameter inference.} (A) The MLE estimated using sensitivities. (B) The log-likelihood of the MLE for multiple optimization runs using sensitivities and a finite difference approximation. Optimization runs are sorted by their log-likelihoods. (C) The log-likelihood landscape of the degradation rates for mRNA and protein, estimated using the LNA, shows a clear optimum for the correct model parameters (contours indicated for $\log[-\ell(\bs \Theta)]$).  Using the second order sensitivities, it is possible to estimate the 95\% confidence interval for the model parameters (red).}
-\label{default}
-\end{center}
-\end{figure}
-
-
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics{Figures/S7.pdf}
-\caption[labelInTOC]{\textbf{LNA++ offline and online computation cost versus model size.}  (A) The time to generate the Matlab executable (``offline cost''). (B) The median (1st and 3rd quantile) simulation run time (``online cost'') with randomly chosen model parameters ($n=10$). First and second order sensitivities computed using LNA++, and estimated for finite differences using a constant factor of $3n$ and $6n(3n-1)$ times the online cost of the LNA for network size $N$, for first order and second order finite differences, respectively.}
-\label{figureLabel}
-\end{center}
-\end{figure}
 
 \end{document}
