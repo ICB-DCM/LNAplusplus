@@ -294,10 +294,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
   /* Temporal cross-covariance matrix */
     if (nlhs > 1) {
-        const mwSize dims_Sigma[] = {static_cast<mwSize<(nObsVar),
-                                     static_cast<mwSize<(nObsVar),
-                                     static_cast<mwSize<(N),
-                                     static_cast<mwSize<(N)};
+        const mwSize dims_Sigma[] = {static_cast<mwSize>(nObsVar),
+                                     static_cast<mwSize>(nObsVar),
+                                     static_cast<mwSize>(N),
+                                     static_cast<mwSize>(N)};
 		plhs[1] = mxCreateNumericArray( (mwSize)4, dims_Sigma, mxDOUBLE_CLASS, mxREAL);
 		if (plhs[1]==0)
 		    	mexErrMsgTxt("Error allocation output 1");
@@ -312,9 +312,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     // Sensitivity of MRE
     if (nlhs > 2) {
-        const mwSize dims_Sens[] = {static_cast<mwSize<(nObsVar),
-                                    static_cast<mwSize<(npar),
-                                    static_cast<mwSize<(N)};
+        const mwSize dims_Sens[] = {static_cast<mwSize>(nObsVar),
+                                    static_cast<mwSize>(npar),
+                                    static_cast<mwSize>(N)};
     	plhs[2] = mxCreateNumericArray( (mwSize)3, dims_Sens, mxDOUBLE_CLASS, mxREAL);
     	if (plhs[2]==0)
     	    	mexErrMsgTxt("Error allocation output 2");
@@ -327,11 +327,11 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     // Sensitivity of the covariance
     if (nlhs > 3) {
-                const mwSize dims[] = {static_cast<mwSize<(nObsVar),
-                                       static_cast<mwSize<(nObsVar),
-                                       static_cast<mwSize<(N),
-                                       static_cast<mwSize<(N),
-                                       static_cast<mwSize<(npar)};
+                const mwSize dims[] = {static_cast<mwSize>(nObsVar),
+                                       static_cast<mwSize>(nObsVar),
+                                       static_cast<mwSize>(N),
+                                       static_cast<mwSize>(N),
+                                       static_cast<mwSize>(npar)};
 		plhs[3] = mxCreateNumericArray((mwSize)5, dims, mxDOUBLE_CLASS, mxREAL);
 		if (plhs[3]==0)
 		    	mexErrMsgTxt("Error allocation output 3");
@@ -344,10 +344,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     // Second order sens. of MRE
     if (nlhs > 4) {
-        const mwSize dims_Sens2[] = {static_cast<mwSize<(nObsVar),
-                                     static_cast<mwSize<(npar),
-                                     static_cast<mwSize<(npar),
-                                     static_cast<mwSize<(N)};
+        const mwSize dims_Sens2[] = {static_cast<mwSize>(nObsVar),
+                                     static_cast<mwSize>(npar),
+                                     static_cast<mwSize>(npar),
+                                     static_cast<mwSize>(N)};
     	plhs[4] = mxCreateNumericArray( (mwSize)4, dims_Sens2, mxDOUBLE_CLASS, mxREAL);
     	if (plhs[4]==0)
     	    	mexErrMsgTxt("Error allocation output 4");
@@ -359,12 +359,12 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     // Second order sens. of Var
     if (nlhs > 5) {
-        const mwSize dims_Sens2_Var[] = {static_cast<mwSize<(nObsVar),
-                                         static_cast<mwSize<(nObsVar),
-                                         static_cast<mwSize<(npar),
-                                         static_cast<mwSize<(npar),
-                                         static_cast<mwSize<(N),
-                                         static_cast<mwSize<(N)};
+        const mwSize dims_Sens2_Var[] = {static_cast<mwSize>(nObsVar),
+                                         static_cast<mwSize>(nObsVar),
+                                         static_cast<mwSize>(npar),
+                                         static_cast<mwSize>(npar),
+                                         static_cast<mwSize>(N),
+                                         static_cast<mwSize>(N)};
     	plhs[5] = mxCreateNumericArray( (mwSize)6, dims_Sens2_Var, mxDOUBLE_CLASS, mxREAL);
     	if (plhs[5]==0)
     	    	mexErrMsgTxt("Error allocation output 5");
