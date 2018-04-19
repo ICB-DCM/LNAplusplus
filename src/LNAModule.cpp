@@ -120,11 +120,11 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	 * 		computeSens: boolean
 	 * 		computeSens2: boolean
 	*/
-    static char* argnames[] = {"Theta", "time", "Y0", "V0", "merr", "obsVar",
+    static const char* argnames[] = {"Theta", "time", "Y0", "V0", "merr", "obsVar",
     		"computeSens", "computeSens2", NULL};
 
     // check input arguments format and parse
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|OOOO$OO", argnames, &_Theta, &_time, &_y0, &_V0, &_merr,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|OOOO$OO", const_cast<char **>(argnames), &_Theta, &_time, &_y0, &_V0, &_merr,
     		 &_obsVar, &_computeSens, &_computeSens2))
     {
     	PyErr_SetString(LNAError, "Usage string.");
