@@ -22,7 +22,7 @@ module1 = Extension('myModuleLNA',
 						+ glob('myModule/C/*.c'), 
 					runtime_library_dirs=['/usr/local/lib'],
 					extra_compile_args=['-Wno-header-guard','-Wno-parentheses','-Wno-incompatible-pointer-types', '-Wno-unused-variable', 
-					'-Wno-c++11-compat-deprecated-writable-strings', '-Wno-unused-function', '-Wno-reorder'])
+					'-Wno-c++11-compat-deprecated-writable-strings', '-Wno-unused-function'])
 					
 
 setup(name = 'myModuleLNA',

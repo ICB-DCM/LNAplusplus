@@ -25,7 +25,7 @@ class LNA
 public:
 
 	LNA(const int nvar_, const int npar_, const MA2 &S_) :
-	nvar(nvar_), npar(npar_), S(S_), RHS_SIZE(nvar_*(nvar_+3)/2 + nvar_*nvar_)
+        nvar(nvar_), npar(npar_), RHS_SIZE(nvar_*(nvar_+3)/2 + nvar_*nvar_), S(S_)
 	{
 		initCVODES();
 
