@@ -445,7 +445,8 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	copyOut(Sigma_out, Sigma);
 
 	// MRE sensitivity
-	PyObject *dMRE_out, *dSigma_out, *d2MRE_out, *d2Sigma_out, *ret;
+        PyObject *dMRE_out, *dSigma_out, *d2MRE_out, *d2Sigma_out, *ret;
+        dMRE_out = dSigma_out = d2MRE_out = d2Sigma_out = ret = nullptr;
 
 	if (computeSens)
 	{
