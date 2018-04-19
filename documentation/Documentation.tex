@@ -12,10 +12,12 @@
 \usepackage{listings}
 \usepackage{authblk}
 \usepackage[colorlinks=true]{hyperref}
-\usepackage{color}
+\usepackage{xcolor}
 
 \usepackage{listings}               %Programmcodeumgebung für Matlab Code 
 \usepackage{microtype}            %Captions im Programmcode 
+
+\hypersetup{bookmarksopen=true}
 
 \definecolor{bgcolor}{rgb}{0,0,0} 
 \definecolor{string}{rgb}{1,0,0} 
@@ -56,7 +58,7 @@
    language=Python, 
    basicstyle=\ttm, 
 %  basicstyle=\scriptsize, 
-      keywordstyle=\ttb\color{deepblue}, 
+   keywordstyle=\ttb\color{deepblue}, 
 %   commentstyle=\color{darkgreen}, 
    emph={MyClass,__init__},          % Custom highlighting
    emphstyle=\ttb\color{deepred},    % Custom highlighting style
@@ -129,7 +131,7 @@ Garching, Germany}
 \newpage
 \section{Toolboxes for Linear Noise Approximation}
 
-LNA++ is a tool designed to efficiently compute the linear noise approximation to a chemical reaction network, along with the first and second order sensitivities of the mean, covariance and temporal cross-covariance matrix. Furthermore, LNA++ facilitates parameter inference on time series data by providing first and second order sensitivities of the log-likelihood with respect to model parameters. To ensure computational efficiency, the numerical simulation is implemented in C++.  LNA++ can be either be integrated into a C++ project, or used in conjunction with Matlab or Python for parameter inference in chemical reaction networks.  
+LNA++ is a tool designed to efficiently compute the linear noise approximation to a chemical reaction network, along with the first and second order sensitivities of the mean, covariance and temporal cross-covariance matrix. Furthermore, LNA++ facilitates parameter inference on time series data by providing first and second order sensitivities of the log-likelihood with respect to model parameters. To ensure computational efficiency, the numerical simulation is implemented in C/C++.  LNA++ can be either be integrated into a C++ project, or used in conjunction with Matlab or Python for parameter inference in chemical reaction networks.  
 
 This document provides the mathematical background and describes the library requirements, the installation and the usage of LNA++.
 
@@ -376,74 +378,63 @@ Confidence intervals can be computed using the maximum likelihood estimator (MLE
 %
 \section{LNA++ installation and requirements}
 \subsection{Installation}
-The contents of the LNA++ distribution zip file should be placed into a separate folder, such as in a folder within the home directory. The archive contains all the necessary scripts and source code for building LNA++ Python modules or Matlab executable files. No further building or installation is necessary until the creation of the model executable, as described below.
+Unpack the LNA++ archive or clone the LNA++ repository which contains all the necessary scripts and source code for building LNA++ Python modules or Matlab executable files. No further building or installation of LNA++ itself is necessary until the creation of the model executables, as described below.
 
 \subsection{Requirements}
-LNA++ uses the standard C++ libraries, the CVODES Sundials library for numerical integration of ODEs and forward sensitivities, and the Blitz++ library for fast, templatized tensor operations. 
+LNA++ uses the standard C libraries, the CVODES Sundials library for numerical integration of ODEs and forward sensitivities, and the Blitz++ library for fast, templatized tensor operations. 
 
 \subsubsection*{Compiler}
-Compilation of C++ source code for use as a standalone executable, or with Matlab or Python requires the use of a suitable compiler such as gcc/g++ on Linux-based systems, or clang on mac OS.
+Compilation of C/C++ source code for use as a standalone executable, or with Matlab or Python requires the use of a suitable compiler such as \texttt{gcc/g++} on Linux-based systems, or \texttt{clang} on mac OS.
 
 \subsubsection*{Blitz++}
-Blitz++ version 1.0.1 is required. It can be obtained via the included source code in \texttt{./libraries}, or from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}.  It is also available via macports on mac OS, and the Ubuntu 16.04 apt repository (libblitz0-dev, libblitz0v5). 
+Blitz++ version 1.0.1 is required. Blitz++ 1.0.1 is included in the \texttt{./libraries} folder, or can be downloaded from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}. It is also available via macports on mac OS. 
 
 When using the provided source archive, extract it to ../libraries/blitz-1.0.1, change to this folder and run:
-\texttt{./configure --with-pic --prefix=`pwd`/install \\
-make install
-}
+\texttt{./configure --with-pic --prefix=`pwd`/install \&\& make install}
 
-For other versions of Blitz++ in non-default locations you need to adapt 'include\_dirs' and 'library\_dirs' in 'python/setupTemplate.py'.
+For other versions of Blitz++ in non-default locations you need to adapt \texttt{include\_dirs} and \texttt{library\_dirs} in
+\texttt{python/setupTemplate.py}.
 
 \subsubsection*{CVODES}
-Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{./libraries}, and is also available from 
-\href{http://computation.llnl.gov/casc/sundials}{http://computation.llnl.gov/casc/sundials}.
+Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{./libraries}, and is also available from \href{http://computation.llnl.gov/casc/sundials}{http://computation.llnl.gov/casc/sundials}.
+To setup CVODES, unzip the source archive, change to the source directory and run:
 
-Source code for Blitz++ and CVODES can be installed via the standard GNU Autoconf toolchain (see \href{https://en.wikipedia.org/wiki/Autoconf}{here}) for further information. Usually it suffices to run the following commands from the source directory after unzipping:
+\begin{verbatim}
+./configure --with-pic --prefix=`pwd`/install
+make && make install
+\end{verbatim}
 
-\texttt{./configure --with-pic \\
-make \\
-sudo make install
-}
-
-This requires administrator privileges.  Otherwise, you can run from within the cvodes directory:
-
-\texttt{./configure --with-pic  --prefix=`pwd`/install\\
-make install
-}
-
-\textit{Note:} CVODES should be compiled using the \texttt{-fPIC} flag to ensure cross-platform compatibility.  This can be enabled by specifying \texttt{--with-pic} to the configure script.
+\textit{Note:} CVODES should be compiled using the \texttt{-fPIC} flag to ensure cross-platform compatibility. This can be enabled by specifying \texttt{--with-pic} to the configure script.
 
 \subsubsection*{Python}
-In order to use LNA++ with Python, you must first install the necessary scientific computing modules, listed below.  Python libraries can be installed using package managers such as apt on Ubuntu, or macports/homebrew on Mac OS, or using the \texttt{Pip3} Python package manager.
+
+In order to use LNA++ with Python, ensure you have installed the necessary scientific computing modules as listed below. Python libraries can be installed using package managers such as apt on Ubuntu, or macports/homebrew on Mac OS, or using the \texttt{pip3} Python package manager.
 
 LNA++ is compatible with Python 3.0 or later.  All libraries must thus be the Python3-compatible version.
 
 \textit{Note for Ubuntu Users:} The necessary Python packages can be installed using the command\\
-\texttt{sudo apt-get install libblitz0-dev libblitz0ldbl libblitz-doc python-sympy libsbml5-python}
+\texttt{sudo apt install python3-numpy python3-sympy libsbml5-python python3-ipdb}
 
+\begin{description}
+ \item[numpy] 
+  Numpy is a widely used mathematics and numerical library.
+ \item[sympy]
+  Sympy provides a framework for symbolic/algebraic computations, and is necessary for computing the linear noise approximation for arbitrary models.
+ \item[libsbml]
+  Libsbml is required for translating SBML models for use with LNA++.
+ \item[ipdb]
+  IPython debugger.
+ \item[(optional) pylab]
+  Pylab provides functions for plotting vectors and matrices, and might thus be useful.
+\end{description}
 
-\subsubsection*{Numpy}
-Numpy is a widely used mathematics and numerical library.
-
-\subsubsection*{Sympy}
-Sympy provides a framework for symbolic/algebraic computations, and is necessary for computing the linear noise approximation for arbitrary models.
-
-\subsubsection*{Libsbml}
-Libsbml is required for translating SBML models for use with LNA++.
-
-\subsubsection*{ipdb}
-IPython debugger.
-
-\subsubsection*{(optional) pylab}
-Pylab provides functions for plotting vectors and matrices, and might thus be useful.
 
 \subsubsection*{Matlab}
-In order to use LNA++ with Matlab, the Matlab Symbolic Toolbox is required for the analytic derivation of the LNA and its sensitivity equations. If Matlab or the Matlab Symbolic Toolbox is not available, LNA++ can still be used in two ways:
-\begin{enumerate}
-\item Python only.  Use the Python implementation (no Matlab) as described in the remainder of this document.
-\item Mixed Matlab/Python.  Both the Python and Matlab implementations of LNA++ generate C code for the analytical components of 
-\end{enumerate}
-the LNA and its sensitivities.  It is therefore possible to generate the C code using the Python scripts, through the \texttt{generateLNAComponents} step, as described below. The Matlab executable is then generated in the normal way, resuming with the \texttt{compileLNA} step.
+In order to use LNA++ with Matlab, the Matlab \textit{Symbolic Math Toolbox} is required for the analytic derivation of the LNA and its sensitivity equations. Matlab is not required when using only the Python version LNA++.
+
+\paragraph{If you do not have the \textit{Symbolic Math Toolbox} available:}
+Both the Python and Matlab implementations of LNA++ generate the same C code for the analytical components of the LNA and its sensitivities. It is therefore possible to generate the C code using the Python scripts, through the \texttt{generateLNAComponents} step, as described below. The Matlab executable is then generated in the normal way, resuming with the \texttt{compileLNA} step.
+
 
 %
 %
@@ -452,7 +443,7 @@ the LNA and its sensitivities.  It is therefore possible to generate the C code 
 In this section we describe how to use LNA++ to create Matlab executable models and Python modules. 
 
 \subsection{Overview}
-LNA++ converts a user specified model, provided as an SBML model configuration file, into a set of symbolic functions for the time derivatives of means, temporal cross-covariances, and their sensitivities. These functions are converted to C++ code which is then compiled together with the core computation engine to generate either Matlab or Python executable files/modules. The system can then be simulated using these executables and user-specified initial conditions and model parameters. 
+LNA++ converts a user-specified model, provided as an SBML model configuration file, into a set of symbolic functions for the time derivatives of means, temporal cross-covariances, and their sensitivities. These functions are converted to C code which is then compiled together with the core computation engine to generate either Matlab or Python executable files/modules. The system can then be simulated using these executables and user-specified initial conditions and model parameters. 
 
 The stoichiometric matrix and reaction propensity functions are extracted from a user-supplied SBML model file, e.g., see \href{http://sbml.org/SBML_Software_Guide/SBML_Software_Summary}{http://sbml.org/}.
 
@@ -471,7 +462,7 @@ To build the model call \texttt{generateLNA(sbmlPath,model,computeSS)}
 \begin{enumerate}
 \item \texttt{sbmlPath}: the path to the SBML model specification file
 \item \texttt{model}: the desired name of the model 
-\item \texttt{computeSS}:  this argument is optional and can have only one of the values \texttt{`Y0'}, \texttt{`V0?}, \texttt{`BOTH'}, or \texttt{`NONE'}.
+\item \texttt{computeSS}:  this argument is optional and can have only one of the values \texttt{`Y0'}, \texttt{`V0'}, \texttt{`BOTH'}, or \texttt{`NONE'}.
 	\begin{enumerate}
 	\item \texttt{`Y0'}:  LNA++ will attempt to calculate the steady state value of the MRE of the stochastic system specified. If \texttt{Y0} is not explicitly provided when invoking the model, the computed value will be automatically substituted. 
 	\item \texttt{`V0'}: LNA++ will attempt to calculate the steady state value of the variance of the stochastic system specified. If \texttt{V0} is not explicitly provided when invoking the model, the computed value will be automatically substituted.
