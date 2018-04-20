@@ -21,12 +21,14 @@ matrix:
       compiler: clang
 
 install:
+    - export BASE_DIR=`pwd`
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade python; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pyenv versions; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pyenv shell 2.7 3.6; fi
     - pip3 install --user sympy python-libsbml numpy matplotlib ipdb
 
 script:
+    - cd $BASE_DIR
     - models/runCI.sh
     # test if all result plots have been generated
     - test `ls BirthDeath*pdf | wc -l` = 9
