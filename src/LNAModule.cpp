@@ -84,7 +84,7 @@ static int assignIntFromPyList(PyObject *inList, int *&outList) {
 
 template <class T>
 static void copyOut(PyObject *obj, T *data_ptr) {
-    auto array = reinterpret_cast<PyArrayObject*>(obj);
+    PyArrayObject* array = reinterpret_cast<PyArrayObject*>(obj);
     void *out_data = PyArray_DATA(array);
     memcpy( out_data, (void*)data_ptr->data(), sizeof(double) * data_ptr->size());
 }
