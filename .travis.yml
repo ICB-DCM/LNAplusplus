@@ -13,4 +13,5 @@ matrix:
             - python3-matplotlib
         
 install:
+    - pip3 install --user sympy 
     - models/runCI.sh
