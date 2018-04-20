@@ -11,7 +11,8 @@ matrix:
             - libsbml5-python
             - python3-ipdb 
             - python3-matplotlib
-
+    - os: osx
+      compiler: clang
 
 install:
     - pyenv versions
