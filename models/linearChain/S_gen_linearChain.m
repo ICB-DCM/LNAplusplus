@@ -1,7 +1,7 @@
+% S_gen_linearChain.m creates the stoichiometric matrix for a linear chain 
+% of reactionswith N species
+
 function S = S_gen_linearChain(N)
-% create a stoichiometric matrix for a linear chain of reactions
-% with N species
-% N-1 forward reactions and N-1 backward reaction
 
 S = zeros(N, 2*N);
 

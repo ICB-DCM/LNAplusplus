@@ -17,17 +17,17 @@ addpath('../matlab')
 % mRNA     -->  0
 %          k_p
 % mRNA     -->  mRNA + protein
-%         g_p
+%          g_p
 % protein  -->  0
 
 %% Create the Matlab executable for the birth / death system
-generateLNA('BirthDeath/BirthDeath.xml', 'BirthDeath', 'BOTH')
+generateLNA('BirthDeath/BirthDeath.xml', 'BirthDeath', 'BOTH');
 
 % add the path to the mex file
-addpath('BirthDeath/')
+addpath('BirthDeath/');
 
 %% Setting
-Theta = [20, 25, 10, 1]; % parameters
+Theta = [20,25,10,1]; % parameters
 Theta_name = {'k_m','k_p','g_m','g_p'}; % parameter names (for visualization)
 tspan = 0:0.1:10; % observation times
 
@@ -123,7 +123,7 @@ ObsIndex = 2; % observable is second species (= protein)
 VarNoise = 0; % variance of measurement noise
 
 MRE0 = [2,200]; % inital values (E(mRNA),E(Protein))
-Var0 = [0,0,0]; % initia co-variances (cov[mRNA,mRNA],cov(mRNA,Protein),cov(Protein,Protein))
+Var0 = toLinear([0,0;0,0]); % initia co-variances (cov[mRNA,mRNA],cov(mRNA,Protein),cov(Protein,Protein))
 
 % solve LNA and compute measured distribution
 [MRE,Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise,MRE0,Var0);

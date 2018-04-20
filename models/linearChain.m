@@ -9,6 +9,7 @@ clc;
 
 % Add path
 addpath('../matlab')
+addpath('./linearChain')
 
 % Model of bearth-death process:
 % ==============================
@@ -16,7 +17,7 @@ addpath('../matlab')
 
 %% Define evaluation parameters
 R = 10; % number of simulation runs
-N_max = 6; % maximum chain length (the minimum is 3)
+N_max = 8; % maximum chain length (the minimum is 3)
 
 %% Initialize matrices for storing computation and run time
 computeTimeMat = nan(N_max-2,1); % time for model construction and compilation
