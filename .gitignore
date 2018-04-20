@@ -29,7 +29,7 @@ models/BirthDeath/matlab
 models/BirthDeath/BirthDeath_LNA*
 models/chain*
 models/positiveFeedback
-models/Wang/C
-models/Wang/matlab
-models/Wang/Wang_LNA*
+models/Wang2010/C
+models/Wang2010/matlab
+models/Wang2010/Wang_LNA*
 documentation/Documentation.pdf
