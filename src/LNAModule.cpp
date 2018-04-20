@@ -6,6 +6,7 @@
 #include "cvodes/cvodes.h"
 #include "nvector/nvector_serial.h"
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 
 #include "MODEL_DEF.h"
@@ -83,8 +84,9 @@ static int assignIntFromPyList(PyObject *inList, int *&outList) {
 
 template <class T>
 static void copyOut(PyObject *obj, T *data_ptr) {
-	void *out_data = PyArray_DATA(obj);
-	memcpy( out_data, (void*)data_ptr->data(), sizeof(double) * data_ptr->size());
+    auto array = reinterpret_cast<PyArrayObject*>(obj);
+    void *out_data = PyArray_DATA(array);
+    memcpy( out_data, (void*)data_ptr->data(), sizeof(double) * data_ptr->size());
 }
 
 
