@@ -24,6 +24,8 @@ install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pyenv versions; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pyenv shell 2.7 3.6; fi
     - pip3 install --user sympy python-libsbml numpy matplotlib ipdb
+
+script:
     - models/runCI.sh
     # test if all result plots have been generated
     - test `ls models/BirthDeath*pdf | wc -l` = 9
