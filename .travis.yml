@@ -1,8 +1,7 @@
-dist: xenial
-
 matrix:
   include: 
     - os: linux  
+      dist: xenial
       compiler: gcc
       addons:
         apt:
