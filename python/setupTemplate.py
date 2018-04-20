@@ -1,4 +1,5 @@
 from distutils.core import setup, Extension
+from distutils import sysconfig
 from glob import glob
 from numpy import get_include
 import sys
@@ -11,6 +12,12 @@ if sys.version_info.major < 3:
 
 numpyPath = get_include()
 
+# Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++ to fix warnings.
+cfg_vars = sysconfig.get_config_vars()
+for key, value in cfg_vars.items():
+    if type(value) == str:
+        cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
+ 
 module1 = Extension('myModuleLNA',
                     define_macros = [('MAJOR_VERSION', '1'),
                                      ('MINOR_VERSION', '0')],
@@ -21,7 +28,7 @@ module1 = Extension('myModuleLNA',
                     sources = ['../src/computeLinearNoise.cpp', 'myModule/myModule_LNA.cpp']\
 						+ glob('myModule/C/*.c'), 
 					runtime_library_dirs=['/usr/local/lib'],
-					extra_compile_args=['-Wno-parentheses','-Wno-incompatible-pointer-types', '-Wno-unused-variable', '-Wno-unused-function'])
+					extra_compile_args=['-Wno-parentheses', '-Wno-unused-variable', '-Wno-unused-function'])
 					
 
 setup(name = 'myModuleLNA',
