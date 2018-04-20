@@ -14,6 +14,8 @@ import os
 import ipdb
 
 lnaRootDir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+lnaModelsDir = lnaRootDir + '/models'
+lnaModulesDir = lnaModelsDir + '/modules'
 
 def jacobian(x,y):
     "Compute the jacobian of x with respect to y"
@@ -229,24 +231,25 @@ def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
     '''generate the C code, for python module'''
 
     # create output directory if necessary
-    if not os.path.isdir(model):
-        os.mkdir(model)
-    if not os.path.isdir('%s/C/' % model):
-        os.mkdir('%s/C/' % model)
+    modelDir = lnaModelsDir+ '/' + model
+    if not os.path.isdir(modelDir):
+        os.mkdir(modelDir)
+    if not os.path.isdir('%s/C/' % modelDir):
+        os.mkdir('%s/C/' % modelDir)
 
     for objs,args,argTypes in tups:
         for x in objs:
             H,C=genCcode(objs[x], x, args, argTypes)
-            f=open("%s/C/%s.h" % (model,x), 'w')
+            f=open("%s/C/%s.h" % (modelDir,x), 'w')
             f.writelines(H)
             f.close()
 
-            f=open("%s/C/%s.c" % (model,x), 'w')
+            f=open("%s/C/%s.c" % (modelDir,x), 'w')
             f.writelines(C)
             f.close()
 
     # generate MODEL_DEF.h
-    f = open("%s/C/MODEL_DEF.h" % model, 'w')
+    f = open("%s/C/MODEL_DEF.h" % modelDir, 'w')
     f.writelines(['#define STOICH_MAT %s\n' % ','.join([str(item) for sublist in S.tolist() for item in sublist]),
 	'#define NVAR %d\n' % S.rows, '#define NPAR %d\n' % npar, '#define NREACT %d\n' % S.cols])
 
@@ -258,17 +261,17 @@ def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
 
     f.close()
 
-    generateModule(model, S, include_dirs, lib_dirs)
+    generateModule(model, S, modelDir, include_dirs, lib_dirs)
 
 
-def generateModule(model, S, include_dirs=[], lib_dirs=[]):
+def generateModule(model, S, modelDir = '.', include_dirs=[], lib_dirs=[]):
     '''Create the wrapper functions for the python module'''
     f = open(lnaRootDir + "/src/pyModuleTemplate.cpp", 'r')
     src = f.readlines()
     f.close()
 
     src2 = [l.replace('myModule', model) for l in src]
-    modFile = open("%s/%s_LNA.cpp" % (model, model), 'w')
+    modFile = open("%s/%s_LNA.cpp" % (modelDir, model), 'w')
     modFile.writelines(src2)
     modFile.close()
 
@@ -287,16 +290,15 @@ def generateModule(model, S, include_dirs=[], lib_dirs=[]):
 
     src2 = [l.replace('INCLUDE_DIRS',str(include_dirs)) for l in src2]
     src2 = [l.replace('LIB_DIRS',str(lib_dirs)) for l in src2]
-
-    setupFile = open("%s/setup.py" % model, 'w')
+    setupFile = open("%s/setup.py" % modelDir, 'w')
     setupFile.writelines(src2)
     setupFile.close()
 
     from distutils.core import run_setup
-    if not os.path.isdir('modules'):
-        os.mkdir('modules')
-    run_setup('%s/setup.py' % model,
-        script_args=["build_ext", "install", "--install-lib=modules"])
+    if not os.path.isdir(lnaModulesDir):
+        os.mkdir(lnaModulesDir)
+    run_setup('%s/setup.py' % modelDir,
+        script_args=["build_ext", "install", "--install-lib=%s" % lnaModulesDir])
     print('Finished')
 
 

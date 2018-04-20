@@ -20,7 +20,7 @@ Created on Sat Aug  2 10:59:39 2014
 @author: justinfeigelman
 """
 
-# Open plot windows or plot to file
+# Open plot windows or plot to file?
 plotToFile = False
 import sys
 if len(sys.argv) > 1 and sys.argv[1] == '--headless':
@@ -28,19 +28,19 @@ if len(sys.argv) > 1 and sys.argv[1] == '--headless':
     import matplotlib
     matplotlib.use('Agg')
 
-# add python module to search path
+# add LNA++ python module to search path
 import os
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 from sys import path
 path.append(scriptDir + '/../python')
 
 
-# Generate Python module of the model
+# Generate Python module of the BirthDeath model
 from LNA import generateLNA
 generateLNA(scriptDir + '/BirthDeath/BirthDeath.xml', 'BirthDeath', computeSS='BOTH')
 
 ############### run some simulations and show results ###############
-path += ['modules']
+path.append(scriptDir + '/modules')
 import BirthDeathLNA
 from numpy import arange
 import matplotlib.pyplot as plt

@@ -23,7 +23,7 @@ module1 = Extension('myModuleLNA',
                     define_macros = [('MAJOR_VERSION', '1'),
                                      ('MINOR_VERSION', '0')],
                     include_dirs = INCLUDE_DIRS + ['/usr/local/include', 
-												lnaRootDir + '/myModule/C', 
+												lnaRootDir + '/models/myModule/C', 
 												lnaRootDir + '/include', 
 												lnaRootDir + '/src', 
 												lnaRootDir + '/libraries/install/blitz-1.0.1/include', 
@@ -33,8 +33,8 @@ module1 = Extension('myModuleLNA',
                     library_dirs = LIB_DIRS + ['/usr/local/lib', 
 											lnaRootDir + '/libraries/install/blitz-1.0.1/lib',
 											lnaRootDir + '/libraries/install/cvodes-2.7.0/lib/'],
-                    sources = [lnaRootDir + '/src/computeLinearNoise.cpp', lnaRootDir + '/myModule/myModule_LNA.cpp']\
-						+ glob(lnaRootDir + '/myModule/C/*.c'), 
+                    sources = [lnaRootDir + '/src/computeLinearNoise.cpp', lnaRootDir + '/models/myModule/myModule_LNA.cpp']\
+						+ glob(lnaRootDir + '/models/myModule/C/*.c'), 
 					runtime_library_dirs=['/usr/local/lib'],
 					extra_compile_args=['-Wno-parentheses', '-Wno-unused-variable', '-Wno-unused-function'])
 					
