@@ -3,6 +3,10 @@ import argparse
 from numpy import empty
 import ipdb
 
+"""
+Load an SBML model from file and print the stoichiometric matrix to stdout.
+"""
+
 def _parser():
 
     parser = argparse.ArgumentParser(description="Parse stoichiometry matrix of SBML file")
