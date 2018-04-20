@@ -3,7 +3,7 @@ matrix:
     - os: linux  
       dist: xenial
       compiler: gcc
-      env: PYENV_VERSION=3.6
+      env: PYENV_VERSION="2.7 3.6"
       addons:
         apt:
           packages:
