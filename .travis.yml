@@ -31,7 +31,6 @@ script:
     - cd $BASE_DIR
     - models/runCI.sh
     # test if all result plots have been generated
-    - pwd
     - test `ls $BASE_DIR/BirthDeath*pdf | wc -l` = 9
     
 after_failure:

@@ -20,4 +20,5 @@ cd cvodes-2.7.0
 make && make install
 
 # run example
-python3 $BASE_DIR/models/BirthDeath.py --headless
+cd $BASE_DIR
+python3 models/BirthDeath.py --headless
