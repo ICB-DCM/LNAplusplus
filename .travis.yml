@@ -23,6 +23,6 @@ install:
     - pip3 install --user sympy python-libsbml numpy matplotlib ipdb
     - models/runCI.sh
     # test if all result plots have been generated
-    - test `ls BirthDeath*pdf | wc -l` = 9
+    - test `ls models/BirthDeath*pdf | wc -l` = 9
 notifications:
   email: false
