@@ -9,7 +9,7 @@ clc;
 % Add path
 addpath('../matlab')
 
-% Model of bearth-death process:
+% Model of birth-death process:
 % ==============================
 %          k_m
 % DNA      -->  DNA+mRNA
@@ -42,7 +42,7 @@ subplot(2,2,1);
 plot(tspan,MRE(1,:));
 xlabel('Time');
 ylabel('Protein');
-title('Macroscopic mean of protein');
+title('Macroscopic mean of mRNA');
 % - mean of protein
 subplot(2,2,3);
 plot(tspan,MRE(2,:));
@@ -63,7 +63,7 @@ ylabel('Time');
 title('Autocovariance of protein');
 
 %% Simulate: IC = steady state; observable = mRNA and protein
-ObsIndex = [1,2]; % observable is second species (= mRNA,protein)
+ObsIndex = [1,2]; % Both species are observed (= mRNA,protein)
 VarNoise = [10,50]; % variance of measurement noise
 
 % solve LNA and compute measured distribution
@@ -76,7 +76,7 @@ subplot(2,2,1);
 plot(tspan,MRE(1,:));
 xlabel('Time');
 ylabel('Protein');
-title('Macroscopic mean of protein');
+title('Macroscopic mean of mRNA');
 % - mean of protein
 subplot(2,2,3);
 plot(tspan,MRE(2,:));
@@ -122,8 +122,8 @@ title('Autocovariance of protein');
 ObsIndex = 2; % observable is second species (= protein)
 VarNoise = 0; % variance of measurement noise
 
-MRE0 = [2,200]; % inital values (E(mRNA),E(Protein))
-Var0 = toLinear([0,0;0,0]); % initia co-variances (cov[mRNA,mRNA],cov(mRNA,Protein),cov(Protein,Protein))
+MRE0 = [2,200]; % initial values (E(mRNA),E(Protein))
+Var0 = toLinear([0,0;0,0]); % initial co-variances (cov[mRNA,mRNA], cov(mRNA,Protein), cov(Protein,Protein))
 
 % solve LNA and compute measured distribution
 [MRE,Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise,MRE0,Var0);

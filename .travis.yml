@@ -31,7 +31,7 @@ script:
     - cd $BASE_DIR
     - models/runCI.sh
     # test if all result plots have been generated
-    - test `ls $BASE_DIR/BirthDeath*pdf | wc -l` = 9
+    - test `ls $BASE_DIR/BirthDeath*pdf | wc -l` = 7
     
 after_failure:
     - ls -alR
