@@ -15,6 +15,9 @@ matrix:
             - python3-matplotlib
     - os: osx
       compiler: clang
+  allow_failures:
+    - os: osx
+      compiler: clang
 
 install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade python; fi
