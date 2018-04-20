@@ -28,7 +28,7 @@ install:
 script:
     - models/runCI.sh
     # test if all result plots have been generated
-    - test `ls models/BirthDeath*pdf | wc -l` = 9
+    - test `ls BirthDeath*pdf | wc -l` = 9
     
 after_failure:
     - ls -alR

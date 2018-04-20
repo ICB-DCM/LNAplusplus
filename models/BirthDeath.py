@@ -29,13 +29,15 @@ if len(sys.argv) > 1 and sys.argv[1] == '--headless':
     matplotlib.use('Agg')
 
 # add python module to search path
+import os
+scriptDir = os.path.dirname(os.path.realpath(__file__))
 from sys import path
-path.append('../python')
+path.append(scriptDir + '/../python')
 
 
 # Generate Python module of the model
 from LNA import generateLNA
-generateLNA('BirthDeath/BirthDeath.xml', 'BirthDeath', computeSS='BOTH')
+generateLNA(scriptDir + '/BirthDeath/BirthDeath.xml', 'BirthDeath', computeSS='BOTH')
 
 ############### run some simulations and show results ###############
 path += ['modules']

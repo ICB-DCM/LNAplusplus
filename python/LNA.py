@@ -13,6 +13,8 @@ import numpy
 import os
 import ipdb
 
+lnaRootDir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 def jacobian(x,y):
     "Compute the jacobian of x with respect to y"
     f=x.transpose().reshape(len(x),1)
@@ -241,7 +243,7 @@ def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
 
 def generateModule(model, S, include_dirs=[], lib_dirs=[]):
     '''Create the wrapper functions for the python module'''
-    f = open("../src/pyModuleTemplate.cpp", 'r')
+    f = open(lnaRootDir + "/src/pyModuleTemplate.cpp", 'r')
     src = f.readlines()
     f.close()
 
@@ -251,11 +253,12 @@ def generateModule(model, S, include_dirs=[], lib_dirs=[]):
     modFile.close()
 
     '''Create the python setup script'''
-    f = open("../python/setupTemplate.py", 'r')
+    f = open(lnaRootDir + "/python/setupTemplate.py", 'r')
     src = f.readlines()
     f.close()
 
     src2 = [l.replace('myModule', model) for l in src]
+    src2 = [l.replace('LNA_ROOT_DIR', lnaRootDir) for l in src2]
 
     if not isinstance(include_dirs,list):
     	include_dirs=[include_dirs]
