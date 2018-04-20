@@ -77,7 +77,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     t = symbols('t', real=True)
     Nvar        = S.rows
 
-    phi0 = symbols('phi0:%d'%Nvar) # symbolic state variables
+    phi0 = symbols('phi0(:%d)'%Nvar) # symbolic state variables
     Theta=tuple(Theta)+phi0 # initial conditions are additional parameters for sensitivities
 
     phi=tuple(phi)
