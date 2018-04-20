@@ -1,5 +1,5 @@
 % S_gen_linearChain.m creates the stoichiometric matrix for a linear chain 
-% of reactionswith N species
+% of reactions with N species
 
 function S = S_gen_linearChain(N)
 
