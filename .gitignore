@@ -23,3 +23,4 @@
 libraries/blitz-1.0.1/
 libraries/cvodes-2.7.0/
 models/modules/
+matlab/compileLNA.m
