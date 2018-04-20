@@ -1,0 +1,15 @@
+matrix:
+  include: 
+    - os: linux  
+      compiler: gcc
+      addons:
+        apt:
+          packages:
+            - python3-numpy 
+            - python3-sympy
+            - libsbml5-python
+            - python3-ipdb 
+            - python3-matplotlib
+        
+install:
+    - models/runCI.sh
