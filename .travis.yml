@@ -13,10 +13,9 @@ matrix:
             - python3-ipdb 
             - python3-matplotlib
 
-before-install:
-    - pip3 install --user sympy 
 
 install:
+    - pip3 install --user sympy 
     - models/runCI.sh
 
 notifications:

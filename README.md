@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ICB-DCM/LNAplusplus.svg?branch=master)](https://travis-ci.org/ICB-DCM/LNAplusplus)
+
 # LNA++: a Fast C++ Implementation of the Linear Noise Approximation with first- and second-order sensitivities
 
 The linear noise approximation (LNA) provides an approximate description of the statistical moments of stochastic chemical reaction networks, a commonly used modeling paradigm describing the probability distribution of systems of biochemical species in the intracellular environment. Unlike exact formulations, the LNA remains computationally feasible even for CRNs with many reaction events. The tractability of the LNA for approximation of CRNs makes it a common choice for inference of unknown chemical reaction parameters. However, this task is impeded by a lack of suitable inference tools for arbitrary CRN models. In particular, no available tool provides temporal cross-correlations, parameter sensitivities and efficient numerical integration.
