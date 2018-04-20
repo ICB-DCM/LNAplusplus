@@ -3,6 +3,7 @@ matrix:
     - os: linux  
       dist: xenial
       compiler: gcc
+      env: PYENV_VERSION=3.6
       addons:
         apt:
           packages:
@@ -11,7 +12,12 @@ matrix:
             - libsbml5-python
             - python3-ipdb 
             - python3-matplotlib
-        
-install:
+
+before-install:
     - pip3 install --user sympy 
+
+install:
     - models/runCI.sh
+
+notifications:
+  email: false
