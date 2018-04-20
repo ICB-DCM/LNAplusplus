@@ -389,8 +389,8 @@ Compilation of C/C++ source code for use as a standalone executable, or with Mat
 \subsubsection*{Blitz++}
 Blitz++ version 1.0.1 is required. Blitz++ 1.0.1 is included in the \texttt{./libraries} folder, or can be downloaded from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}. It is also available via macports on mac OS. 
 
-When using the provided source archive, extract it to ../libraries/blitz-1.0.1, change to this folder and run:
-\texttt{./configure --with-pic --prefix=`pwd`/install \&\& make install}
+When using the provided source archive, extract it to \texttt{../libraries/blitz-1.0.1}, change to this folder and run:
+\texttt{./configure --with-pic --prefix=`pwd`/../install/blitz-1.0.1 \&\& make install}
 
 For other versions of Blitz++ in non-default locations you need to adapt \texttt{include\_dirs} and \texttt{library\_dirs} in
 \texttt{python/setupTemplate.py}.
@@ -400,7 +400,7 @@ Numerical integration is computed using the CVODES Sundials package.  Source cod
 To setup CVODES, unzip the source archive, change to the source directory and run:
 
 \begin{verbatim}
-./configure --with-pic --prefix=`pwd`/install
+./configure --with-pic --prefix=`pwd`/../install/cvodes-2.7.0
 make && make install
 \end{verbatim}
 
@@ -520,7 +520,7 @@ If only 2 output arguments are specified, the computation engine does not comput
 
 %
 \subsection{Python}
-To use LNA++ with Python, call the function generateLNA of the LNA module, with the following arguments:
+To use LNA++ with Python, call the function \texttt{generateLNA} of the LNA module, with the following arguments:
 \begin{enumerate}
 \item \texttt{sbmlPath}: the path to the SBML model specification file
 \item \texttt{model}: the desired name of the model 

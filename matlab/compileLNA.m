@@ -26,7 +26,7 @@ eval(cmd_compile)
 %% compile CPP code
 disp('Compiling LNA code...')
 cmd_compile_cpp = ['mex CXXFLAGS=''$CXXFLAGS -fPIC' Cpp_Flags ''' -c ../src/computeLinearNoise.cpp ../src/mexLNA.cpp ' ...
-    ' -I' model '/C -I/usr/local/include -I../include -I../libraries/blitz-1.0.1/install/include -I../libraries/cvodes-2.7.0/install/include'];
+    ' -I' model '/C -I/usr/local/include -I../include -I../libraries/install/blitz-1.0.1/include -I../libraries/install/cvodes-2.7.0/include'];
 eval( cmd_compile_cpp )
 
 %% link executable
@@ -34,7 +34,7 @@ disp('Linking...')
 Cobj = dir([model '/C/*.o']);
 cmd_link = [ sprintf('mex -cxx -output %s/%s_LNA_mex  computeLinearNoise.o mexLNA.o %s', ...
     model, model, strjoin(fullfile(model, 'C', {Cobj.name}))) ... libstdcpp ...
-    ' -L../libraries/blitz-1.0.1/install/lib -L../libraries/cvodes-2.7.0/install/lib/ ' ...
+    ' -L../libraries/install/blitz-1.0.1/lib -L../libraries/install/cvodes-2.7.0/lib/ ' ...
     ' -lsundials_cvodes -lsundials_nvecserial -lblitz -lstdc++']; 
 eval(cmd_link)
 disp('Done')
