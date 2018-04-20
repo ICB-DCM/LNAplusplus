@@ -1,6 +1,5 @@
-% BirthDeath.m constructes the LNA for a simple birth-death process and
-% illustrates the functionality of LNA++, including the incorporation of
-% measurement noise and 1st and 2nd order senstivity analysis.
+% runWang2010.m constructes the LNA for the model of DNA self-regulation
+% introduced by Wang et al. 2010.
 
 clear all;
 close all;
