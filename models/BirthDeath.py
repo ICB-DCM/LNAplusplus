@@ -20,12 +20,19 @@ Created on Sat Aug  2 10:59:39 2014
 @author: justinfeigelman
 """
 
+# Open plot windows or plot to file
+plotToFile = False
+import sys
+if len(sys.argv) > 1 and sys.argv[1] == '--headless':
+    plotToFile = True
+
 # add python module to search path
 from sys import path
 path.append('../python')
 
-from LNA import generateLNA
 
+# Generate Python module of the model
+from LNA import generateLNA
 generateLNA('BirthDeath/BirthDeath.xml', 'BirthDeath', computeSS='BOTH')
 
 ############### run some simulations and show results ###############
@@ -35,6 +42,11 @@ from numpy import arange
 import matplotlib.pyplot as plt
 from numpy import squeeze
 
+def plot(plotToFile, filename): 
+    if plotToFile:
+        plt.savefig(filename)
+    else:
+        plt.show()
 
 # define initial conditions
 Y0 = [2, 200]
@@ -57,22 +69,26 @@ MRE,Sigma = BirthDeathLNA.LNA(Theta,tspan, obsVar=obsVar)
 
 # MRE
 plt.plot(MRE.squeeze())
-plt.show()
+plt.title("MRE")
+plot(plotToFile, 'BirthDeath1_MRE.pdf')
 
 # covariance matrix
 plt.matshow(squeeze(Sigma))
-plt.show()
+plt.title("Sigma")
+plot(plotToFile, 'BirthDeath1_Sigma.pdf')
 
 
 # compute the mean and temporal auto-covariance matrix specifying the initial conditions for mean and variance
 MRE,Sigma = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, obsVar=obsVar)
 # MRE of protein
 plt.plot(MRE.squeeze())
-plt.show()
+plt.title("MRE")
+plot(plotToFile, 'BirthDeath2_MRE.pdf')
 
 # covariance matrix
 plt.matshow(squeeze(Sigma))
-plt.show()
+plt.title("Sigma")
+plot(plotToFile, 'BirthDeath2_Sigma.pdf')
 
 
 # compute the mean and temporal auto-covariance matrix specifying the initial conditions for mean and variance
@@ -81,7 +97,8 @@ MRE,Sigma,dMRE,dSigma  = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, computeSens=True
 
 # sensitivity w.r.t. first model parameter
 plt.matshow(squeeze(dSigma[0,0,:,:,1]))
-plt.show()
+plt.title("Sigma 1st-order sensitivities")
+plot(plotToFile, 'BirthDeath3_dSigma.pdf')
 
 
 # compute the mean and temporal auto-covariance matrix specifying the initial conditions for mean and variance
@@ -90,15 +107,19 @@ MRE,Sigma,dMRE,dSigma,d2MRE,d2Sigma = BirthDeathLNA.LNA(Theta,tspan, Y0, V0, obs
 
 # MRE
 plt.plot(MRE.squeeze())
-plt.show()
+plt.title("MRE")
+plot(plotToFile, 'BirthDeath4_MRE.pdf')
 
 # covariance matrix
 plt.matshow(squeeze(Sigma))
-plt.show()
+plt.title("Sigma")
+plot(plotToFile, 'BirthDeath4_Sigma.pdf')
 
 # sensitivity w.r.t. first model parameter
 plt.matshow(squeeze(dSigma[0,0,:,:,1]))
-plt.show()
+plt.title("Sigma 1st-order sensitivities")
+plot(plotToFile, 'BirthDeath4_dSigma.pdf')
 
 plt.matshow(squeeze(d2Sigma[0,0,3,3,:,:]))
-plt.show()
+plt.title("Sigma 2nd-order sensitivities")
+plot(plotToFile, 'BirthDeath4_d2Sigma.pdf')
