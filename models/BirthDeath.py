@@ -25,6 +25,8 @@ plotToFile = False
 import sys
 if len(sys.argv) > 1 and sys.argv[1] == '--headless':
     plotToFile = True
+    import matplotlib
+    matplotlib.use('Agg')
 
 # add python module to search path
 from sys import path
