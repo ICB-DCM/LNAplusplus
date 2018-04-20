@@ -22,5 +22,14 @@
 *.backup
 libraries/blitz-1.0.1/
 libraries/cvodes-2.7.0/
+libraries/SBMLToolbox-4.1.0/
 models/modules/
-matlab/compileLNA.m
+models/BirthDeath/C
+models/BirthDeath/matlab
+models/BirthDeath/BirthDeath_LNA*
+models/chain*
+models/positiveFeedback
+models/Wang/C
+models/Wang/matlab
+models/Wang/Wang_LNA*
+documentation/Documentation.pdf

@@ -1,3 +1,7 @@
+% BirthDeath.m constructes the LNA for a simple birth-death process and
+% illustrates the functionality of LNA++, including the incorporation of
+% measurement noise and 1st and 2nd order senstivity analysis.
+
 clear all;
 close all;
 clc;
