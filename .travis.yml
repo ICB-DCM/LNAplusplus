@@ -15,7 +15,7 @@ matrix:
 
 
 install:
-    - pip3 install --user sympy 
+    - pip3 install --user sympy python-libsbml numpy matplotlib ipdb
     - models/runCI.sh
 
 notifications:
