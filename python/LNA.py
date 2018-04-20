@@ -36,6 +36,26 @@ def toLinear(X):
 
 	
 def generateLNA(fileName, model, computeSS='NONE',include_dirs=[], lib_dirs=[]):
+    """
+    Create a LNA++ Python module for a model provided in an SBML file.
+    
+    Parameters:
+    - sbmlPath: the path to the SBML model specification file
+    - model: the desired name of the model 
+    - computeSS (optional): one of the values:
+      - 'Y0': LNA++ will attempt to calculate the steady state value of the MRE of the stochastic system specified. If `Y0` is not explicitly provided when invoking the model, the computed value will be automatically substituted. 
+      - 'V0': LNA++ will attempt to calculate the steady state value of the variance of the stochastic system specified. If `V0` is not explicitly provided when invoking the model, the computed value will be automatically substituted.
+      - 'BOTH': LNA++ will compute both `V0` and `Y0` if possible. If `Y0` or `V0` is not explicitly provided when invoking the model, the computed values will be automatically substituted.
+      - 'NONE': LNA++ will not compute any steady state values. Invocation of the model without explicitly specifying the initial conditions for `Y0` and `V0` will result in an error message being generated.
+    - include_dirs (optional): a Python list of directories to be searched for header files, specified as a list of strings.
+    - lib_dirs (optional): a Python list of directories to be searched for libraries, specified as a list of strings.
+
+    Using the created Python module:    
+    
+    After running generateLNA, a Python module is created and placed in the `modules/` subdirectory of LNA++. The module is named `modelLNA`, where `model' is replaced by the name of the model specified. The module can be imported using `import`, as long as the module is on the Python module path. To add this directory to the module path either modify the value of `sys.path` or add the modules directory to the `PYTHONPATH` environment variable. 
+    
+    Model simulations are run using the `LNA` function in the module created from the respective model.
+    """
     try:
         S, species, parameters, fHandle = SBML2StoichProp(fileName)
     except IOError:
