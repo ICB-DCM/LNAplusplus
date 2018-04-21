@@ -29,12 +29,12 @@ def triu(X):
     return sum([Matrix(X)[i,i:].tolist()[0] for i in range(Matrix(X).rows)],[])
 
 def toLinear(X):
-	"Return the upper triangular portion of X in column-major ordering"
-	if not isinstance(X, Matrix):
-		X=Matrix(X)
-	if X.shape[0] != X.shape[1]:
-		raise(ValueError("Matrix must be square"))
-	return sum([sum(X[0:i+1,i].tolist(),[]) for i in range(X.cols)],[])
+    "Return the upper triangular portion of X in column-major ordering"
+    if not isinstance(X, Matrix):
+        X=Matrix(X)
+    if X.shape[0] != X.shape[1]:
+	    raise(ValueError("Matrix must be square"))
+    return sum([sum([], [float(x) for x in X[0:i+1,i]]) for i in range(X.cols)],[])
 
 	
 def generateLNA(fileName, model, computeSS='NONE',include_dirs=[], lib_dirs=[]):
