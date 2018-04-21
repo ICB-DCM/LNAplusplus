@@ -232,6 +232,8 @@ def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
 
     # create output directory if necessary
     modelDir = lnaModelsDir+ '/' + model
+    if not os.path.isdir(lnaModelsDir):
+        os.mkdir(lnaModelsDir)
     if not os.path.isdir(modelDir):
         os.mkdir(modelDir)
     if not os.path.isdir('%s/C/' % modelDir):
