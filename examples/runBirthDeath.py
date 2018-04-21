@@ -101,12 +101,12 @@ plot(plotToFile, 'BirthDeath1.pdf')
 
 # Simulate: IC = steady state; observable = mRNA and protein
 # Both species are observed (= mRNA,protein)
-ObsIndex = [1, 2]
+ObsIndex = [0, 1]
 # Variance of measurement noise
 VarNoise = [10.0,50.0]
 
 # solve LNA and compute measured distribution
-MRE, Var = BirthDeathLNA.LNA(Theta, tspan, merr =VarNoise,obsVar=ObsIndex)
+MRE, Var = BirthDeathLNA.LNA(Theta, tspan, merr=VarNoise,obsVar=ObsIndex)
 
 # plot results:
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -137,7 +137,7 @@ plot(plotToFile, 'BirthDeath2.pdf')
 
 # Simulate: IC = steady state; observable = protein
 # observable is second species (= protein)
-ObsIndex = [2]
+ObsIndex = [1]
 # Variance of measurement noise
 VarNoise = [50.0]
 
@@ -163,7 +163,7 @@ plot(plotToFile, 'BirthDeath3.pdf')
 
 # Simulate: IC = no steady state; observable = protein
 # observable is second species (= protein)
-ObsIndex = [2]
+ObsIndex = [1]
 # Variance of measurement noise
 VarNoise = [0.0]
 # initial values (E(mRNA),E(Protein))

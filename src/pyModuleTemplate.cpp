@@ -14,7 +14,7 @@ static PyMethodDef myModuleMethods[] = {
      "Y0 (numeric list): initial values for each species\n"
      "V0 (numeric list): initial values for each entry of the (upper triangular portion of the) covariance matrix in column-major ordering\n"
      "merr (numeric or numeric list): measurement error, single value for all observables or list with one value per observable\n"
-     "obsVar (numeric list): list of observable state indices (1-based!!)\n"
+     "obsVar (numeric list): list of observable state indices (0-based)\n"
      "computeSens (boolean): compute first-order sensitivities\n"
      "computeSens2 (boolean): compute second-order sensitivities\n"
      "\n"

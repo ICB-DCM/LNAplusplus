@@ -252,7 +252,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	    			PyErr_SetString(LNAError, "obsVar must consist of integers only");
 					return NULL;
 	    		}
-				varObs(i) = PyLong_AsLong(list_item)-1;
+                                varObs(i) = PyLong_AsLong(list_item);
 				if ( (varObs(i) < 0) || (varObs(i) > (nvar-1)))
 				{
 					PyErr_SetString(LNAError, "Invalid observable variable specified.");
@@ -262,7 +262,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	    } else { // was a number
 	    	nObsVar=1;
 	    	varObs.resize(1);
-	    	varObs(0) = PyLong_AsLong(_obsVar)-1;
+                varObs(0) = PyLong_AsLong(_obsVar);
 	    }
 	}
 
