@@ -1,4 +1,4 @@
-2<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" version="4">
   <annotation>
     <SimBiology xmlns="http://www.mathworks.com">
@@ -108,7 +108,7 @@
             <apply>
               <times/>
               <ci> k5 </ci>
-              <ci> P^2 </ci>
+              <ci> P * P </ci>
             </apply>
           </math>
         </kineticLaw>
