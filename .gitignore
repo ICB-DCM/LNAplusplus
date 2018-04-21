@@ -26,13 +26,4 @@ libraries/blitz-1.0.1/
 libraries/cvodes-2.7.0/
 libraries/SBMLToolbox-4.1.0/
 libraries/install/
-models/modules/
-models/BirthDeath/C
-models/BirthDeath/matlab
-models/BirthDeath/BirthDeath_LNA*
-models/chain*
-models/positiveFeedback
-models/Wang2010/C
-models/Wang2010/matlab
-models/Wang2010/Wang_LNA*
-documentation/Documentation.pdf
+models/

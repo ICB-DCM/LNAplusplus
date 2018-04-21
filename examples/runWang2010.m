@@ -6,7 +6,7 @@ close all;
 clc;
 
 % Add path
-addpath('../matlab')
+addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'matlab'));
 
 % Model:
 % ======
@@ -20,7 +20,7 @@ addpath('../matlab')
 % R8: P         -->  0
     
 %% Create the Matlab executable for the birth / death system
-generateLNA('../examples/Wang2010.xml','Wang2010','NONE');
+generateLNA(fullfile(fileparts(mfilename('fullpath')), 'Wang2010.xml'),'Wang2010','NONE');
 
 % add the path to the mex file
 addpath('Wang2010/');

@@ -8,8 +8,7 @@ close all;
 clc;
 
 % Add path
-addpath('../matlab')
-addpath('./linearChain')
+addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'matlab'));
 
 % Model of linear reaction chain:
 % ===============================
@@ -33,7 +32,7 @@ for N = 3:N_max
     assume(Theta, 'positive')
     
     % Generate stochiometic matric and flux vector
-    SS = S_gen_linearChain(N);
+    SS = linearChainGenerateStoichiometricMatrix(N);
     F = @(phi,t,Theta) [Theta(1),Theta(2)*phi(1),phi(1:end-1).*Theta(3:length(phi)+1),phi(2:end).*Theta(length(phi)+2:end)].';
     FF = matlabFunction(F(phi,t,Theta),'vars',{phi, t, Theta});
 
@@ -48,7 +47,7 @@ for N = 3:N_max
     fHandle = eval(['@chain' int2str(N) '_LNA']);
     
     % Add path
-    addpath(modelName);
+    addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'models', modelName));
     
     % Run simulation
     disp('Running simulations...')

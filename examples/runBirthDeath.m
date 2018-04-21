@@ -1,4 +1,4 @@
-% BirthDeath.m constructes the LNA for a simple birth-death process and
+% runBirthDeath.m constructs the LNA for a simple birth-death process and
 % illustrates the functionality of LNA++, including the incorporation of
 % measurement noise and 1st and 2nd order senstivity analysis.
 
@@ -7,7 +7,9 @@ close all;
 clc;
 
 % Add path
-addpath('../matlab')
+exampleDir = fullfile(fileparts(mfilename('fullpath')));
+lnaDir = fullfile(fileparts(fileparts(mfilename('fullpath'))));
+addpath([lnaDir '/matlab']);
 
 % Model of birth-death process:
 % ==============================
@@ -21,10 +23,10 @@ addpath('../matlab')
 % protein  -->  0
 
 %% Create the Matlab executable for the birth / death system
-generateLNA('BirthDeath/BirthDeath.xml', 'BirthDeath', 'BOTH');
+generateLNA([exampleDir '/BirthDeath.xml'], 'BirthDeath', 'BOTH');
 
 % add the path to the mex file
-addpath('BirthDeath/');
+addpath([lnaDir '/models/BirthDeath/']);
 
 %% Setting
 Theta = [20,25,10,1]; % parameters
