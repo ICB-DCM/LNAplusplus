@@ -40,7 +40,11 @@ else
     COMPUTE_Y0 = false;        
 end
 %% create directories to store the outputted scripts
-dirName = modelName;
+lnaMatlabDir = fullfile(fileparts(mfilename('fullpath')));
+dirName = fullfile(lnaMatlabDir, '..', 'models', modelName);
+if ~exist(fullfile(fileparts(dirName)), 'dir')
+    mkdir(fullfile(fileparts(dirName)))
+end
 if ~exist(dirName, 'dir')
     mkdir(dirName)
 end
@@ -287,7 +291,7 @@ objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
 
 % requires only Theta
 objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
-addpath('../../../matlab')
+addpath(lnaMatlabDir)
 for i = 1:length(objs1)
     fprintf('Generating %s source...\n', objs1{i})
     genCCode(eval(objs1{i}), objs1{i}, {phi, t, Theta}, {'VECTOR','SCALAR','VECTOR'});
