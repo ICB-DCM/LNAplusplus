@@ -652,7 +652,7 @@ f = lambda phi,t,Theta: \
 [Theta[0],Theta[2]*phi[0],Theta[1]*phi[0],Theta[3]*phi[1]]
 
 # Generate the symbolic C code:
-tups = generateLNAComponents(model,S,fHandle,\
+tups = generateLNAComponents(model,S,f,\
                              species,parameters,computeSS)
 npar = len(parameters) # number of parameters
 

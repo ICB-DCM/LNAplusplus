@@ -1,4 +1,4 @@
-% LinearChain.m constructes the LNA for a linear reaction chain of varying
+% LinearChain.m constructs the LNA for a linear reaction chain of varying
 % length. This is used to assess the scalability of the symbolic
 % construction as well as the numerical simulation without sensitivities,
 % with 1st order sensitivities and with 2nd order sensitivities.
@@ -11,8 +11,8 @@ clc;
 addpath('../matlab')
 addpath('./linearChain')
 
-% Model of bearth-death process:
-% ==============================
+% Model of linear reaction chain:
+% ===============================
 % X_{i} -> X_{i+1} for i = 1 to N-1
 
 %% Define evaluation parameters
@@ -29,7 +29,7 @@ runTimeMat2    = nan(N_max-2,R); % time for simulation with 2nd order sensitivit
 for N = 3:N_max
     syms t; % time
     phi   = sym('phi'  ,[1,  N]); % symbolic variables for macroscopic mean
-    Theta = sym('Theta',[1,2*N]); % symbolic variables for paraeters
+    Theta = sym('Theta',[1,2*N]); % symbolic variables for parameters
     assume(Theta, 'positive')
     
     % Generate stochiometic matric and flux vector

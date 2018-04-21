@@ -142,7 +142,7 @@ ObsIndex = [2]
 VarNoise = [50.0]
 
 # solve LNA and compute measured distribution
-MRE, Var = BirthDeathLNA.LNA(Theta, tspan, merr =VarNoise,obsVar=ObsIndex)
+MRE, Var = BirthDeathLNA.LNA(Theta, tspan, merr=VarNoise,obsVar=ObsIndex)
 
 # plot results:
 fig, (ax1, ax2) = plt.subplots(1, 2)
