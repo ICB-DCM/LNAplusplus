@@ -14,6 +14,11 @@ matrix:
             - libsbml5-python
             - python3-ipdb 
             - python3-matplotlib
+    - os: linux  
+      dist: xenial
+      compiler: clang
+    - os: osx
+      compiler: gcc
     - os: osx
       compiler: clang
 #  allow_failures:
