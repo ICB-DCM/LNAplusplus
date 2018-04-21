@@ -17,12 +17,15 @@
 *.synctex.gz
 *.toc
 *.DS_Store
-.pydevproject
-.settings/
 *.backup
+.pydevproject
+.directory
+.settings/
+.ipynb_checkpoints/
 libraries/blitz-1.0.1/
 libraries/cvodes-2.7.0/
 libraries/SBMLToolbox-4.1.0/
+libraries/install/
 models/modules/
 models/BirthDeath/C
 models/BirthDeath/matlab
