@@ -266,37 +266,36 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	    }
 	}
 
-
     // measurement error
-	if (_merr == NULL) {
-		// merr. default 0
-		merr = new double[nObsVar];
-    	for (int i=0; i<nObsVar; i++)
-    		merr[i] = 0.0;
-
-	} else {
-		// parse measurement error
-		if (!((PyList_Check(_merr) || PyFloat_Check(_merr) || PyLong_Check(_merr) ))) {
-			PyErr_SetString(LNAError, "merr has wrong type.");
-			return NULL;
-		}
-		int n;
-		if (PyList_Check(_merr))
-			n=PyList_Size(_merr);
-		else
-			n=1;
-
-		if (n != nObsVar)
-		{
-			// was a list but of the wrong length
-			PyErr_SetString(LNAError, "Number of measurement errors must be the same as the number of observed variables");
-			return NULL;
-		}
-		else {
-			assignDoubleFromPyList(_merr,merr);
-		}
-
-	}
+    if (_merr == NULL) {
+        // merr. default 0
+        merr = new double[nObsVar];
+        for (int i=0; i<nObsVar; i++)
+            merr[i] = 0.0;
+    } else if (PyList_Check(_merr)) {
+        // provided list
+        if (PyList_Size(_merr) != nObsVar) {
+            // was a list but of the wrong length
+            PyErr_SetString(LNAError, "Number of measurement errors must be the same as the number of observed variables");
+            return NULL;
+        } else {
+            assignDoubleFromPyList(_merr,merr);
+        }
+    } else if (PyFloat_Check(_merr) || PyLong_Check(_merr)) {
+        // provided scalar -> use for all observables
+        double tmp = 0.0;
+        if(PyFloat_Check(_merr)) {
+            tmp = PyFloat_AsDouble(_merr);
+        } else if(PyLong_Check(_merr)) {
+            tmp = PyLong_AsDouble(_merr);
+        }
+        merr = new double[nObsVar];
+        for (int i=0; i<nObsVar; i++)
+            merr[i] = tmp;
+    } else {
+        PyErr_SetString(LNAError, "merr has wrong type.");
+        return NULL;
+    }
 
     /* compute sensitivities ? */
     if (_computeSens != 0) {
