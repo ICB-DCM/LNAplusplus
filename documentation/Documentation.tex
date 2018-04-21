@@ -432,9 +432,9 @@ LNA++ is compatible with Python 3.0 or later.  All libraries must thus be the Py
 \subsubsection*{Matlab}
 In order to use LNA++ with Matlab, the Matlab \textit{Symbolic Math Toolbox} is required for the analytic derivation of the LNA and its sensitivity equations. Matlab is not required when using only the Python version LNA++.
 
-\paragraph{If you do not have the \textit{Symbolic Math Toolbox} available:}
-Both the Python and Matlab implementations of LNA++ generate the same C code for the analytical components of the LNA and its sensitivities. It is therefore possible to generate the C code using the Python scripts, through the \texttt{generateLNAComponents} step, as described below. The Matlab executable is then generated in the normal way, resuming with the \texttt{compileLNA} step.
-
+% {DW: I would consider this rather experimental until more testing has been done.}
+%\paragraph{If you do not have the \textit{Symbolic Math Toolbox} available:}
+%Both the Python and Matlab implementations of LNA++ generate the same C code for the analytical components of the LNA and its sensitivities. It is therefore possible to generate the C code using the Python scripts, through the \texttt{generateLNAComponents} step, as described below. The Matlab executable is then generated in the normal way, resuming with the \texttt{compileLNA} step.
 
 %
 %
@@ -482,7 +482,7 @@ Linker flags and compiler flags can both be specified, by providing both pairs o
 \subsubsection*{Matlab executable}
 \texttt{generateLNA} generates a mex file and a Matlab wrapper, which provides help messages and removes singleton dimensions for more convenient output. These are placed in the model subdirectory corresponding to the model specified.  To execute them, copy them to the desired final folder, or add them to the Matlab path. Usage of the generated function is specified in the help for that function.
 
-See \texttt{BirthDeath} in \texttt{./models}, and generated \texttt{BirthDeath\_LNA.m} for an example of the generated wrapper function and its invocation.
+See \texttt{runBirthDeath.m} in \texttt{examples/}, and the generated \texttt{models/BirthDeath/BirthDeath\_LNA.m} for an example of the generated wrapper function and its invocation.
 
 \subsubsection*{Using the generated mex wrapper}
 The mex wrapper corresponding to a particular model can be invoked with between 2 and 6 arguments, which must occur in the correct order:
