@@ -1,14 +1,14 @@
-function output = generateLNAComponents(modelName, S, F, phi, Theta, varargin) 
+function output = generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, varargin) 
 % generate all of the necessary components for the LNA model for the model
 % with the given stoichiometric matrix S, and reactino flux vector
 % reactionFlux
 % input:
 %  modelName: name of the model (string)
 %  S: stoichiometric matrix
-%  reactionFlux: function handle for computing the reaction fluxes for the
+%  reactionFluxFun: function handle @(phi, t, Theta) for symbolically computing the reaction fluxes for the
 %   given state and parameters
 %  phi: symbolic vector containing the macroscopic state variables
-%  Theta: the model parameters (symbolic)
+%  Theta: symbolic vector containing the model parameters
 % optional arguments:
 %  computeSS: Can be 'Both' (default), 'Y0', 'V0', or 'None'.  
 %   'Y0': attempt to compute the steady state solution to the MRE
@@ -65,7 +65,7 @@ assume(phi0,'real')
 
 Theta = [Theta, phi0]; % necessary for sensitivities wrt initial conditions
 
-reactionFlux = F(phi, t, Theta);
+reactionFlux = reactionFluxFun(phi, t, Theta);
 
 % jacobian of flux vector
 J           = Jacobian(reactionFlux, phi);

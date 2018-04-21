@@ -60,19 +60,19 @@ for N = 3:N_max
         
         % Simulate w/o sensitivities
         tic
-        [M,S] = fHandle(Theta,tspan,1:N,0,MRE0,Var0);
+        [M,S] = fHandle(Theta,tspan,MRE0,Var0,0,1:N);
         runTimeMat0(N-2,i) = toc;        
         fprintf('.')
 
         % Simulate with 1st order sensitivities
         tic
-        [M1,S1,dM,dS] = fHandle(Theta,tspan,1:N,0,MRE0,Var0);
+        [M1,S1,dM,dS] = fHandle(Theta,tspan,MRE0,Var0,0,1:N);
         runTimeMat1(N-2,i) = toc;        
         fprintf('.')
         
         % Simulate with 2nd order sensitivities
         tic
-        [M2,S2,dM,dS,d2M,d2S] = fHandle(Theta,tspan,1:N,0,MRE0,Var0);
+        [M2,S2,dM,dS,d2M,d2S] = fHandle(Theta,tspan,MRE0,Var0,0,1:N);
         runTimeMat2(N-2,i) = toc;        
         fprintf('.')
     end

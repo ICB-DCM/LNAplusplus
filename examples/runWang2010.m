@@ -23,7 +23,7 @@ addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'matlab'));
 generateLNA(fullfile(fileparts(mfilename('fullpath')), 'Wang2010.xml'),'Wang2010','NONE');
 
 % add the path to the mex file
-addpath('Wang2010/');
+addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'models', 'BirthDeath'));
 
 %% Define parameters, initial conditions and simulation time
 Theta = [0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1];
@@ -33,7 +33,7 @@ Var0  = toLinear(zeros(5));
 tspan = linspace(0,150,100);
 
 %% Simulate model
-[MRE,Var] = Wang2010_LNA(Theta,tspan,1:5,0,MRE0,Var0);
+[MRE,Var] = Wang2010_LNA(Theta,tspan,MRE0,Var0,0,1:5);
 
 figure('name','Simulation');
 for k = 1:5

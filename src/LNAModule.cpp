@@ -122,7 +122,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	 * 		computeSens: boolean
 	 * 		computeSens2: boolean
 	*/
-    static const char* argnames[] = {"Theta", "time", "Y0", "V0", "merr", "obsVar",
+    static const char* argnames[] = {"Theta", "timepoints", "Y0", "V0", "merr", "obsVar",
     		"computeSens", "computeSens2", NULL};
 
     // check input arguments format and parse

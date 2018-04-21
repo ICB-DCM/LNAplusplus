@@ -4,13 +4,13 @@
 // Methods table
 static PyMethodDef myModuleMethods[] = {
     {"LNA",  (PyCFunction)LNA_LNA,  METH_VARARGS | METH_KEYWORDS,
-     "LNA(Theta, time, Y0 = None, V0 = None, merr = None, obsVar = None, computeSens = False, computeSens2 = False)"
+     "LNA(Theta, timepoints, Y0 = None, V0 = None, merr = None, obsVar = None, computeSens = False, computeSens2 = False)"
      " -> MRE, Var [, dMRE, dSigma, [d2MRE, d2Sigma]]\n\n"
-     "Compute the linear noise approximation.\n\n"
+     "Compute the linear noise approximation for myModule.\n\n"
      "Parameters:\n"
      "-----------\n"
      "Theta (numeric list): model parameters\n"
-     "time (numeric list): output times\n"
+     "timepoints (numeric list): output times\n"
      "Y0 (numeric list): initial values for each species\n"
      "V0 (numeric list): initial values for each entry of the (upper triangular portion of the) covariance matrix in column-major ordering\n"
      "merr (numeric or numeric list): measurement error, single value for all observables or list with one value per observable\n"
@@ -33,7 +33,7 @@ static PyMethodDef myModuleMethods[] = {
 static struct PyModuleDef myModule = {
    PyModuleDef_HEAD_INIT,
    "myModule",   /* name of module */
-   "myModule  model created using LNA++", /* module documentation, may be NULL */
+   "myModule model created using LNA++", /* module documentation, may be NULL */
    -1,       /* size of per-interpreter state of the module,
                 or -1 if the module keeps state in global variables. */
    myModuleMethods

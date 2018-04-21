@@ -44,13 +44,13 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	static const char* usageMsg =
 			"Usage:\n"
 			"[MRE, Sigma, dMRE_dTheta, dSigma_dTheta, d2MRE_dTheta2, d2Sigma_dTheta2] = "
-			"LNA_Onset(Theta, time, [obsVar], [merr], [Y0], [V0] )\n"
+                        "LNA_Onset(Theta, timepoints, [Y0], [V0], [merr], [obsVar])\n"
 			"Theta: vector of model parameters\n"
-			"time: array of times for output\n"
-			"obsVar: variables to output\n"
-			"merr: measurement variance for observed variables\n"
-			"Y0: initial conditions for each variable\n"
-			"V0: initial variances (upper triangular portion)\n";
+                        "timepoints: array of times for output\n"
+                        "Y0: initial conditions for each variable\n"
+                        "V0: initial variances (upper triangular portion)\n"
+                        "merr: measurement variance for observed variables\n"
+                        "obsVar: variables to output\n";
 
 	if( (nrhs < 2) || (nrhs>6) || (nlhs>6)) {
 		// require at least Theta and the time
@@ -62,11 +62,11 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	 */
 
 	enum { ixTheta,
-		ixTime,
-		ixObsVar,
-		ixMerr,
-		ixY0,
-		ixV0
+               ixTime,
+               ixY0,
+               ixV0,
+               ixMerr,
+               ixObsVar
 	};
 
 	// number of model parameters
@@ -118,7 +118,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 		nargin = 2+mxGetNumberOfElements(prhs[2]);
 
 	/* obsvar */
-	if (nargin >= 3) {
+        if (nargin >= ixObsVar + 1 && !mxIsEmpty(mxGetCell(prhs[2], ixObsVar-2))) {
 
 		if (!mxIsCell(prhs[2]))
 			mexErrMsgIdAndTxt("LNA_Onset:obsVar", "invalid parameters. varargin must be a cell array");
@@ -152,7 +152,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	}
 
 	/* merr */
-	if (nargin >= 4) {
+        if (nargin >= ixMerr + 1 && !mxIsEmpty(mxGetCell(prhs[2], ixMerr-2))) {
 		const mxArray *merrArray = mxGetCell(prhs[2], ixMerr-2);
 		if (!mxIsDouble(merrArray))
 			mexErrMsgIdAndTxt("LNA_Onset:merr", "merr must be a numeric vector");
@@ -188,7 +188,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	}
 
 	/* Y0 */
-	if (nargin >= 5) {
+        if (nargin >= ixY0 + 1 && !mxIsEmpty(mxGetCell(prhs[2], ixY0-2))) {
 		const mxArray *Y0_Array = mxGetCell(prhs[2], ixY0-2);
 		if (!mxIsDouble(Y0_Array))
 			mexErrMsgIdAndTxt("LNA_Onset:Y0", "Y0 must be a numeric vector");
@@ -206,7 +206,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	}
 
 	/* V0 */
-	if (nargin >= 6) {
+        if (nargin >= ixV0 + 1 && !mxIsEmpty(mxGetCell(prhs[2], ixV0-2))) {
 		const mxArray *V0_Array = mxGetCell(prhs[2], ixV0-2);
 		if (!mxIsDouble(V0_Array))
 			mexErrMsgIdAndTxt("LNA_Onset:V0", "V0 must be a numeric vector");

@@ -381,19 +381,19 @@ Confidence intervals can be computed using the maximum likelihood estimator (MLE
 Unpack the LNA++ archive or clone the LNA++ repository which contains all the necessary scripts and source code for building LNA++ Python modules or Matlab executable files. No further building or installation of LNA++ itself is necessary until the creation of the model executables, as described below.
 
 \subsection{Requirements}
-LNA++ uses the standard C libraries, the CVODES Sundials library for numerical integration of ODEs and forward sensitivities, and the Blitz++ library for fast, templatized tensor operations. 
+LNA++ uses the standard C(++) libraries, the CVODES Sundials library for numerical integration of ODEs and forward sensitivities, and the Blitz++ library for fast, templatized tensor operations. 
 
 \subsubsection*{Compiler}
-Compilation of C/C++ source code for use as a standalone executable, or with Matlab or Python requires the use of a suitable compiler such as \texttt{gcc/g++} on Linux-based systems, or \texttt{clang} on mac OS.
+Compilation of C/C++ source code for use as a standalone executable, or with Matlab or Python requires the use of a suitable compiler such as \texttt{gcc/g++} or \texttt{clang}.
 
 \subsubsection*{Blitz++}
-Blitz++ version 1.0.1 is required. Blitz++ 1.0.1 is included in the \texttt{./libraries} folder, or can be downloaded from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}. It is also available via macports on mac OS. 
+Blitz++ version 1.0.1 is required. This version is included in the \texttt{./libraries} folder. Alternatively, Blitz++ can be downloaded from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}. It is also available via macports on mac OS. 
 
-When using the provided source archive, extract it to \texttt{../libraries/blitz-1.0.1}, change to this folder and run:
+When using the provided source archive, extract it to \texttt{../libraries/blitz-1.0.1}, change to this folder and run:\\
 \texttt{./configure --with-pic --prefix=`pwd`/../install/blitz-1.0.1 \&\& make install}
 
 For other versions of Blitz++ in non-default locations you need to adapt \texttt{include\_dirs} and \texttt{library\_dirs} in
-\texttt{python/setupTemplate.py}.
+\texttt{python/setupTemplate.py} or the respective lines in \texttt{matlab/compileLNA.m}.
 
 \subsubsection*{CVODES}
 Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{./libraries}, and is also available from \href{http://computation.llnl.gov/casc/sundials}{http://computation.llnl.gov/casc/sundials}.
@@ -440,28 +440,22 @@ In order to use LNA++ with Matlab, the Matlab \textit{Symbolic Math Toolbox} is 
 %
 %
 \section{Usage}
-In this section we describe how to use LNA++ to create Matlab executable models and Python modules. 
+
+In this section we describe how to use LNA++ to create Matlab executable models and Python modules. More application examples are available in the \texttt{examples/} directory.
 
 \subsection{Overview}
 LNA++ converts a user-specified model, provided as an SBML model configuration file, into a set of symbolic functions for the time derivatives of means, temporal cross-covariances, and their sensitivities. These functions are converted to C code which is then compiled together with the core computation engine to generate either Matlab or Python executable files/modules. The system can then be simulated using these executables and user-specified initial conditions and model parameters. 
 
-The stoichiometric matrix and reaction propensity functions are extracted from a user-supplied SBML model file, e.g., see \href{http://sbml.org/SBML_Software_Guide/SBML_Software_Summary}{http://sbml.org/}.
+The stoichiometric matrix and reaction propensity functions are extracted from a user-supplied SBML model file (see \href{http://sbml.org/SBML_Software_Guide/SBML_Software_Summary}{http://sbml.org/}) or can be provided directly.
 
 \subsection{Matlab}
-To generate the Matlab executable simply call the function generateLNA specifying the path to the SBML input file, the model name and an optional argument indicating whether to attempt to compute the steady state of the system, see below.
-
-It is recommended to run this command using the \texttt{models} subdirectory of the LNA++ root directory as the working directory.  This ensures the correct relative path for the subsequent build steps.
-
-See \texttt{BirthDeath.m} in \texttt{./models} for an example of how this is done.
-
-\subsubsection*{Paths}
-After running the functions for generating the mex file, the resulting C code, executable file, and wrapper function are placed in a subdirectory with the name of the model as specified.  Make sure that the wrapper function and executable are on the Matlab path, e.g. by changing to the directory of the model or by adding them to the path using \texttt{addpath}.
+To generate the Matlab executable simply call the function \texttt{generateLNA} specifying the path to the SBML input file, the model name and an optional argument indicating whether to attempt to compute the steady state of the system as described below. See also \texttt{examples/runBirthDeath.m} for a detailed example of how this is done.
 
 \subsubsection*{Building the model}
-To build the model call \texttt{generateLNA(sbmlPath,model,computeSS)}
+To build the model call \texttt{generateLNA(sbmlFileName, modelName, computeSS)}
 \begin{enumerate}
-\item \texttt{sbmlPath}: the path to the SBML model specification file
-\item \texttt{model}: the desired name of the model 
+\item \texttt{sbmlFileName}: the path of the SBML model specification file
+\item \texttt{modelName}: the desired name of the model 
 \item \texttt{computeSS}:  this argument is optional and can have only one of the values \texttt{`Y0'}, \texttt{`V0'}, \texttt{`BOTH'}, or \texttt{`NONE'}.
 	\begin{enumerate}
 	\item \texttt{`Y0'}:  LNA++ will attempt to calculate the steady state value of the MRE of the stochastic system specified. If \texttt{Y0} is not explicitly provided when invoking the model, the computed value will be automatically substituted. 
@@ -474,15 +468,16 @@ To build the model call \texttt{generateLNA(sbmlPath,model,computeSS)}
 \textit{Note for custom library paths and custom linker or compiler flags:}
 It is also possible to specify custom flags to the linker or compiler, for example if CVODES or Blitz are not installed in a standard location.  Linker and compiler flags can be specified using Name, Value argument pairs where Name is either \texttt{Linker\_Flags}, or \texttt{Cpp\_Flags}, e.g.,
 \begin{itemize}
-\item \texttt{generateLNA(sbmlPath,model,computeSS,`Linker\_Flags',FLAGS)} or
-\item \texttt{generateLNA(modelName,S,Npar,`Cpp\_flags',FLAGS)}.
+\item \texttt{generateLNA(sbmlFileName, modelName, computeSS, `Linker\_Flags', FLAGS)} or
+\item \texttt{generateLNA(sbmlFileName, modelName, computeSS, `Cpp\_flags', FLAGS)}.
 \end{itemize}
 Linker flags and compiler flags can both be specified, by providing both pairs of arguments.
 
-\subsubsection*{Matlab executable}
-\texttt{generateLNA} generates a mex file and a Matlab wrapper, which provides help messages and removes singleton dimensions for more convenient output. These are placed in the model subdirectory corresponding to the model specified.  To execute them, copy them to the desired final folder, or add them to the Matlab path. Usage of the generated function is specified in the help for that function.
 
-See \texttt{runBirthDeath.m} in \texttt{examples/}, and the generated \texttt{models/BirthDeath/BirthDeath\_LNA.m} for an example of the generated wrapper function and its invocation.
+\subsubsection*{Matlab executable}
+\texttt{generateLNA} generates a mex file and a Matlab wrapper, which provides help messages and removes singleton dimensions for more convenient output. These are placed in the \texttt{models/} subdirectory with the name of the model as specified in the \texttt{generateLNA} call. To execute them, copy them to the desired final folder, or add them to the Matlab path using \texttt{addpath}. Usage of the generated function is specified in the help for that function.
+
+See \texttt{examples/runBirthDeath.m}, and the generated \texttt{models/BirthDeath/BirthDeath\_LNA.m} for an example of the generated wrapper function and its invocation.
 
 \subsubsection*{Using the generated mex wrapper}
 The mex wrapper corresponding to a particular model can be invoked with between 2 and 6 arguments, which must occur in the correct order:

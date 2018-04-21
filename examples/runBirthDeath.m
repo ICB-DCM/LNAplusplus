@@ -69,8 +69,7 @@ ObsIndex = [1,2]; % Both species are observed (= mRNA,protein)
 VarNoise = [10,50]; % variance of measurement noise
 
 % solve LNA and compute measured distribution
-[MRE,Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise);
-
+[MRE,Var] = BirthDeath_LNA(Theta,tspan,[],[],VarNoise,ObsIndex);
 % plot results
 figure('Name','Simulation: IC = steady state; observable = mRNA and protein')
 % - mean of mRNA
@@ -103,7 +102,7 @@ ObsIndex = 2; % observable is second species (= protein)
 VarNoise = 50; % variance of measurement noise
 
 % solve LNA and compute measured distribution
-[MRE,Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise);
+[MRE,Var] = BirthDeath_LNA(Theta,tspan,[],[],VarNoise,ObsIndex);
 
 % plot results
 figure('Name','Simulation: IC = steady state; observable = protein')
@@ -128,7 +127,7 @@ MRE0 = [2,200]; % initial values (E(mRNA),E(Protein))
 Var0 = toLinear([0,0;0,0]); % initial co-variances (cov[mRNA,mRNA], cov(mRNA,Protein), cov(Protein,Protein))
 
 % solve LNA and compute measured distribution
-[MRE,Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise,MRE0,Var0);
+[MRE,Var] = BirthDeath_LNA(Theta,tspan,MRE0,Var0,VarNoise,ObsIndex);
 
 % plot results
 figure('Name','Simulation: IC = no steady state; observable = protein')
@@ -147,7 +146,7 @@ title('Autocovariance of protein');
 
 %% Simulate: IC = no steady state; observable = protein; sensitivity = 1st order
 % solve LNA and compute measured distribution
-[MRE,Var,Sens_MRE,Sens_Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise,MRE0,Var0);
+[MRE,Var,Sens_MRE,Sens_Var] = BirthDeath_LNA(Theta,tspan,MRE0,Var0,VarNoise,ObsIndex);
 
 % plot results
 figure('Name','Simulation: IC = no steady state; observable = protein; sensitivity = 1st order')
@@ -170,7 +169,7 @@ end
 
 %% Simulate: IC = no steady state; observable = protein; sensitivity = 1st & 2nd order
 % solve LNA and compute measured distribution
-[MRE,Var,Sens_MRE,Sens_Var,Sens2_MRE,Sens2_Var] = BirthDeath_LNA(Theta,tspan,ObsIndex,VarNoise,MRE0,Var0);
+[MRE,Var,Sens_MRE,Sens_Var,Sens2_MRE,Sens2_Var] = BirthDeath_LNA(Theta,tspan,MRE0,Var0,VarNoise,ObsIndex);
 
 % plot results
 figure('Name','Simulation of mean: IC = no steady state; observable = protein; sensitivity = 1st & 2nd order')

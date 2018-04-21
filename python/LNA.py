@@ -37,29 +37,50 @@ def toLinear(X):
     return sum([sum([], [float(x) for x in X[0:i+1,i]]) for i in range(X.cols)],[])
 
 	
-def generateLNA(fileName, model, computeSS='NONE',include_dirs=[], lib_dirs=[]):
+def generateLNA(sbmlFileName, modelName, computeSS='NONE', include_dirs=[], lib_dirs=[]):
     """
     Create a LNA++ Python module for a model provided in an SBML file.
     
     Parameters:
-    - sbmlPath: the path to the SBML model specification file
-    - model: the desired name of the model 
+    - sbmlFileName: the path to the SBML model specification file
+    - modelName: the desired name of the model (model code will be 
+      created in $LNA_BASE/models/$modelName)
     - computeSS (optional): one of the values:
-      - 'Y0': LNA++ will attempt to calculate the steady state value of the MRE of the stochastic system specified. If `Y0` is not explicitly provided when invoking the model, the computed value will be automatically substituted. 
-      - 'V0': LNA++ will attempt to calculate the steady state value of the variance of the stochastic system specified. If `V0` is not explicitly provided when invoking the model, the computed value will be automatically substituted.
-      - 'BOTH': LNA++ will compute both `V0` and `Y0` if possible. If `Y0` or `V0` is not explicitly provided when invoking the model, the computed values will be automatically substituted.
-      - 'NONE': LNA++ will not compute any steady state values. Invocation of the model without explicitly specifying the initial conditions for `Y0` and `V0` will result in an error message being generated.
-    - include_dirs (optional): a Python list of directories to be searched for header files, specified as a list of strings.
-    - lib_dirs (optional): a Python list of directories to be searched for libraries, specified as a list of strings.
+      - 'Y0': LNA++ will attempt to calculate the steady state value of 
+        the MRE of the stochastic system specified. If `Y0` is not explicitly 
+        provided when invoking the model, the computed value will be 
+        automatically substituted. 
+      - 'V0': LNA++ will attempt to calculate the steady state value of 
+        the variance of the stochastic system specified. If `V0` is not 
+        explicitly provided when invoking the model, the computed value will be 
+        automatically substituted.
+      - 'BOTH': LNA++ will compute both `V0` and `Y0` if possible. If 
+        `Y0` or `V0` is not explicitly provided when invoking the model, the 
+        computed values will be automatically substituted.
+      - 'NONE': LNA++ will not compute any steady state values. 
+        Invocation of the model without explicitly specifying the initial 
+        conditions for `Y0` and `V0` will result in an error message being 
+        generated.
+    - include_dirs (optional): a Python list of directories to be 
+      searched for header files, specified as a list of strings.
+    - lib_dirs (optional): a Python list of directories to be searched 
+      for libraries, specified as a list of strings.
 
     Using the created Python module:    
     
-    After running generateLNA, a Python module is created and placed in the `modules/` subdirectory of LNA++. The module is named `modelLNA`, where `model' is replaced by the name of the model specified. The module can be imported using `import`, as long as the module is on the Python module path. To add this directory to the module path either modify the value of `sys.path` or add the modules directory to the `PYTHONPATH` environment variable. 
-    
-    Model simulations are run using the `LNA` function in the module created from the respective model.
+    After running generateLNA, a Python module is created and placed in 
+    the `$LNA_BASE/models/modules/` subdirectory of LNA++. The module is 
+    named `modelLNA`, where `model' is replaced by the name of the model 
+    specified. The module can be imported using `import`, as long as the 
+    module is on the Python module path. To add this directory to the module 
+    path either modify the value of `sys.path` or add the modules directory 
+    to the `PYTHONPATH` environment variable. 
+        
+    Model simulations are run using the `LNA` function in the module 
+    created from the respective model.
     """
     try:
-        S, species, parameters, fHandle = SBML2StoichProp(fileName)
+        S, species, parameters, fHandle = SBML2StoichProp(sbmlFileName)
     except IOError:
         print("Doing nothing!")
         return
@@ -67,13 +88,29 @@ def generateLNA(fileName, model, computeSS='NONE',include_dirs=[], lib_dirs=[]):
     species = symbols(species)
     parameters = symbols(parameters)
         
-    tups = generateLNAComponents(model, S, fHandle, species, parameters, computeSS)
+    tups = generateLNAComponents(modelName, S, fHandle, species, parameters, computeSS)
     npar = len(parameters) # number of parameters
-    compileLNA(model, S, tups, npar, include_dirs=include_dirs, lib_dirs=lib_dirs)
+    compileLNA(modelName, S, tups, npar, include_dirs=include_dirs, lib_dirs=lib_dirs)
 
 
-def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NONE'):
-    "Generate all of the symbolic components necessary for the LNA method"
+def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='NONE'):
+    """
+    generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='NONE') -> tups
+    
+    Generate all of the symbolic components necessary for the LNA method.
+    
+    Parameters:
+    - modelName: name of the model (string)
+    - S: stoichiometric matrix (sympy Matrix)
+      reactionFluxFun: function handle @(phi, t, Theta) for symbolically computing 
+      the reaction fluxes for the given state and parameters
+    - phi: symbolic vector containing the macroscopic state variables
+    - Theta: symbolic vector containing the model parameters
+    - computeSS='NONE': see same argument in generateLNA 
+    
+    Returns:
+    tups: model components to be passed to compileLNA
+    """
     t = symbols('t', real=True)
     Nvar        = S.rows
 
@@ -83,7 +120,7 @@ def generateLNAComponents(modelName, S, reactionFlux, phi, Theta, computeSS='NON
     phi=tuple(phi)
     Npar = len(Theta)
 
-    F = Matrix(reactionFlux(phi, t, Theta))
+    F = Matrix(reactionFluxFun(phi, t, Theta))
     J           = F.jacobian(phi)
     dFdTheta    = F.jacobian(Theta)
     d2fdTheta2   = jacobian(dFdTheta,Theta)
@@ -227,11 +264,23 @@ def solveSS_var(A,E,F,S,phi,Theta):
     
     return V0
 
-def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
-    '''generate the C code, for python module'''
+def compileLNA(modelName, S, tups, npar, include_dirs=[], lib_dirs=[]):
+    """
+    compileLNA(modelName, S, tups, npar, include_dirs=[], lib_dirs=[]) -> None
+    
+    Generate and compile C/C++ code for the Python module for the given model.
+    
+    Parameters:
+    - modelName: Name of the model module to be generated (Module code will be written to $LNA_BASE/models/$modelName
+    - S: The symbolic stoichiometrix matrix of the model
+    - tups: The model components as obtained from LNA.generateLNAComponents
+    - npar: Number of parameters 
+    - include_dirs=[]: optional additional compiler include directories 
+    - lib_dirs=[]: optional additional linker library directories    
+    """
 
     # create output directory if necessary
-    modelDir = lnaModelsDir+ '/' + model
+    modelDir = lnaModelsDir+ '/' + modelName
     if not os.path.isdir(lnaModelsDir):
         os.mkdir(lnaModelsDir)
     if not os.path.isdir(modelDir):
@@ -263,7 +312,7 @@ def compileLNA(model, S, tups, npar, include_dirs=[], lib_dirs=[]):
 
     f.close()
 
-    generateModule(model, S, modelDir, include_dirs, lib_dirs)
+    generateModule(modelName, S, modelDir, include_dirs, lib_dirs)
 
 
 def generateModule(model, S, modelDir = '.', include_dirs=[], lib_dirs=[]):
