@@ -20,7 +20,7 @@ addpath('../matlab')
 % R8: P         -->  0
     
 %% Create the Matlab executable for the birth / death system
-generateLNA('Wang2010/Wang2010.xml','Wang2010','NONE');
+generateLNA('../examples/Wang2010.xml','Wang2010','NONE');
 
 % add the path to the mex file
 addpath('Wang2010/');

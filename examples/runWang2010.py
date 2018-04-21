@@ -27,7 +27,7 @@ import LNA
 import sympy
 
 # Create the Python module for the model
-LNA.generateLNA(scriptDir + '/Wang2010/Wang2010.xml', 'Wang2010', 'NONE')
+LNA.generateLNA(scriptDir + '/Wang2010.xml', 'Wang2010', 'NONE')
 
 # Extend path for LNA++-created modules and import
 sys.path.append(LNA.lnaModulesDir)

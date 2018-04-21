@@ -34,7 +34,7 @@ install:
 
 script:
     - cd $BASE_DIR
-    - models/runCI.sh
+    - misc/runCI.sh
     # test if all result plots have been generated
     - test `ls $BASE_DIR/BirthDeath*pdf | wc -l` = 7
     

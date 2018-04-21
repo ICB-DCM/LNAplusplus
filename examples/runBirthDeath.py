@@ -53,11 +53,11 @@ path.append(scriptDir + '/../python')
 
 
 # Create the Python module for the birth / death system
-from LNA import generateLNA
-generateLNA(scriptDir + '/BirthDeath/BirthDeath.xml', 'BirthDeath', computeSS='BOTH')
+import LNA
+LNA.generateLNA(scriptDir + '/BirthDeath.xml', 'BirthDeath', computeSS='BOTH')
 
 # Import the generated module (adapt path first)
-path.append(scriptDir + '/modules')
+path.append(LNA.lnaModulesDir)
 import BirthDeathLNA
 
 import numpy as np

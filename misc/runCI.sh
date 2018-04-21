@@ -21,4 +21,4 @@ make && make install
 
 # run example
 cd $BASE_DIR
-python3 models/BirthDeath.py --headless
+python3 examples/BirthDeath.py --headless
