@@ -9,6 +9,7 @@ matrix:
       addons:
         apt:
           packages:
+            - gfortran
             - python3-numpy 
             - python3-sympy
             - libsbml5-python
