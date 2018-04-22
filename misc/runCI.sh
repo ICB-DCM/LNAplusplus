@@ -16,7 +16,7 @@ make && make install
 cd $BASE_DIR/libraries
 tar -xzf cvodes-2.7.0.tar.gz
 cd cvodes-2.7.0
-./configure --with-pic --prefix=$BASE_DIR/libraries/install/cvodes-2.7.0
+./configure --with-pic --disable-mpi --prefix=$BASE_DIR/libraries/install/cvodes-2.7.0
 make && make install
 
 # run example
