@@ -29,11 +29,17 @@ matrix:
       osx_image: xcode9.1
     - os: osx
       compiler: gcc
-      osx_image: xcode9
-    - os: osx
-      compiler: gcc
       osx_image: xcode8.3
   allow_failures:
+    - os: osx
+      compiler: gcc
+      osx_image: xcode9.3
+    - os: osx
+      compiler: gcc
+      osx_image: xcode9.2
+    - os: osx
+      compiler: gcc
+      osx_image: xcode9.1
     - os: osx
       compiler: gcc
       osx_image: xcode8.3
