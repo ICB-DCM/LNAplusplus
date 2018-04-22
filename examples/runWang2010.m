@@ -31,7 +31,7 @@ addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'models', 'Wang201
 
 %% Define parameters, initial conditions and simulation time
 Theta = [0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1];
-species_names = {'DNA', 'DNAP2', 'RNA', 'P', 'P2'};
+species_names = {'DNA', 'DNA:P_2', 'RNA', 'P', 'P_2'};
 MRE0  = [20, 1, 1, 1, 1];
 Var0  = toLinear(zeros(5));
 tspan = linspace(0,150,100);
