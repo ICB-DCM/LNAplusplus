@@ -17,3 +17,8 @@ LNA++ uses the standard C++ libraries, the CVODES Sundials library for numerical
 - CVODES
 - For python interface: Python 3.x with numpy, sympy, libsbml, pylab, ipdb
 - For Matlab interface: Matlab (tested with R2017b)
+
+## Contacts
+- Justin Feigelman:
+- Jan Hasenauer: jan.hasenauer@helmholtz-muenchen.de
+- Carsten Marr: carsten.marr@helmholtz-muenchen.de
