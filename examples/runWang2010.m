@@ -23,7 +23,7 @@ addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'matlab'));
 generateLNA(fullfile(fileparts(mfilename('fullpath')), 'Wang2010.xml'),'Wang2010','NONE');
 
 % add the path to the mex file
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'models', 'BirthDeath'));
+addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'models', 'Wang2010'));
 
 %% Define parameters, initial conditions and simulation time
 Theta = [0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1];
