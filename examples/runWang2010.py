@@ -42,7 +42,7 @@ Var0  = LNA.toLinear(np.zeros((numSpecies, numSpecies)))
 tspan = np.linspace(0, 150, 100).tolist()
 
 # Simulate model
-[MRE,Var] = Wang2010LNA.LNA(Theta, tspan, merr=0.0, Y0=MRE0, V0=Var0)
+[MRE,Var,sMRE,sVar] = Wang2010LNA.LNA(Theta, tspan, merr=0.0, Y0=MRE0, V0=Var0, computeSens=True)
 
 # Plot results
 import matplotlib.pyplot as plt
