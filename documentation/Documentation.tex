@@ -122,6 +122,11 @@
 Garching, Germany}
 \affil[3]{ETH Z\"urich, Institute of Molecular Systems Biology, Auguste-Piccard-Hof 1, 8093 Z\"urich, Switzerland}
 
+% authors and title to pdf meta-data
+\makeatletter
+\hypersetup{pdftitle={\@title},pdfauthor={\@author}}
+\makeatother
+ 
 \date{} % no date
 \maketitle
 \tableofcontents
@@ -485,11 +490,11 @@ The mex wrapper corresponding to a particular model can be invoked with between 
 \paragraph{Inputs:}
 \begin{enumerate}
 \item \texttt{Theta}: the vector of model parameters, with the same dimension as specified during the model construction
-\item \texttt{Time}: a vector of times at which the result of the model simulation is to be outputted. The first time is always zero.
-\item \texttt{obsVar} (optional): a vector of indices corresponding to the species which should be outputted.  The numbering of species matches the numbering of species in the stoichiometric matrix.  If omitted, all species are outputted.
-\item \texttt{Merr} (optional): a vector of numbers (possibly of length 1) corresponding to estimated measurement error of each species, specified as a variance.  The measurement error is added to diagonal of the temporal cross-covariance matrix.  If only one number is specified, this number is used for all species.  If multiple numbers are specified, the number specified must equal the number of observed variables.  If omitted, measurement error is assumed to be zero for all species.
+\item \texttt{Timepoints}: a vector of times at which the result of the model simulation is to be outputted. The first time is always zero.
 \item \texttt{Y0} (optional): a vector of initial conditions for each of the species.  The length must be the same as the number of species.  If omitted, the steady-state initial conditions are assumed, if they were computed when the model was created; otherwise an error is generated requesting the initial conditions to be specified.
 \item \texttt{V0} (optional): a vector of initial conditions for the (co-)variances between all species. They are specified in column-major order, i.e. for a 3x3 matrix
+\item \texttt{Merr} (optional): a vector of numbers (possibly of length 1) corresponding to estimated measurement error of each species, specified as a variance.  The measurement error is added to diagonal of the temporal cross-covariance matrix.  If only one number is specified, this number is used for all species.  If multiple numbers are specified, the number specified must equal the number of observed variables.  If omitted, measurement error is assumed to be zero for all species.
+\item \texttt{obsVar} (optional): a vector of indices corresponding to the species which should be outputted.  The numbering of species matches the numbering of species in the stoichiometric matrix.  If omitted, all species are outputted.
 \begin{equation*}
 \begin{bmatrix}
 \texttt{V\_11},\texttt{V\_12},\texttt{V\_13} \\
@@ -517,8 +522,8 @@ If only 2 output arguments are specified, the computation engine does not comput
 \subsection{Python}
 To use LNA++ with Python, call the function \texttt{generateLNA} of the LNA module, with the following arguments:
 \begin{enumerate}
-\item \texttt{sbmlPath}: the path to the SBML model specification file
-\item \texttt{model}: the desired name of the model 
+\item \texttt{sbmlFileName}: the path to the SBML model specification file
+\item \texttt{modelName}: the desired name of the model 
 \item \texttt{computeSS}:  this argument is optional and can have only one of the values \texttt{`Y0'}, \texttt{`V0'}, \texttt{`BOTH'}, or \texttt{`NONE'}.
 	\begin{enumerate}
 	\item \texttt{Y0}:  LNA++ will attempt to calculate the steady state value of the MRE of the stochastic system specified. If \texttt{Y0} is not explicitly provided when invoking the model, the computed value will be automatically substituted. 
@@ -528,10 +533,8 @@ To use LNA++ with Python, call the function \texttt{generateLNA} of the LNA modu
 	\end{enumerate}
 \end{enumerate}
 
-\textit{Note:} It is recommended to save the model as a script in the \texttt{models} subdirectory of the LNA++ root directory.  This ensures the correct relative path for the subsequent build steps.
-
 \subsubsection*{Creating the Python module}
-After running generateLNA, a Python module is created and placed in the modules subdirectory. The module is named \texttt{modelLNA}, where `model' is replaced by the name of the model specified. The module can be imported using \texttt{import}, as long as the module is on the Python module path. To add this directory to the module path either modify the value of \texttt{sys.path} or add the modules directory to the \texttt{PYTHONPATH} environment variable. 
+After running \texttt{generateLNA}, a Python module is created and placed in the \texttt{models/modules/} subdirectory. The module is named \texttt{modelLNA}, where `model' is replaced by the name of the model specified. The module can be imported using \texttt{import}, as long as the module is on the Python module path. To add this directory to the module path either modify the value of \texttt{sys.path} or add the modules directory to the \texttt{PYTHONPATH} environment variable. 
 
 \textit{Note for non-standard library or include paths:}
 If CVODES or Blitz++ are not installed in a standard location (e.g. due to lack of administrator permissions), then custom include and/or library paths can be provided by specifying two additional arguments to \texttt{generateLNA}:
@@ -539,8 +542,9 @@ If CVODES or Blitz++ are not installed in a standard location (e.g. due to lack 
 \item \texttt{include\_dirs}: a Python list of directories to be searched for header files, specified as a list of strings.
 \item \texttt{lib\_dirs}: a Python list of directories to be searched for libraries, specified as a list of strings.
 \end{itemize}
-Using the created Python module	
-The Python module for a given model must first be imported as described above.  The model is simulated using the LNA function in the module.  For example if the model is called \texttt{myModel} then the generated module is called \texttt{myModelLNA} and the \texttt{LNA} function can be imported using the statement:
+
+\subsubsection*{Using the created Python module}
+The Python module for a given model must first be imported as described above.  The model is simulated using the \texttt{LNA} function in the module.  For example, if the model is called \texttt{myModel}, then the generated module is called \texttt{myModelLNA} and the \texttt{LNA} function can be imported using the statement:
 
 \texttt{from myModelLNA import LNA}
 
@@ -565,7 +569,7 @@ with \texttt{V\_12 = V\_21}, \texttt{V\_13 = V\_31}, and \texttt{V\_23 = V\_32} 
 If initial conditions are not specified, but were computed using the computeSS flag at the time of the module creation, then the steady state values are automatically used. If the initial conditions were not computed when generating the module, then an error occurs if no initial conditions are specified.  
 
 \item \texttt{computeSens} (optional): a Boolean variable indicating whether the first order sensitivities should be computed.  By default no first order sensitivities are computed.
-\item \texttt{computeSens2} (optional):  a Boolean variable indicating whether the second order sensitivities should be computed.  By default no second order sensitivities are computed.
+\item \texttt{computeSens2} (optional): a Boolean variable indicating whether the second order sensitivities should be computed. Implies \texttt{computeSens=True}. By default no second order sensitivities are computed.
 \end{enumerate}
 
 \paragraph{Outputs:}
@@ -579,15 +583,13 @@ The LNA function returns between 2 and 6 output arguments.  In the following, $N
 \item \texttt{d2Sigma} (if \texttt{computeSens2}): an $N \times N \times T \times d \times d$ array corresponding to the second order sensitivities of the temporal cross-covariance matrix at all timepoints for the observed species. The sensitivities are ordered such that the first sensitivities are of the \texttt{MRE} with respect to the model parameters, followed by sensitivities with respect to the initial conditions of each species.
 \end{enumerate}
 
-Note: if \texttt{computeSens2} is \texttt{True}, the first order sensitivities are always also computed and outputted.
-
 %
 %
 %
 \section{Advanced Notes}
 
 \subsection{Specifying custom propensity functions}
-It is possible to manually specify the components necessary for the computation of the linear noise approximation instead of deriving them from a supplied SBML file. For both Matlab and Python, the following components need to specified:
+It is possible to manually specify the components necessary for the computation of the linear noise approximation instead of deriving them from a supplied SBML file (see also \texttt{examples/runLinearChain.(m|py)}. For both Matlab and Python, the following components need to be specified:
 
 \subsubsection*{State variables}
 These are the species in the chemical reaction network, e.g. mRNA or proteins.
@@ -599,11 +601,11 @@ This is the $N$ by $R$ matrix of stoichiometric coefficients describing the chem
 This is a vector function of length $R$, describing the rate of each reaction as a function of the current state of the system, the kinetic constants, and potentially with explicit time dependence. By entering the reaction fluxes manually (i.e. not from SBML), custom propensity functions can be specified.
 
 \subsubsection*{Model parameters}
-The model parameters are the set of model-specific constants that influence the reaction rates.  Sensitivities of the mean and temporal cross-covariance matrices are computed with respect to the model parameters.
+The model parameters are the set of model-specific constants that influence the reaction rates. Sensitivities of the mean and temporal cross-covariance matrices are computed with respect to the model parameters.
 
 \subsubsection*{Matlab}
 \begin{MatlabCode} 
-% Define the stoichiometry matrix (S) for the model:
+% Define the stoichiometric matrix (S) for the model:
 S = [1,-1,0,0; % change to mRNA
      0,0,1,-1]; % change to protein
 
@@ -611,20 +613,20 @@ S = [1,-1,0,0; % change to mRNA
 syms k_m k_p g_m g_p real
 syms m p real
 
+modelName = 'BirthDeath';
 phi = [m,p]; % state vector
 Theta = [k_m, k_p, g_m, g_p]; % parameter vector
 npar = length(Theta); % number of parameters
 
 % Define the reaction fluxes as a function of phi, t and Theta:
-f = @(phi,t,Theta) [Theta(1),Theta(3)*phi(1),...
+fluxFunction = @(phi,t,Theta) [Theta(1),Theta(3)*phi(1),...
                     Theta(2)*phi(1),Theta(4)*phi(2)];
 
 % Generate the symbolic C code:
-addpath('../matlab')
-generateLNAComponents('BirthDeath', S, f, phi, Theta, 'BOTH')
+generateLNAComponents(modelName, S, fluxFunction, phi, Theta, 'BOTH')
 
 % Compile the code and generate the Mex file:
-compileLNA(model);
+compileLNA(modelName);
 \end{MatlabCode}
 
 \subsubsection*{Python}
@@ -633,7 +635,7 @@ compileLNA(model);
 from sympy import Matrix
 from LNA import *
 
-# Define the stoichiometry matrix (S) for the model:
+# Define the stoichiometric matrix (S) for the model:
 S = Matrix([[1,-1,0,0],[0,0,-1,1]])
 
 # Define the state variables and model parameters as symbols:
@@ -643,24 +645,25 @@ phi = symbols('m,p',real=True)
 Theta = symbols('k_m,k_p,g_m,g_p',real=True)
 
 # Define the reaction fluxes as a function of phi, t and Theta:
-f = lambda phi,t,Theta: \
+fluxFunction = lambda phi,t,Theta: \
 [Theta[0],Theta[2]*phi[0],Theta[1]*phi[0],Theta[3]*phi[1]]
 
+modelName = 'BirthDeath'
+
 # Generate the symbolic C code:
-tups = generateLNAComponents(model,S,f,\
+tups = generateLNAComponents(modelName,S,fluxFunction,\
                              species,parameters,computeSS)
 npar = len(parameters) # number of parameters
 
 # Compile the code and generate the Python module:
-compileLNA(model,S,tups,npar)
-
+compileLNA(modelName,S,tups,npar)
 \end{PythonCode} 
 
 %
 %
 \section{Applications}
 \subsection{Birth-death Process}
-To test the performance of LNA++, we implemented a simple birth-death process involving a constitutively active DNA, and stochastic production and degradation of mRNA and protein (see Figure~\ref{fig:birth-death-model}A, Table \ref{tab:BirthDeathReactions}).  The mRNA production reaction has a constant propensity $k_m$.  The propensity of production of a molecule of protein depends on the number of mRNAs, and on the rate constant $k_p$.  Lastly, mRNA is degraded with rate constant $\gamma_m$ and protein with rate constant $\gamma_p$.
+To test the performance of LNA++, we implemented a simple birth-death process involving a constitutively active DNA, and stochastic production and degradation of mRNA and protein (see Figure~\ref{fig:birth-death-model}A, Table \ref{tab:BirthDeathReactions}, \texttt{examples/runBirthDeath.(m|py)}). The mRNA production reaction has a constant propensity $k_m$.  The propensity of producing a protein molecule depends on the number of mRNAs, and on the rate constant $k_p$.  Lastly, mRNA is degraded with rate constant $\gamma_m$ and protein with rate constant $\gamma_p$.
 
 \begin{figure}[htb!]
 \begin{center}
