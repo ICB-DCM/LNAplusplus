@@ -1,5 +1,7 @@
 % runWang2010.m constructes the LNA for the model of DNA self-regulation
-% introduced by Wang et al. 2010.
+% introduced by Wang et al. (2010) in "Parameter inference for discretely 
+% observed stochastic kinetic models using stochastic gradient descent."
+% BMC Syst. Biol., 4, 99.
 
 clear all;
 close all;
@@ -21,20 +23,21 @@ addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'matlab'));
     
 %% Create the Matlab executable for the birth / death system
 generateLNA(fullfile(fileparts(mfilename('fullpath')), 'Wang2010.xml'),'Wang2010','NONE');
+% Note: For this model the symbolic calculation of the steady state fails
+% as the resulting equations are already to complex.
 
-% add the path to the mex file
+% Add the path to the mex file
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'models', 'Wang2010'));
 
 %% Define parameters, initial conditions and simulation time
-Theta = zeros(1,8);%[0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1];
-%Theta = [0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1];
+Theta = [0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1];
 species_names = {'DNA', 'DNAP2', 'RNA', 'P', 'P2'};
-MRE0  = [20, 0, 0, 0, 0];
+MRE0  = [20, 1, 1, 1, 1];
 Var0  = toLinear(zeros(5));
 tspan = linspace(0,150,100);
 
 %% Simulate model
-[MRE,Var,sMREsdVar] = Wang2010_LNA(Theta,tspan,MRE0,Var0,0,1:5);
+[MRE,Var,sMRE,sdVar] = Wang2010_LNA(Theta,tspan,MRE0,Var0,0,1:5);
 
 figure('name','Simulation');
 for k = 1:5

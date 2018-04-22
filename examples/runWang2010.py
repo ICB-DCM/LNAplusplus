@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 This example constructs the LNA for the model of DNA self-regulation
-introduced by Wang et al. 2010.
+introduced by Wang et al. (2010) in "Parameter inference for discretely 
+observed stochastic kinetic models using stochastic gradient descent."
+BMC Syst. Biol., 4, 99.
+
 
 Model:
 ======
@@ -28,6 +31,8 @@ import sympy
 
 # Create the Python module for the model
 LNA.generateLNA(scriptDir + '/Wang2010.xml', 'Wang2010', 'NONE')
+""" Note: For this model the symbolic calculation of the steady state fails as
+the resulting equations are already to complex."""
 
 # Extend path for LNA++-created modules and import
 sys.path.append(LNA.lnaModulesDir)
@@ -37,7 +42,7 @@ import Wang2010LNA
 Theta = [0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1]
 speciesNames = ['DNA', 'DNAP2', 'RNA', 'P', 'P2']
 numSpecies = len(speciesNames)
-MRE0  = [20.0, 0.0, 0.0, 0.0, 0.0]
+MRE0  = [20.0, 1.0, 1.0, 1.0, 1.0]
 Var0  = LNA.toLinear(np.zeros((numSpecies, numSpecies)))
 tspan = np.linspace(0, 150, 100).tolist()
 
