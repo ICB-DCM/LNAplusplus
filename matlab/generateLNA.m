@@ -13,7 +13,9 @@ function generateLNA(sbmlFileName, modelName, computeSS, varargin)
 sbmlModel = TranslateSBML(sbmlFileName);
 [ S, ~, P ] = SBML2StoichProp(sbmlModel, true);
 
+orig_state = warning('off', 'symbolic:generate:FunctionNotVerifiedToBeValid');
 f = matlabFunction(P, 'Vars', {'phi','t','Theta'});
+warning(orig_state)
 
 % species
 phi = cell2sym({sbmlModel.species.name});
