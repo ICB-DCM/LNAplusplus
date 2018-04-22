@@ -12,11 +12,11 @@ addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'matlab'));
 % ======
 % R1: DNA + P2  -->  DNA.P2
 % R2: DNA.P2    -->  DNA + P2
-% R3: DNA       -->  DNA + P 
+% R3: DNA       -->  DNA + RNA
 % R4: RNA       -->  0
 % R5: P + P     -->  P2
 % R6: P2        -->  P + P
-% R7: RNA       -->  RNA + P 
+% R7: RNA       -->  RNA + P
 % R8: P         -->  0
     
 %% Create the Matlab executable for the birth / death system

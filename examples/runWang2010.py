@@ -7,7 +7,7 @@ Model:
 ======
 R1: DNA + P2  -->  DNA.P2
 R2: DNA.P2    -->  DNA + P2
-R3: DNA       -->  DNA + P 
+R3: DNA       -->  DNA + RNA 
 R4: RNA       -->  0
 R5: P + P     -->  P2
 R6: P2        -->  P + P

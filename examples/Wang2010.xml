@@ -108,7 +108,8 @@
             <apply>
               <times/>
               <ci> k5 </ci>
-              <ci> P * P </ci>
+              <ci> P </ci>
+              <ci> P </ci>
             </apply>
           </math>
         </kineticLaw>
