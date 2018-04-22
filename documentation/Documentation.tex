@@ -470,6 +470,8 @@ To build the model call \texttt{generateLNA(sbmlFileName, modelName, computeSS)}
 	\end{enumerate}
 \end{enumerate}
 
+\textit{Remark:} Analytical solution of the steady state equations can only be derived for some models. If the user selects \texttt{`Y0'}, \texttt{`V0'} or \texttt{`BOTH'} and the calculations fails, LNA++ reports an error.
+
 \textit{Note for custom library paths and custom linker or compiler flags:}
 It is also possible to specify custom flags to the linker or compiler, for example if CVODES or Blitz are not installed in a standard location.  Linker and compiler flags can be specified using Name, Value argument pairs where Name is either \texttt{Linker\_Flags}, or \texttt{Cpp\_Flags}, e.g.,
 \begin{itemize}
@@ -532,6 +534,8 @@ To use LNA++ with Python, call the function \texttt{generateLNA} of the LNA modu
 	\item \texttt{NONE}: LNA++ will not compute any steady state values.  Invocation of the model without explicitly specifying the initial conditions for \texttt{Y0} and \texttt{V0} will result in an error message being generated.
 	\end{enumerate}
 \end{enumerate}
+
+\textit{Remark:} Analytical solution of the steady state equations can only be derived for some models. If the user selects \texttt{`Y0'}, \texttt{`V0'} or \texttt{`BOTH'} and the calculations fails, LNA++ reports an error.
 
 \subsubsection*{Creating the Python module}
 After running \texttt{generateLNA}, a Python module is created and placed in the \texttt{models/modules/} subdirectory. The module is named \texttt{modelLNA}, where `model' is replaced by the name of the model specified. The module can be imported using \texttt{import}, as long as the module is on the Python module path. To add this directory to the module path either modify the value of \texttt{sys.path} or add the modules directory to the \texttt{PYTHONPATH} environment variable. 
