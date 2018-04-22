@@ -19,6 +19,6 @@ LNA++ uses the standard C++ libraries, the CVODES Sundials library for numerical
 - For Matlab interface: Matlab (tested with R2017b)
 
 ## Contacts
-- Justin Feigelman:
+- Justin Feigelman: JustinFeigelmanPhD@gmail.com
 - Jan Hasenauer: jan.hasenauer@helmholtz-muenchen.de
 - Carsten Marr: carsten.marr@helmholtz-muenchen.de
