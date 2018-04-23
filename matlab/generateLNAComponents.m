@@ -96,6 +96,12 @@ d2EdTheta2  = simplifyExpr(Jacobian(dEdTheta, Theta));
 dEdPhi      = simplifyExpr(Jacobian(Efunc, phi));
 d2EdPhi2    = simplifyExpr(Jacobian(dEdPhi, phi));
 
+EEfunc      = Efunc*Efunc.';
+dEEdTheta   = simplifyExpr(Jacobian(EEfunc, Theta));
+d2EEdTheta2 = simplifyExpr(Jacobian(dEEdTheta, Theta));
+dEEdPhi     = simplifyExpr(Jacobian(EEfunc, phi));
+d2EEdPhi2   = simplifyExpr(Jacobian(dEEdPhi, phi));
+
 %% solve for the initial steady state 
 nvar = length(phi);
 npar = length(Theta)+nvar;
@@ -167,20 +173,26 @@ d2AdThetadPhi = simplifyExpr(Jacobian(dAdTheta, phi));
 d2EdPhidTheta = simplifyExpr(Jacobian(dEdPhi, Theta));
 d2EdThetadPhi = simplifyExpr(Jacobian(dEdTheta, phi));
 
+d2EEdPhidTheta = simplifyExpr(Jacobian(dEEdPhi, Theta));
+d2EEdThetadPhi = simplifyExpr(Jacobian(dEEdTheta, phi));
+
 %% generate the C library
 disp('Generating C source')
 
-%old path
+% old path
 olddir = cd([dirName '/matlab']);
 
 % requires phi, t, Theta
 objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
          'dAdPhi', 'd2AdPhi2', 'd2AdTheta2', 'd2AdThetadPhi', 'd2AdPhidTheta', ...
          'd2AdPhidTheta', 'Efunc', 'dEdTheta', 'd2EdTheta2', 'd2EdThetadPhi', ...
-         'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2',  'systemJacobian_diag'};
+         'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2',  'systemJacobian_diag',...
+         'EEfunc','dEEdTheta','d2EEdTheta2','dEEdPhi','d2EEdPhi2',...
+         'd2EEdPhidTheta','d2EEdThetadPhi'};
 
 % requires only Theta
 objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
+
 addpath(lnaMatlabDir)
 for i = 1:length(objs1)
     fprintf('Generating %s source...\n', objs1{i})
@@ -236,8 +248,6 @@ else
 end
 Y0 = [tmp2{:}];
 
-% for i=1:length(phi0), Y0(i)=tmp.(char(phi0(i))); end
-
 end
 
 function [V0] = solveSS_var(A,E,F,S,phi,Theta,Y0) %#codegen
@@ -256,10 +266,6 @@ t = sym('t','real');
 % set the upper triangular components to zero flux!
 
 nvar = numel(phi);
-%     VfluxCellArray  = mat2cell( reshape( dVdt, 1, []), 1, ones(1,nvar^2));
-%     VarCellArray    = mat2cell( reshape( V, 1, []), 1, ones(1,nvar^2));
-% 
-%     V0              = solve(VfluxCellArray{:}, VarCellArray{:});
 
 f1 = matlabFunction(dVdt, 'vars', {phi, t, Theta, V}); % function handle to dVdt
 f2 = f1(Y0,t,Theta,V); % matrix of symbols
@@ -279,50 +285,6 @@ if isempty(V0)
     warning('Could not solve for steady state variance.  Setting initial variance to zero.')
     V0 = zeros(nvar*(nvar+1)/2,1);
 end
-
-
-% convert to symbolic vector
-
-
-% tmp = struct2cell(V0);
-% V0              = [tmp{:}];
-% V0              = reshape(V0,nvar,nvar);
-% V0              = V0(find(triu(ones(size(V0))))); % just upper triangular region
-
-% substitute the solution to the initial steady state of the species
-
-%     varNames = cellfun(@(x) [char(x)], mat2cell(phi,1,ones(1,length(phi))), ...
-%         'UniformOutput', false);
-%     syms(varNames{:}, 'real'); % generate symbols in this scope
-% 
-%     thetaNames = cellfun(@(x) [char(x)], mat2cell(Theta,1,ones(1,length(Theta))), ...
-%         'UniformOutput', false);
-%     syms(thetaNames{:}, 'real'); % generate symbols in this scope
-% 
-%     for i=1:length(phi), sym(phi(i), 'real'), eval([char(phi(i)), '=', char(Y0(i))]), end
-%     V0              = subs(V0);
-
-% system Jacobian
-% sysVar = phi;
-% for i=1:length(phi)
-%     for j=1:i
-%         sysVar = [sysVar, V(i,j)];
-%     end
-% end
-% Phi = sym('Phi', [numel(phi), numel(phi)]);
-% Phi = sym(Phi,'real');
-% 
-% sysVar = [sysVar reshape(Phi,1,[])];
-% 
-% RHS = [S*F'; dVdt(find(triu(ones(size(dVdt))))); reshape(A*Phi,[],1)];
-% 
-% systemJacobian = Jacobian(RHS, sysVar);
-
-% % preconditioner
-% gamma=sym('gamma','real');
-% M=eye(size(systemJacobian))-gamma*systemJacobian;
-% 
-% MI = pinv(M);
 
 end
 
