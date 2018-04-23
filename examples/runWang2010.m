@@ -57,3 +57,37 @@ for k = 1:5
         legend('mean','+/- std');
     end
 end
+
+%% Test of cross-species sensitivities
+i = 5;
+eps_theta = 1e-3;
+[MRE_per,Var_per,sMRE_per,sdVar_per] = Wang2010_LNA(Theta+[0*[1:i-1],1,0*[i+1:8]]*eps_theta,tspan,MRE0,Var0,0,1:5);
+
+k1 = 50;
+k2 = 100;
+
+figure
+subplot(1,3,1)
+imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta)
+colorbar
+title('finite differences');
+subplot(1,3,2)
+imagesc(sdVar(:,:,k1,k2,i))
+colorbar
+title('analytical sensitivities');
+subplot(1,3,3)
+imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta - sdVar(:,:,k1,k2,i))
+colorbar
+title('error');
+
+% l = 1
+% figure
+% subplot(1,3,1)
+% imagesc(squeeze((Var_per(l,l,:,:)-Var(l,l,:,:))./eps_theta))
+% colorbar
+% subplot(1,3,2)
+% imagesc(squeeze(sdVar(l,l,:,:,i)))
+% colorbar
+% subplot(1,3,3)
+% imagesc(squeeze((Var_per(l,l,:,:)-Var(l,l,:,:))./eps_theta - sdVar(l,l,:,:,i)))
+% colorbar
