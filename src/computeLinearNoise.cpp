@@ -466,8 +466,8 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 					// JH: dSigmaBlocks_i_ii_r 	= sum(Fund_i_ii(a,c)*dSigmaBlocks_ii_r(c,b),c);
 					// JH: dSigmaBlocks_i_ii_r  	+= sum( dFund_i_ii_r(a,c)*SigmaBlocks_ii(c,b),c);
 					// JH: dSigmaBlocks_i_ii_r 	= dSigmaBlocks_i_ii_r.transpose(secondDim,firstDim);
-                    dSigmaBlocks_i_ii_r        =  sum(dSigmaBlocks_ii_r(a,c)*Fund_i_ii(b,c),c); // transpose!
-                    dSigmaBlocks_i_ii_r        += sum(SigmaBlocks_ii(a,c)*dFund_i_ii_r(b,c),c); // transpose!
+                    dSigmaBlocks_i_ii_r        =  sum(dSigmaBlocks_ii_r(a,c)*Fund_i_ii(b,c),c); // JH
+                    dSigmaBlocks_i_ii_r        += sum(SigmaBlocks_ii(a,c)*dFund_i_ii_r(b,c),c); // JH
 
 					// copy back into the block covariance sensitivities matrix (upper triangular)
 					dSigmaBlocks(all,all,i,ii,lPar) = dSigmaBlocks_i_ii_r;

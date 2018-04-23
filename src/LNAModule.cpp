@@ -350,12 +350,12 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
     	*Y = 0; *Sigma=0; *traj_deriv=0; *dSigma=0; *Sens2_MRE=0; *Sens2_Var=0;
 
 //	outputStruct os;
-    	os.Y 			= Y;
-    	os.traj_deriv 		= traj_deriv;
-    	os.Sigma 		= Sigma;
+    os.Y 			= Y;
+    os.traj_deriv 	= traj_deriv;
+    os.Sigma 		= Sigma;
 	os.dSigma 		= dSigma;
-	os.Sens2_MRE 		= Sens2_MRE;
-	os.Sens2_Var  		= Sens2_Var;
+	os.Sens2_MRE 	= Sens2_MRE;
+	os.Sens2_Var  	= Sens2_Var;
 
 //	/* temporary */
 //	double Theta_tmp[] = { 20., 25., 10., 1., 2., 200.};
