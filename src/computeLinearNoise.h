@@ -60,6 +60,9 @@ public:
 		d2EdThetadPhi_mem 		= new double[nvar*Nreact*npar*nvar];
 		d2EdPhidTheta_mem		= new double[nvar*Nreact*nvar*npar];
 
+        dEEdPhi_mem             = new double[nvar*npar*nvar]; // JH
+		dEEdTheta_mem           = new double[nvar*nvar*npar]; // JH
+
 		// jacobian
 		int RHS_SIZE = nvar + (nvar*(nvar+1)/2) + nvar*nvar;
 
@@ -104,7 +107,10 @@ public:
 		delete[] d2EdPhi2_mem;
 		delete[] d2EdThetadPhi_mem;
 		delete[] d2EdPhidTheta_mem;
-		
+
+        delete[] dEEdPhi_mem;
+        delete[] dEEdTheta_mem;
+
 //		printf("Destroyed LNA object\n");
 
 		delete[] jac_mem;
@@ -179,6 +185,9 @@ public:
 	double *d2EdPhi2_mem;
 	double *d2EdThetadPhi_mem;
 	double *d2EdPhidTheta_mem;
+
+    double *dEEdPhi_mem;
+    double *dEEdTheta_mem;
 
 	double *jac_mem;
 

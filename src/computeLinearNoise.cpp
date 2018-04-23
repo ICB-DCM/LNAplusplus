@@ -42,6 +42,8 @@ extern "C" {
 #include "d2EdTheta2.h"
 #include "d2EdThetadPhi.h"
 #include "d2EdPhidTheta.h"
+#include "dEEdPhi.h" // JH
+#include "dEEdTheta.h" // JH
 //#include "systemJacobian.h"
 #include "systemJacobian_diag.h"
 //#include "MI.h"
@@ -461,9 +463,11 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 
 					firstIndex a; secondIndex b; thirdIndex c;
 
-					dSigmaBlocks_i_ii_r 	= sum(Fund_i_ii(a,c)*dSigmaBlocks_ii_r(c,b),c);
-					dSigmaBlocks_i_ii_r  	+= sum( dFund_i_ii_r(a,c)*SigmaBlocks_ii(c,b),c);
-					dSigmaBlocks_i_ii_r 	= dSigmaBlocks_i_ii_r.transpose(secondDim,firstDim);
+					// JH: dSigmaBlocks_i_ii_r 	= sum(Fund_i_ii(a,c)*dSigmaBlocks_ii_r(c,b),c);
+					// JH: dSigmaBlocks_i_ii_r  	+= sum( dFund_i_ii_r(a,c)*SigmaBlocks_ii(c,b),c);
+					// JH: dSigmaBlocks_i_ii_r 	= dSigmaBlocks_i_ii_r.transpose(secondDim,firstDim);
+                    dSigmaBlocks_i_ii_r        =  sum(dSigmaBlocks_ii_r(a,c)*Fund_i_ii(b,c),c); // transpose!
+                    dSigmaBlocks_i_ii_r        += sum(SigmaBlocks_ii(a,c)*dFund_i_ii_r(b,c),c); // transpose!
 
 					// copy back into the block covariance sensitivities matrix (upper triangular)
 					dSigmaBlocks(all,all,i,ii,lPar) = dSigmaBlocks_i_ii_r;
@@ -982,7 +986,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	double *dEdTheta_mem = par->lna->dEdTheta_mem;
 	dEdTheta(phi,t,Theta,dEdTheta_mem);
 	MA3 mydEdTheta(dEdTheta_mem, shape(nvar, Nreact, npar), neverDeleteData, ColumnMajorArray<3>());
-
+	
 	// E
 	double *E_mem = par->lna->E_sens_mem;
 	Efunc(phi,t,Theta,E_mem);
@@ -1008,6 +1012,16 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	dEdPhi(phi,t,Theta,dEdPhi_mem);
 	MA3 mydEdPhi(dEdPhi_mem, shape(nvar,Nreact,nvar), neverDeleteData, ColumnMajorArray<3>());
 
+    // JH: dEEdPhi
+	double *dEEdPhi_mem = par->lna->dEEdPhi_mem;
+	dEEdPhi(phi,t,Theta,dEEdPhi_mem);
+	MA3 mydEEdPhi(dEEdPhi_mem, shape(nvar, nvar, nvar), neverDeleteData, ColumnMajorArray<3>());
+
+    // JH: dEEdTheta
+	double *dEEdTheta_mem = par->lna->dEEdTheta_mem;
+	dEEdTheta(phi,t,Theta,dEEdTheta_mem);
+	MA3 mydEEdTheta(dEEdTheta_mem, shape(nvar, nvar, npar), neverDeleteData, ColumnMajorArray<3>());
+
 	/* compute the time derivative of the sensitivity of the covariance matrix */
 
 	fourthIndex l;
@@ -1019,14 +1033,19 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	// Total derivative of E WRT Theta
 	static MA3 dEdTheta_tot(nvar,Nreact,npar);
 	dEdTheta_tot = sum( mydEdPhi(i,j,l)*Sens_MRE(l,k),l) + mydEdTheta(i,j,k);
+	
+    // JH: Total derivative of E*E^T WRT Theta
+	static MA3 dEEdTheta_tot(nvar,nvar,npar);
+	dEdTheta_tot = sum( mydEEdPhi(i,j,l)*Sens_MRE(l,k),l) + mydEEdTheta(i,j,k);
 
 	// Tensor equation for time derivative of the sensitivities of the variance
 	Sens_Var_dot  = sum(dAdTheta_tot(i,l,k)*V(l,j), l);
 	Sens_Var_dot += sum(A(i,l)*Sens_Var(l,j,k),l);
 	Sens_Var_dot += sum(Sens_Var(i,l,k)*A(j,l),l);
 	Sens_Var_dot += sum(V(i,l)*dAdTheta_tot(j,l,k),l);
-	Sens_Var_dot += sum(dEdTheta_tot(i,l,k)*E(j,l),l);
-	Sens_Var_dot += sum(E(i,l)*dEdTheta_tot(j,l,k),l);
+	Sens_Var_dot += dEdTheta_tot(i,j,k); // JH
+	//Sens_Var_dot += sum(dEdTheta_tot(i,l,k)*E(j,l),l);
+	//Sens_Var_dot += sum(E(i,l)*dEdTheta_tot(j,l,k),l);
 	//
 
 	/* Sensitivities of the fundamental matrix */
