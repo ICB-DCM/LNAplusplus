@@ -49,10 +49,11 @@ install:
 #    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade python; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc || brew link --overwrite gcc; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pip3 install --upgrade pip setuptools wheel; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export F77=gfortran; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pyenv versions; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then pyenv shell 2.7 3.6; fi
-    - pip3 install --user sympy python-libsbml numpy matplotlib ipdb
+    - pip3 install --user --upgrade sympy python-libsbml numpy matplotlib ipdb
 
 script:
     - cd $BASE_DIR
@@ -62,6 +63,7 @@ script:
     
 after_failure:
     - ls -alR
+    - cat $BASE_DIR/models/BirthDeath/C/*.c
     
 notifications:
   email: false
