@@ -139,6 +139,12 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
     dEdPhi      = jacobian(E,phi)
     d2EdPhi2    = jacobian(dEdPhi, phi)
 
+    EE = E * E.transpose()
+    dEEdTheta   = jacobian(EE, Theta)
+    d2EEdTheta2 = jacobian(dEEdTheta, Theta)
+    dEEdPhi     = jacobian(EE, phi)
+    d2EEdPhi2   = jacobian(dEEdPhi, phi)
+ 
     global COMPUTE_Y0, COMPUTE_V0
     COMPUTE_Y0 = True
     COMPUTE_V0 = True
@@ -200,12 +206,14 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
 
 
     "mixed derivatives"
-    d2AdPhidTheta = jacobian(dAdPhi, Theta);
-    d2AdThetadPhi = jacobian(dAdTheta, phi);
+    d2AdPhidTheta = jacobian(dAdPhi, Theta)
+    d2AdThetadPhi = jacobian(dAdTheta, phi)
 
-    d2EdPhidTheta = jacobian(dEdPhi, Theta);
-    d2EdThetadPhi = jacobian(dEdTheta, phi);
-
+    d2EdPhidTheta = jacobian(dEdPhi, Theta)
+    d2EdThetadPhi = jacobian(dEdTheta, phi)
+    d2EEdPhidTheta = jacobian(dEEdPhi, Theta)
+    d2EEdThetadPhi = jacobian(dEEdTheta, phi)
+     
     # objects dictionary for autogenerating C code
     objs = {'reactionFlux':F,
             'J':J,
@@ -226,6 +234,13 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
             'd2AdThetadPhi':d2AdThetadPhi,
             'd2EdPhidTheta':d2EdPhidTheta,
             'd2EdThetadPhi':d2EdThetadPhi,
+            'EEfunc' : EE,
+            'dEEdTheta': dEEdTheta,
+            'd2EEdTheta2': d2EEdTheta2,
+            'dEEdPhi': dEEdPhi,
+            'd2EEdPhi2': d2EEdPhi2,
+            'd2EEdPhidTheta': d2EEdPhidTheta,
+            'd2EEdThetadPhi': d2EEdThetadPhi
     }
 
     "depends on phi, t, Theta"
