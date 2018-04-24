@@ -72,41 +72,78 @@ plt.show()
 
 
 # Test of cross-species sensitivities
-i = 4
-j = 4
+i = 5-1
+j = 5-1
 eps_theta = 1e-3;
 Theta_per = Theta 
-Theta_per[i] *= 1 + eps_theta
+Theta_per[i] += eps_theta
 [MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = Wang2010LNA.LNA(Theta_per, tspan, merr=0.0, Y0=MRE0, V0=Var0, computeSens2=True)
 
 k1 = 50-1;
 k2 = 100-1;
 
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-ax1.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta)
-ax1.set_title('finite differences')
-ax2.imshow(sVar[:, :, k1, k2, i])
-ax2.set_title('analytical sensitivities')
-ax3.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta - sVar[:, :, k1, k2, i])
-ax3.set_title('error')
+fig, plt.subplots(1, 3)
+plt.subplot(1, 3, 1)
+im = plt.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta)
+plt.title('finite differences')
+plt.colorbar(im)
+plt.subplot(1, 3, 2)
+im = plt.imshow(sVar[:, :, k1, k2, i])
+plt.title('analytical sensitivities')
+plt.colorbar(im)
+plt.subplot(1, 3, 3)
+im = plt.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta - sVar[:, :, k1, k2, i])
+plt.title('error')
+plt.colorbar(im)
 plt.show()
+
 
 # 2nd order test - diagonal
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-ax1.imshow(np.squeeze((sVar_per[1, 1, :, :, j] - sVar[1, 1, :, :, j]) / eps_theta))
-ax1.set_title('finite differences')
-ax2.imshow(np.squeeze(s2Var[1, 1, i, j, :, :]))
-ax2.set_title('analytical sensitivities')
-ax3.imshow(np.squeeze((sVar_per[1, 1, :, :, j] - sVar[1, 1, :, :, j]) / eps_theta) - np.squeeze(s2Var[1, 1, i, j, :, :]))
-ax3.set_title('error')
+fig, plt.subplots(1, 3)
+plt.subplot(1, 3, 1)
+im = plt.imshow(np.squeeze((sVar_per[1, 1, :, :, j] - sVar[1, 1, :, :, j]) / eps_theta))
+plt.title('finite differences')
+plt.colorbar(im)
+plt.subplot(1, 3, 2)
+im = plt.imshow(np.squeeze(s2Var[1, 1, i, j, :, :]))
+plt.title('analytical sensitivities')
+plt.colorbar(im)
+plt.subplot(1, 3, 3)
+im = plt.imshow(np.squeeze((sVar_per[1, 1, :, :, j] - sVar[1, 1, :, :, j]) / eps_theta) - np.squeeze(s2Var[1, 1, i, j, :, :]))
+plt.title('error')
+plt.colorbar(im)
 plt.show()
 
+#fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+#ax1.imshow(np.squeeze((sVar_per[1, 1, :, :, j] - sVar[1, 1, :, :, j]) / eps_theta))
+#ax1.set_title('finite differences')
+#ax2.imshow(np.squeeze(s2Var[1, 1, i, j, :, :]))
+#ax2.set_title('analytical sensitivities')
+#ax3.imshow(np.squeeze((sVar_per[1, 1, :, :, j] - sVar[1, 1, :, :, j]) / eps_theta) - np.squeeze(s2Var[1, 1, i, j, :, :]))
+#ax3.set_title('error')
+#plt.show()
+#
 # 2nd order test - off-diagonal
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-ax1.imshow((sVar_per[:, :, k1, k2, j] - sVar[:, :, k1, k2, j]) / eps_theta)
-ax1.set_title('finite differences')
-ax2.imshow(s2Var[:, :, i, j, k1, k2])
-ax2.set_title('analytical sensitivities')
-ax3.imshow((sVar_per[:, :, k1, k2, j] - sVar[:, :, k1, k2, j]) / eps_theta - s2Var[:, :, i, j, k1, k2])
-ax3.set_title('error')
+fig, plt.subplots(1, 3)
+plt.subplot(1, 3, 1)
+im = plt.imshow((sVar_per[:, :, k1, k2, j] - sVar[:, :, k1, k2, j]) / eps_theta)
+plt.title('finite differences')
+plt.colorbar(im)
+plt.subplot(1, 3, 2)
+im = plt.imshow(s2Var[:, :, i, j, k1, k2])
+plt.title('analytical sensitivities')
+plt.colorbar(im)
+plt.subplot(1, 3, 3)
+im = plt.imshow((sVar_per[:, :, k1, k2, j] - sVar[:, :, k1, k2, j]) / eps_theta - s2Var[:, :, i, j, k1, k2])
+plt.title('error')
+plt.colorbar(im)
 plt.show()
+
+#fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+#ax1.imshow((sVar_per[:, :, k1, k2, j] - sVar[:, :, k1, k2, j]) / eps_theta)
+#ax1.set_title('finite differences')
+#ax2.imshow(s2Var[:, :, i, j, k1, k2])
+#ax2.set_title('analytical sensitivities')
+#ax3.imshow((sVar_per[:, :, k1, k2, j] - sVar[:, :, k1, k2, j]) / eps_theta - s2Var[:, :, i, j, k1, k2])
+#ax3.set_title('error')
+#plt.show()
