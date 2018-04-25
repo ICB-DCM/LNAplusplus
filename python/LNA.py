@@ -8,6 +8,7 @@
 
 from sympy import symbols, Matrix, solve, sqrt, diag, Symbol, printing, zeros
 from sympy.matrices import *
+import sympy
 from SBML2StoichProp import SBML2StoichProp
 import numpy
 import os
@@ -20,7 +21,7 @@ lnaModulesDir = lnaModelsDir + '/modules'
 def jacobian(x,y):
     "Compute the jacobian of x with respect to y"
     f=x.transpose().reshape(len(x),1)
-    return f.jacobian(y)
+    return sympy.simplify(f.jacobian(y))
 
 def triu(X):
     "Return the upper triangular portion of X as a list"
@@ -126,20 +127,20 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
     d2fdTheta2   = jacobian(dFdTheta,Theta)
 
     "sensitivities of A"
-    A           = S*J
+    A           = sympy.simplify(S*J)
     dAdTheta    = jacobian(A,Theta)
     dAdPhi      = jacobian(A,phi)
     d2AdTheta2  = jacobian(dAdTheta, Theta)
     d2AdPhi2    = jacobian(dAdPhi, phi)
 
     "sensitivities of E"
-    E           = S*diag(*[sqrt(i[0]) for i in F.tolist()])
+    E           = sympy.simplify(S*diag(*[sqrt(i[0]) for i in F.tolist()]))
     dEdTheta    = jacobian(E,Theta)
     d2EdTheta2  = jacobian(dEdTheta, Theta)
     dEdPhi      = jacobian(E,phi)
     d2EdPhi2    = jacobian(dEdPhi, phi)
 
-    EE = E * E.transpose()
+    EE          = sympy.simplify(E * E.transpose())
     dEEdTheta   = jacobian(EE, Theta)
     d2EEdTheta2 = jacobian(dEEdTheta, Theta)
     dEEdPhi     = jacobian(EE, phi)
@@ -192,7 +193,7 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
 
     Phi = [[Symbol('Phi%d%d' % (j,i), real=True) for i in range(N)] for j in range(N)]
     Phi2 = Matrix(Phi).reshape(1,N**2).tolist()[0]
-    dVdt = A*Matrix(V) + Matrix(V)*A.T + E*E.T
+    dVdt = sympy.simplify(A*Matrix(V) + Matrix(V)*A.T + E*E.T)
     sysVar = list(phi)+VV+Phi2
     RHS = sum((S*F).tolist(),[]) + sum([dVdt[i,i:].tolist()[0] for i in range(dVdt.rows)],[]) + (A*Matrix(Phi)).reshape(1,N*N).tolist()[0]
     systemJacobian = jacobian(Matrix(RHS), sysVar)
