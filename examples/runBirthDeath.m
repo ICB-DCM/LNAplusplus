@@ -200,9 +200,9 @@ end
 
 
 %% Test of cross-species sensitivities
-i = 3;
-j = 3;
-eps_theta = 1e-4;
+i = 1;
+j = 1;
+eps_theta = 1e-3;
 [MRE,Var,sMRE,sVar,s2MRE,s2Var] = BirthDeath_LNA(Theta,tspan);
 [MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = BirthDeath_LNA(Theta+[0*[1:i-1],1,0*[i+1:4]]*eps_theta,tspan);
 
