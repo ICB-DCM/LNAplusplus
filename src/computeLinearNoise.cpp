@@ -44,6 +44,12 @@ extern "C" {
 #include "d2EdPhidTheta.h"
 #include "dEEdPhi.h" // JH
 #include "dEEdTheta.h" // JH
+
+#include "d2EEdPhi2.h"
+#include "d2EEdPhidTheta.h"
+#include "d2EEdThetadPhi.h"
+
+
 //#include "systemJacobian.h"
 #include "systemJacobian_diag.h"
 //#include "MI.h"
@@ -1022,6 +1028,26 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	dEEdTheta(phi,t,Theta,dEEdTheta_mem);
 	MA3 mydEEdTheta(dEEdTheta_mem, shape(nvar, nvar, npar), neverDeleteData, ColumnMajorArray<3>());
 
+    // d2EEdTheta2
+	double *d2EEdTheta2_mem = par->lna->d2EEdTheta2_mem;
+	dEEdTheta(phi,t,Theta,d2EEdTheta2_mem);
+	MA4 myd2EEdTheta2(d2EEdTheta2_mem, shape(nvar, nvar, npar, npar), neverDeleteData, ColumnMajorArray<4>());
+
+//	// d2EEdPhi2
+//	double *d2EEdPhi2_mem = par->lna->d2EEdPhi2_mem;
+//	d2EEdPhi2(phi,t,Theta,d2EEdPhi2_mem);
+//	MA4 myd2EEdPhi2(d2EEdPhi2_mem, shape(nvar, nvar, nvar, nvar), neverDeleteData, ColumnMajorArray<4>());
+//
+//	// d2EEdPhidTheta
+//	double *d2EEdPhidTheta_mem = par->lna->d2EEdPhidTheta_mem;
+//	d2EEdPd2EEdPhidTheta(phi,t,Theta,d2EEdPhidTheta_mem);
+//	MA4 myd2EEdPhidTheta(d2EEdPhidTheta_mem, shape(nvar, nvar, nvar, npar), neverDeleteData, ColumnMajorArray<4>());
+//
+//	// d2EEdPhi2
+//	double *d2EEdThetadPhi_mem = par->lna->d2EEdThetadPhi_mem;
+//	d2EEdPhi2(phi,t,Theta,d2EEdThetadPhi_mem);
+//	MA4 myd2EEdThetadPhi(d2EEdThetadPhi_mem, shape(nvar, nvar, npar, nvar), neverDeleteData, ColumnMajorArray<4>());
+
 	/* compute the time derivative of the sensitivity of the covariance matrix */
 
 	fourthIndex l;
@@ -1115,6 +1141,8 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		double *d2EdThetadPhi_mem 	= par->lna->d2EdThetadPhi_mem;
 		double *d2EdPhidTheta_mem	= par->lna->d2EdPhidTheta_mem;
 
+
+
 		// evaluate functions
 		d2AdTheta2(phi,t,Theta,d2AdTheta2_mem);
 		d2AdPhi2(phi,t,Theta,d2AdPhi2_mem);
@@ -1124,6 +1152,9 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		d2EdPhi2(phi,t,Theta,d2EdPhi2_mem);
 		d2EdThetadPhi(phi,t,Theta,d2EdThetadPhi_mem);
 		d2EdPhidTheta(phi,t,Theta,d2EdPhidTheta_mem);
+
+
+
 
 		// Array objects
 		MA4 myd2AdTheta2(d2AdTheta2_mem, shape(nvar,nvar,npar,npar), neverDeleteData, ColumnMajorArray<4>());
@@ -1226,14 +1257,23 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// dVdTheta_j*dA'dTheta_i
 		vvvpp = V(i,k)*d2AdTheta2_tot(j,k,l,m);
 		Sens2_Var_dot 	+=	sum(vvvpp(i,j,m,k,l),m);	// V*d2A'dTheta_i_j
-		vvvpp = d2EdTheta2_tot(i,k,l,m)*E(j,k);
-		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// d2EdTheta_i_j*E'
-		vvvpp = dEdTheta_tot(i,k,l)*dEdTheta_tot(j,k,m);
-		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// dEdTheta_i*dEdTheta_j'
-		vvvpp = dEdTheta_tot(i,k,m)*dEdTheta_tot(j,k,l);
-		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// dEdTheta_j*dEdTheta_i'
-		vvvpp = E(i,k)*d2EdTheta2_tot(j,k,l,m);
-		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// E*d2EdTheta_i_j'
+
+		/* terms related to the second derivative of E*E' -- numeric product */
+//		vvvpp = d2EdTheta2_tot(i,k,l,m)*E(j,k);
+//		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// d2EdTheta_i_j*E'
+//		vvvpp = dEdTheta_tot(i,k,l)*dEdTheta_tot(j,k,m);
+//		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// dEdTheta_i*dEdTheta_j'
+//		vvvpp = dEdTheta_tot(i,k,m)*dEdTheta_tot(j,k,l);
+//		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// dEdTheta_j*dEdTheta_i'
+//		vvvpp = E(i,k)*d2EdTheta2_tot(j,k,l,m);
+//		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// E*d2EdTheta_i_j'
+
+		/* terms related to the second derivative of E*E' -- analytical */
+
+		Sens2_Var_dot 	+= myd2EEdTheta2;
+
+
+
 
 //		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 

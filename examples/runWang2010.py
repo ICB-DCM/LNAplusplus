@@ -77,7 +77,8 @@ j = 4
 eps_theta = 1e-3;
 Theta_per = Theta 
 Theta_per[i] += eps_theta
-[MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = Wang2010LNA.LNA(Theta_per, tspan, merr=0.0, Y0=MRE0, V0=Var0, computeSens2=True)
+#[MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = Wang2010LNA.LNA(Theta_per, tspan, merr=0.0, Y0=MRE0, V0=Var0, computeSens2=True)
+[MRE_per,Var_per,sMRE_per,sVar_per] = Wang2010LNA.LNA(Theta_per, tspan, merr=0.0, Y0=MRE0, V0=Var0)
 
 k1 = 50-1;
 k2 = 100-1;
