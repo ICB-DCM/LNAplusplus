@@ -1065,14 +1065,14 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	
     // JH: Total derivative of E*E^T WRT Theta
 	static MA3 dEEdTheta_tot(nvar,nvar,npar);
-	dEdTheta_tot = sum( mydEEdPhi(i,j,l)*Sens_MRE(l,k),l) + mydEEdTheta(i,j,k);
+	dEEdTheta_tot = sum( mydEEdPhi(i,j,l)*Sens_MRE(l,k),l) + mydEEdTheta(i,j,k);
 
 	// Tensor equation for time derivative of the sensitivities of the variance
 	Sens_Var_dot  = sum(dAdTheta_tot(i,l,k)*V(l,j), l);
 	Sens_Var_dot += sum(A(i,l)*Sens_Var(l,j,k),l);
 	Sens_Var_dot += sum(Sens_Var(i,l,k)*A(j,l),l);
 	Sens_Var_dot += sum(V(i,l)*dAdTheta_tot(j,l,k),l);
-	Sens_Var_dot += dEdTheta_tot(i,j,k); // JH
+	Sens_Var_dot += dEEdTheta_tot(i,j,k); // JH
 	//Sens_Var_dot += sum(dEdTheta_tot(i,l,k)*E(j,l),l);
 	//Sens_Var_dot += sum(E(i,l)*dEdTheta_tot(j,l,k),l);
 	//
