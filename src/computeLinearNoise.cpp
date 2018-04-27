@@ -29,7 +29,6 @@ extern "C" {
 #include "Afunc.h"
 #include "dAdPhi.h"
 #include "Efunc.h"
-#include "dEdPhi.h"
 #include "dFdTheta.h"
 #include "d2fdTheta2.h"
 #include "d2AdTheta2.h"
@@ -37,14 +36,8 @@ extern "C" {
 #include "d2AdThetadPhi.h"
 #include "d2AdPhidTheta.h"
 #include "dAdTheta.h"
-#include "dEdTheta.h"
-#include "d2EdPhi2.h"
-#include "d2EdTheta2.h"
-#include "d2EdThetadPhi.h"
-#include "d2EdPhidTheta.h"
-#include "dEEdPhi.h" // JH
-#include "dEEdTheta.h" // JH
-
+#include "dEEdPhi.h"
+#include "dEEdTheta.h"
 #include "d2EEdTheta2.h"
 #include "d2EEdPhi2.h"
 #include "d2EEdPhidTheta.h"
@@ -166,7 +159,6 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 	k=0;
 	for (int i=0; i<nvar; i++)
 		for (int j=0; j<nvar; j++) {
-//			NV_Ith_S(y,ix+i) = (i==j);
 			NV_Ith_S(y,ix+k) = (i==j);
 			k++;
 		}
@@ -340,7 +332,7 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 			// results of integration
 			double phi[nvar];
 			static MA2 V_i_j(nvar,nvar), // covariance from t_i to t_j
-					Fund_i_j(nvar,nvar); // Fundamental matrix from t_i to t_j
+					Fund_i_j(nvar,nvar); // fundamental matrix from t_i to t_j
 
 			// get RHS of ODE
 			unpackYDot(x, phi, V_i_j, Fund_i_j);
@@ -470,11 +462,8 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 
 					firstIndex a; secondIndex b; thirdIndex c;
 
-					// JH: dSigmaBlocks_i_ii_r 	= sum(Fund_i_ii(a,c)*dSigmaBlocks_ii_r(c,b),c);
-					// JH: dSigmaBlocks_i_ii_r  	+= sum( dFund_i_ii_r(a,c)*SigmaBlocks_ii(c,b),c);
-					// JH: dSigmaBlocks_i_ii_r 	= dSigmaBlocks_i_ii_r.transpose(secondDim,firstDim);
-                    dSigmaBlocks_i_ii_r        =  sum(dSigmaBlocks_ii_r(a,c)*Fund_i_ii(b,c),c); // JH
-                    dSigmaBlocks_i_ii_r        += sum(SigmaBlocks_ii(a,c)*dFund_i_ii_r(b,c),c); // JH
+                    dSigmaBlocks_i_ii_r        =  sum(dSigmaBlocks_ii_r(a,c)*Fund_i_ii(b,c),c);
+                    dSigmaBlocks_i_ii_r        += sum(SigmaBlocks_ii(a,c)*dFund_i_ii_r(b,c),c);
 
 					// copy back into the block covariance sensitivities matrix (upper triangular)
 					dSigmaBlocks(all,all,i,ii,lPar) = dSigmaBlocks_i_ii_r;
@@ -519,10 +508,8 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 				d2SigmaBlocks_i_ii 	= sum(vvvpp(a,b,e,c,d),e);
 				vvvpp = dSigmaBlocks_ii(a,c,d)*dFund_i_ii(b,c,e); // dVdTheta_i*dPhi'dTheta_j
 				d2SigmaBlocks_i_ii += sum(vvvpp(a,b,e,c,d),e);
-//				vvvpp = dSigmaBlocks_ii(a,c,e)*dFund_i_ii(c,b,d); // dVdTheta_j*dPhidTheta_i
 				vvvpp = dSigmaBlocks_ii(a,c,e)*dFund_i_ii(b,c,d); // dVdTheta_j*dPhi'dTheta_i
 				d2SigmaBlocks_i_ii += sum(vvvpp(a,b,e,c,d),e);
-//				vvvpp = SigmaBlocks_ii(a,c)*d2Fund_i_ii(c,b,d,e); // V*d2PhidTheta_i_j
 				vvvpp = SigmaBlocks_ii(a,c)*d2Fund_i_ii(b,c,d,e); // V*d2Phi'dTheta_i_j
 				d2SigmaBlocks_i_ii += sum(vvvpp(a,b,e,c,d),e);
 				d2SigmaBlocks(all,all,i,ii,all,all) = d2SigmaBlocks_i_ii;
@@ -621,7 +608,7 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 	delete[] v0;
 	delete[] Theta;
 
-	return(0); // succesful return
+	return(0); // successful return
 }
 
 
@@ -1091,14 +1078,8 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		MA3 myd2fdTheta2(d2fdTheta2_mem, shape(Nreact,npar,npar), neverDeleteData, ColumnMajorArray<3>());
 		static MA3 myd2FdTheta2(nvar,npar,npar);
 
-//		myd2FdTheta2=0;
-//		static MA4 tmp1(nvar,npar,npar,Nreact);
-//		tmp1 = ;
 		firstIndex i; secondIndex j; thirdIndex k; fourthIndex l;
 		myd2FdTheta2 = sum(S(i,l)*myd2fdTheta2(l,j,k),l);
-//		cout << "t= " << t << endl;
-//		cout << "d2fdTheta2 " << endl << myd2fdTheta2 << endl;
-//		cout << "d2FdTheta2 " << endl << myd2FdTheta2 << endl;
 
 		// TO DO:  need d2FdTheta2 = S*d2fdTheta2
 		// get the current second order sensitivities
@@ -1112,9 +1093,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		Sens2_MRE_dot	=  sum(vvpp(i,l,j,k),l);
 		vvpp = A(i,j)*Sens2_MRE(j,k,l);
 		Sens2_MRE_dot 	+= sum(vvpp(i,l,j,k),l);
-//
 		vvpp = mydAdTheta(i,j,k)*Sens_MRE(j,l); // partial dAdTheta_i*S_j
-//
 		Sens2_MRE_dot 	+= sum(vvpp(i,l,j,k),l);
 		Sens2_MRE_dot 	+= myd2FdTheta2(i,j,k);
 
@@ -1123,39 +1102,21 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		double *d2AdPhi2_mem 		= par->lna->d2AdPhi2_mem;
 		double *d2AdThetadPhi_mem 	= par->lna->d2AdThetadPhi_mem;
 		double *d2AdPhidTheta_mem 	= par->lna->d2AdPhidTheta_mem;
-		double *d2EdTheta2_mem 		= par->lna->d2EdTheta2_mem;
-		double *d2EdPhi2_mem 		= par->lna->d2EdPhi2_mem;
-		double *d2EdThetadPhi_mem 	= par->lna->d2EdThetadPhi_mem;
-		double *d2EdPhidTheta_mem	= par->lna->d2EdPhidTheta_mem;
-
-
 
 		// evaluate functions
 		d2AdTheta2(phi,t,Theta,d2AdTheta2_mem);
 		d2AdPhi2(phi,t,Theta,d2AdPhi2_mem);
 		d2AdThetadPhi(phi,t,Theta,d2AdThetadPhi_mem);
 		d2AdPhidTheta(phi,t,Theta,d2AdPhidTheta_mem);
-		d2EdTheta2(phi,t,Theta,d2EdTheta2_mem);
-		d2EdPhi2(phi,t,Theta,d2EdPhi2_mem);
-		d2EdThetadPhi(phi,t,Theta,d2EdThetadPhi_mem);
-		d2EdPhidTheta(phi,t,Theta,d2EdPhidTheta_mem);
-
-
-
 
 		// Array objects
 		MA4 myd2AdTheta2(d2AdTheta2_mem, shape(nvar,nvar,npar,npar), neverDeleteData, ColumnMajorArray<4>());
 		MA4 myd2AdPhi2(d2AdPhi2_mem, shape(nvar,nvar,nvar,nvar), neverDeleteData, ColumnMajorArray<4>());
 		MA4 myd2AdThetadPhi(d2AdThetadPhi_mem, shape(nvar,nvar,npar,nvar), neverDeleteData, ColumnMajorArray<4>());
 		MA4 myd2AdPhidTheta(d2AdPhidTheta_mem, shape(nvar,nvar,nvar,npar), neverDeleteData, ColumnMajorArray<4>());
-		MA4 myd2EdTheta2(d2EdTheta2_mem, shape(nvar,Nreact,npar,npar), neverDeleteData, ColumnMajorArray<4>());
-		MA4 myd2EdPhi2(d2EdPhi2_mem, shape(nvar,Nreact,nvar,nvar), neverDeleteData, ColumnMajorArray<4>());
-		MA4 myd2EdThetadPhi(d2EdThetadPhi_mem, shape(nvar,Nreact,npar,nvar), neverDeleteData, ColumnMajorArray<4>());
-		MA4 myd2EdPhidTheta(d2EdPhidTheta_mem, shape(nvar,Nreact,nvar,npar), neverDeleteData, ColumnMajorArray<4>());
 
 		// construct total second derivative of A, E and E'E* WRT Theta
 		static MA4 d2AdTheta2_tot(nvar,nvar,npar,npar);
-		static MA4 d2EdTheta2_tot(nvar,nvar,npar,npar);
 		static MA4 d2EEdTheta2_tot(nvar,nvar,npar,npar);
 
 		// temporary objects for tensor multiplication
@@ -1174,15 +1135,12 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 		d2AdTheta2_tot 	= vvpp;
 		vvvpp			= myd2AdPhidTheta(i,j,k,m)*Sens_MRE(k,l);
-
-		d2AdTheta2_tot +=	sum(vvvpp(i,j,m,k,l), m);			// d2AdPhidTheta*dPhidTheta_i
-		vvvpp 			=	mydAdPhi(i,j,k)*Sens2_MRE(k,l,m);
-
-		d2AdTheta2_tot += 	sum(vvvpp(i,j,m,k,l), m);			// dAdPhi*d2PhidTheta_i_j
-
-		vvvpp 			=	myd2AdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
-		d2AdTheta2_tot += 	sum(vvvpp(i,j,m,k,l),m);		// d2AdTheta_idPhi*dPhidTheta_j
-		d2AdTheta2_tot +=	myd2AdTheta2(i,j,k,l);			// d2AdTheta_i_j
+		d2AdTheta2_tot += sum(vvvpp(i,j,m,k,l), m);			// d2AdPhidTheta*dPhidTheta_i
+		vvvpp 			= mydAdPhi(i,j,k)*Sens2_MRE(k,l,m);
+		d2AdTheta2_tot += sum(vvvpp(i,j,m,k,l), m);			// dAdPhi*d2PhidTheta_i_j
+		vvvpp 			= myd2AdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
+		d2AdTheta2_tot += sum(vvvpp(i,j,m,k,l),m);		// d2AdTheta_idPhi*dPhidTheta_j
+		d2AdTheta2_tot += myd2AdTheta2(i,j,k,l);			// d2AdTheta_i_j
 
 		// total second derivative of E*E'
 		vvvvp 			= Sens_MRE(k,m)*myd2EEdPhi2(i,j,k,l);
@@ -1190,60 +1148,29 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		vvvpp 			= vvvp(i,j,k,l)*Sens_MRE(k,m);
 		vvpp 			= sum(vvvpp(i,j,m,k,l),m);
 
-		d2EEdTheta2_tot 	= vvpp;
-		vvvpp			= myd2EEdPhidTheta(i,j,k,m)*Sens_MRE(k,l);
-		vvpp			= sum(vvvpp(i,j,m,k,l), m);
-
-		d2EEdTheta2_tot +=	vvpp;
-		vvvpp 			=	mydEEdPhi(i,j,k)*Sens2_MRE(k,l,m);
-
-		d2EEdTheta2_tot += 	sum(vvvpp(i,j,m,k,l), m);
-
-		vvvpp 			=	myd2EEdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
-		d2EEdTheta2_tot += 	sum(vvvpp(i,j,m,k,l),m);
-		d2EEdTheta2_tot +=	myd2EEdTheta2(i,j,k,l);
-
-
-
+		d2EEdTheta2_tot =  vvpp;
+		vvvpp			=  myd2EEdPhidTheta(i,j,k,m)*Sens_MRE(k,l);
+		vvpp			=  sum(vvvpp(i,j,m,k,l), m);
+		d2EEdTheta2_tot += vvpp;
+		vvvpp 			=  mydEEdPhi(i,j,k)*Sens2_MRE(k,l,m);
+		d2EEdTheta2_tot += sum(vvvpp(i,j,m,k,l), m);
+		vvvpp 			=  myd2EEdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
+		d2EEdTheta2_tot += sum(vvvpp(i,j,m,k,l),m);
+		d2EEdTheta2_tot += myd2EEdTheta2(i,j,k,l);
 
 		// Variance
-//		Range all = Range::all();
 		vvvpp = d2AdTheta2_tot(i,k,l,m)*V(k,j);
-//		cout << "tmp5 j=0" << endl << tmp5(all,all,all,all,0) << endl;
-		Sens2_Var_dot 	=	sum(vvvpp(i,j,m,k,l),m);			// d2AdTheta_l_m * V
-//		cout << "d2AdTheta_l_m * V" << endl;
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
-
+		Sens2_Var_dot 	=	sum(vvvpp(i,j,m,k,l),m);	// d2AdTheta_l_m * V
 		vvvpp = dAdTheta_tot(i,k,l)*Sens_Var(k,j,m);
-		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);			// dAdTheta_l * dVdTheta_m
-//		cout << "dAdTheta_l * dVdTheta_m" << endl;
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
-
+		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// dAdTheta_l * dVdTheta_m
 		vvvpp = dAdTheta_tot(i,k,m)*Sens_Var(k,j,l);
 		Sens2_Var_dot 	+=	sum(vvvpp(i,j,m,k,l),m); 	// dAdTheta_m * dVdTheta_l
-//		cout << "dAdTheta_m * dVdTheta_l" << endl;
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
-
-//		cout << "A:" << endl << A << endl;
-//		cout << "Sens2_Var" << endl << Sens2_Var << endl;
 		vvvpp = A(i,k)*Sens2_Var(k,j,l,m);
 		Sens2_Var_dot 	+=	sum(vvvpp(i,j,m,k,l),m);	// A*d2VdTheta_l_m (transpose necessary b/c of blitz++ partial reductions, see documentation)
-
-//		cout << "A" << endl << A << endl;
-//		cout << "Sens2_Var" << endl << Sens2_Var << endl;
-//		cout << "A*d2VdTheta_l_m" << endl;
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 		vvvpp = Sens2_Var(i,k,l,m)*A(j,k);
 		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m);	// d2VdTheta_l_m*A'
-
-//		cout << "d2VdTheta_l_m*A\'" << endl;
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
-
 		vvvpp = Sens_Var(i,k,l)*dAdTheta_tot(j,k,m);
 		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// dVdTheta_i*dA'dTheta_j
-//		cout << "dVdTheta_i*dA\'dTheta_j" << endl;
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
-
 		vvvpp = Sens_Var(i,k,m)*dAdTheta_tot(j,k,l);
 		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// dVdTheta_j*dA'dTheta_i
 		vvvpp = V(i,k)*d2AdTheta2_tot(j,k,l,m);
@@ -1251,9 +1178,6 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 		/* terms related to the second derivative of E*E' -- analytical */
 		Sens2_Var_dot 	+= d2EEdTheta2_tot;
-
-
-//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 
 		// Fundamental matrix
 		vvvpp 			= d2AdTheta2_tot(i,k,l,m)*Phi(k,j);
@@ -1266,24 +1190,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		Xi2_dot 		+= 	sum(vvvpp(i,j,m,k,l),m);			// A*d2PhidTheta_i_j
 
 		// pack the NVector with the computed derivatives
-
 		packYSDot_HO(yS_dot, Sens2_MRE_dot, Sens2_Var_dot, Xi2_dot);
-//		for (int lPar=0; lPar<npar; lPar++)
-//		{
-//			cout << lPar << ": ";
-//			for (int lVar=0; lVar<nvar; lVar++)
-//				cout << setw(20) << NV_Ith_S(yS_dot[lPar],lVar);
-//			cout << endl;
-//		}
-//
-//		for (int lPar1=0; lPar1<npar; lPar1++)
-//			for (int lPar2=0; lPar2<npar; lPar2++)
-//			{
-//				cout << "(" << lPar1 << ", " << lPar2 << "): " ;
-//				for (int lVar=0; lVar<nvar; lVar++)
-//					cout << setw(20) << NV_Ith_S(yS_dot[lPar1*npar+lPar2+1],lVar);
-//				cout << endl;
-//			}
 	}
 
 	return 0;

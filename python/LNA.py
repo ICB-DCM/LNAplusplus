@@ -122,30 +122,29 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
     Npar = len(Theta)
 
     F = Matrix(reactionFluxFun(phi, t, Theta))
-    J           = F.jacobian(phi)
-    dFdTheta    = F.jacobian(Theta)
-    d2fdTheta2   = jacobian(dFdTheta,Theta)
+    J           = sympy.simplify(F.jacobian(phi))
+    dFdTheta    = sympy.simplify(F.jacobian(Theta))
+    d2fdTheta2  = sympy.simplify(jacobian(dFdTheta, Theta))
 
-    "sensitivities of A"
-    A           = sympy.simplify(S*J)
-    dAdTheta    = jacobian(A,Theta)
-    dAdPhi      = jacobian(A,phi)
-    d2AdTheta2  = jacobian(dAdTheta, Theta)
-    d2AdPhi2    = jacobian(dAdPhi, phi)
+    "A and sensitivities"
+    A             = sympy.simplify(S*J)
+    dAdTheta      = sympy.simplify(jacobian(A, Theta))
+    dAdPhi        = sympy.simplify(jacobian(A, phi))
+    d2AdTheta2    = sympy.simplify(jacobian(dAdTheta, Theta))
+    d2AdPhi2      = sympy.simplify(jacobian(dAdPhi, phi))
+    d2AdPhidTheta = sympy.simplify(jacobian(dAdPhi, Theta))
+    d2AdThetadPhi = sympy.simplify(jacobian(dAdTheta, phi))
 
-    "sensitivities of E"
-    E           = sympy.simplify(S*diag(*[sqrt(i[0]) for i in F.tolist()]))
-    dEdTheta    = jacobian(E,Theta)
-    d2EdTheta2  = jacobian(dEdTheta, Theta)
-    dEdPhi      = jacobian(E,phi)
-    d2EdPhi2    = jacobian(dEdPhi, phi)
+    "E*E^T and sensitivities"
+    E              = sympy.simplify(S*diag(*[sqrt(i[0]) for i in F.tolist()]))
+    EE             = sympy.simplify(E * E.transpose())
+    dEEdTheta      = sympy.simplify(jacobian(EE, Theta))
+    dEEdPhi        = sympy.simplify(jacobian(EE, phi))
+    d2EEdTheta2    = sympy.simplify(jacobian(dEEdTheta, Theta))
+    d2EEdPhi2      = sympy.simplify(jacobian(dEEdPhi, phi))
+    d2EEdPhidTheta = sympy.simplify(jacobian(dEEdPhi, Theta))
+    d2EEdThetadPhi = sympy.simplify(jacobian(dEEdTheta, phi))
 
-    EE          = sympy.simplify(E * E.transpose())
-    dEEdTheta   = jacobian(EE, Theta)
-    d2EEdTheta2 = jacobian(dEEdTheta, Theta)
-    dEEdPhi     = jacobian(EE, phi)
-    d2EEdPhi2   = jacobian(dEEdPhi, phi)
- 
     global COMPUTE_Y0, COMPUTE_V0
     COMPUTE_Y0 = True
     COMPUTE_V0 = True
@@ -174,7 +173,7 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
     if COMPUTE_V0:
         V0 = solveSS_var(A,E,F,S,phi,Theta)
         V0 = V0.subs(list(zip(phi,phi0)))
-        "SS variance sensitivities"
+        # SS variance sensitivities
         SV0  = jacobian(V0, Theta)
         S2V0 = jacobian(SV0, Theta)
     else:
@@ -199,22 +198,6 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
     systemJacobian = jacobian(Matrix(RHS), sysVar)
     systemJacobian_diag = numpy.diag(systemJacobian)
 
-#    "subsitute steady state values"
-#    subsPairs =  [(key, Y0[key]) for key in Y0]
-#    V0 = V0.subs(subsPairs)
-#    SV0 = SV0.subs(subsPairs)
-#    S2V0 = S2V0.subs(subsPairs)
-
-
-    "mixed derivatives"
-    d2AdPhidTheta = jacobian(dAdPhi, Theta)
-    d2AdThetadPhi = jacobian(dAdTheta, phi)
-
-    d2EdPhidTheta = jacobian(dEdPhi, Theta)
-    d2EdThetadPhi = jacobian(dEdTheta, phi)
-    d2EEdPhidTheta = jacobian(dEEdPhi, Theta)
-    d2EEdThetadPhi = jacobian(dEEdTheta, phi)
-     
     # objects dictionary for autogenerating C code
     objs = {'reactionFlux':F,
             'J':J,
@@ -225,23 +208,17 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
             'dAdPhi':dAdPhi,
             'd2AdTheta2':d2AdTheta2,
             'd2AdPhi2':d2AdPhi2,
-            'Efunc':E,
-            'dEdTheta':dEdTheta,
-            'd2EdTheta2':d2EdTheta2,
-            'dEdPhi':dEdPhi,
-            'd2EdPhi2':d2EdPhi2,
-            'systemJacobian_diag':systemJacobian_diag,
             'd2AdPhidTheta':d2AdPhidTheta,
             'd2AdThetadPhi':d2AdThetadPhi,
-            'd2EdPhidTheta':d2EdPhidTheta,
-            'd2EdThetadPhi':d2EdThetadPhi,
-            'EEfunc' : EE,
-            'dEEdTheta': dEEdTheta,
-            'd2EEdTheta2': d2EEdTheta2,
+            'systemJacobian_diag':systemJacobian_diag,
+            'Efunc':E,
+            'EEfunc' :EE,
+            'dEEdTheta':dEEdTheta,
             'dEEdPhi': dEEdPhi,
-            'd2EEdPhi2': d2EEdPhi2,
-            'd2EEdPhidTheta': d2EEdPhidTheta,
-            'd2EEdThetadPhi': d2EEdThetadPhi
+            'd2EEdTheta2':d2EEdTheta2,
+            'd2EEdPhi2':d2EEdPhi2,
+            'd2EEdPhidTheta':d2EEdPhidTheta,
+            'd2EEdThetadPhi':d2EEdThetadPhi
     }
 
     "depends on phi, t, Theta"
@@ -252,10 +229,10 @@ def generateLNAComponents(modelName, S, reactionFluxFun, phi, Theta, computeSS='
 
     objs2 = {'S0':S0,
              'S20':S20,
-            'SV0':SV0,
-            'S2V0':S2V0,
-            'V0':V0,
-            'Y0':Y0}
+             'SV0':SV0,
+             'S2V0':S2V0,
+             'V0':V0,
+             'Y0':Y0}
     
     argTypes1 = ['VECTOR','SCALAR','VECTOR']
     argTypes2 = ['VECTOR']
@@ -383,7 +360,6 @@ def genCcode(f, fName, args, argTypes ):
         if k < len(args)-1:
             argsList += ','
             
-#    argsList = ', '.join([('const double *' if isinstance(q,tuple) else 'const double ') + p for p,q in args])
     N = len(f)
 
     "header file"
@@ -398,8 +374,6 @@ void %s(%s, double varOut[%d]);
     "source code"
     code = "#include \"%s.h\"\n" % fName
     code += "void %s(%s, double varOut[%d])\n" % (fName, argsList, N)
-    #x = sum(f.reshape(len(f),1).tolist(),[])
-    #print(f)
     x = sum(f.transpose().reshape(len(f),1).tolist(),[])
 
     code += "{\n"
@@ -412,8 +386,6 @@ void %s(%s, double varOut[%d]);
                 k += 1
 
     for i in range(N):
-        #print(x[i])
-        #xOut = parseString(str(x[i]))
         code += "varOut[%d] = %s;\n" % (i, printing.ccode(x[i]))
 
     code += "}"

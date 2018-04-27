@@ -53,7 +53,6 @@ if ~exist([dirName '/matlab'], 'dir')
 end
 if ~exist([dirName '/C'], 'dir')
     mkdir([dirName '/C']) % generated C code
-    %mkdir([dirName '/mex'])
 end
 
 disp('Computing symbolic derivatives')
@@ -78,29 +77,24 @@ dFdTheta    = Jacobian(reactionFlux, Theta);
 % d2f/dtheta2
 d2fdTheta2  = Jacobian(dFdTheta, Theta);
 
-% A
-Afunc           = S*J;
+% A and sensitivities
+Afunc          = S*J;
+dAdTheta       = Jacobian(Afunc, Theta);
+dAdPhi         = Jacobian(Afunc, phi);
+d2AdTheta2     = Jacobian(dAdTheta, Theta);
+d2AdPhi2       = Jacobian(dAdPhi, phi);
+d2AdPhidTheta  = simplify(Jacobian(dAdPhi, Theta));
+d2AdThetadPhi  = simplify(Jacobian(dAdTheta, phi));
 
-% sensitivities of A
-dAdTheta    = Jacobian(Afunc, Theta);
-dAdPhi      = Jacobian(Afunc,phi);
-d2AdTheta2  = Jacobian(dAdTheta, Theta);
-d2AdPhi2    = Jacobian(dAdPhi, phi);
-
-% E
-Efunc       = S*sqrt(diag(reactionFlux));
-
-% sensitivities of E
-dEdTheta    = simplifyExpr(Jacobian(Efunc, Theta));
-d2EdTheta2  = simplifyExpr(Jacobian(dEdTheta, Theta));
-dEdPhi      = simplifyExpr(Jacobian(Efunc, phi));
-d2EdPhi2    = simplifyExpr(Jacobian(dEdPhi, phi));
-
-EEfunc      = Efunc*Efunc.';
-dEEdTheta   = simplifyExpr(Jacobian(EEfunc, Theta));
-d2EEdTheta2 = simplifyExpr(Jacobian(dEEdTheta, Theta));
-dEEdPhi     = simplifyExpr(Jacobian(EEfunc, phi));
-d2EEdPhi2   = simplifyExpr(Jacobian(dEEdPhi, phi));
+% E*E^T and sensitivities
+Efunc          = S*sqrt(diag(reactionFlux));
+EEfunc         = simplify(Efunc*Efunc.');
+dEEdTheta      = simplify(Jacobian(EEfunc, Theta));
+dEEdPhi        = simplify(Jacobian(EEfunc, phi));
+d2EEdTheta2    = simplify(Jacobian(dEEdTheta, Theta));
+d2EEdPhi2      = simplify(Jacobian(dEEdPhi, phi));
+d2EEdPhidTheta = simplify(Jacobian(dEEdPhi, Theta));
+d2EEdThetadPhi = simplify(Jacobian(dEEdTheta, phi));
 
 %% solve for the initial steady state 
 nvar = length(phi);
@@ -140,7 +134,7 @@ sysVar = [sysVar reshape(Phi,1,[])];
 dVdt = Afunc*V + V*Afunc.' + subs(Efunc*Efunc.');
 RHS = [S*reactionFlux; dVdt(find(triu(ones(size(dVdt))))); reshape(Afunc*Phi,[],1)];
 
-systemJacobian = simplifyExpr(Jacobian(RHS, sysVar));
+systemJacobian = simplify(Jacobian(RHS, sysVar));
 systemJacobian_diag = diag(systemJacobian); % just the diagonal
 
 %% initial sensitivities
@@ -148,33 +142,23 @@ disp('computing initial sensitivities')
 
 if COMPUTE_Y0
     % dY/dTheta
-    S0  = simplifyExpr(Jacobian(Y0, Theta));
+    S0  = simplify(Jacobian(Y0, Theta));
     % d2Y/dTheta2
-    S20 = simplifyExpr(Jacobian(S0, Theta));
+    S20 = simplify(Jacobian(S0, Theta));
 else
-   S0   = zeros(1,nvar*npar); % placeholder
-   S20  = zeros(1,nvar*npar*npar); % placeholder
+    S0  = zeros(1,nvar*npar); % placeholder
+    S20 = zeros(1,nvar*npar*npar); % placeholder
 end
 
 if COMPUTE_V0
     % dV/dTheta
-    SV0 = simplifyExpr(Jacobian(V0, Theta));
+    SV0  = simplify(Jacobian(V0, Theta));
     % d2V/dTheta2
-    S2V0 = simplifyExpr(Jacobian(SV0, Theta));
+    S2V0 = simplify(Jacobian(SV0, Theta));
 else
     SV0  = zeros(1,nvar*(nvar+1)/2*npar); % placeholder
     S2V0 = zeros(1,nvar*(nvar+1)/2*npar*npar); % placeholder
 end
-%% mixed second derivatives
-disp('Computing Mixed Second Derivatives')
-d2AdPhidTheta = simplifyExpr(Jacobian(dAdPhi, Theta));
-d2AdThetadPhi = simplifyExpr(Jacobian(dAdTheta, phi));
-
-d2EdPhidTheta = simplifyExpr(Jacobian(dEdPhi, Theta));
-d2EdThetadPhi = simplifyExpr(Jacobian(dEdTheta, phi));
-
-d2EEdPhidTheta = simplifyExpr(Jacobian(dEEdPhi, Theta));
-d2EEdThetadPhi = simplifyExpr(Jacobian(dEEdTheta, phi));
 
 %% generate the C library
 disp('Generating C source')
@@ -185,10 +169,8 @@ olddir = cd([dirName '/matlab']);
 % requires phi, t, Theta
 objs1 = {'reactionFlux', 'J', 'dFdTheta', 'd2fdTheta2', 'Afunc', 'dAdTheta', ...
          'dAdPhi', 'd2AdPhi2', 'd2AdTheta2', 'd2AdThetadPhi', 'd2AdPhidTheta', ...
-         'd2AdPhidTheta', 'Efunc', 'dEdTheta', 'd2EdTheta2', 'd2EdThetadPhi', ...
-         'd2EdPhidTheta', 'dEdPhi', 'd2EdPhi2',  'systemJacobian_diag',...
-         'EEfunc','dEEdTheta','d2EEdTheta2','dEEdPhi','d2EEdPhi2',...
-         'd2EEdPhidTheta','d2EEdThetadPhi'};
+         'd2AdPhidTheta', 'Efunc', 'EEfunc', 'dEEdTheta', 'd2EEdTheta2', 'dEEdPhi', ...
+         'd2EEdPhi2', 'd2EEdPhidTheta', 'd2EEdThetadPhi', 'systemJacobian_diag'};
 
 % requires only Theta
 objs2 = {'S0','S20','SV0','S2V0','Y0','V0'};
@@ -290,9 +272,4 @@ end
 
 function J=Jacobian(x,y)
     J = jacobian(reshape(x,[],1),y);
-end
-
-function expr=simplifyExpr(expr)
-    [N,D] = numden(expr);
-    expr = N./expand(D);
 end
