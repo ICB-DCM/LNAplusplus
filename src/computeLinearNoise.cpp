@@ -1015,18 +1015,14 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	dAdPhi(phi,t,Theta,dAdPhi_mem);
 	MA3 mydAdPhi(dAdPhi_mem, shape(nvar,nvar,nvar), neverDeleteData, ColumnMajorArray<3>());
 
-	double *dEdPhi_mem = par->lna->dEdPhi_mem;
-	dEdPhi(phi,t,Theta,dEdPhi_mem);
-	MA3 mydEdPhi(dEdPhi_mem, shape(nvar,Nreact,nvar), neverDeleteData, ColumnMajorArray<3>());
-
 
 	/* derivatives of E*E' */
-    // JH: dEEdPhi
+    // dEEdPhi
 	double *dEEdPhi_mem = par->lna->dEEdPhi_mem;
 	dEEdPhi(phi,t,Theta,dEEdPhi_mem);
 	MA3 mydEEdPhi(dEEdPhi_mem, shape(nvar, nvar, nvar), neverDeleteData, ColumnMajorArray<3>());
 
-    // JH: dEEdTheta
+    // dEEdTheta
 	double *dEEdTheta_mem = par->lna->dEEdTheta_mem;
 	dEEdTheta(phi,t,Theta,dEEdTheta_mem);
 	MA3 mydEEdTheta(dEEdTheta_mem, shape(nvar, nvar, npar), neverDeleteData, ColumnMajorArray<3>());
@@ -1059,11 +1055,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	static MA3 dAdTheta_tot(nvar,nvar,npar);
 	dAdTheta_tot = sum( mydAdPhi(i,j,l)*Sens_MRE(l,k),l) + mydAdTheta(i,j,k);
 
-	// Total derivative of E WRT Theta
-	static MA3 dEdTheta_tot(nvar,Nreact,npar);
-	dEdTheta_tot = sum( mydEdPhi(i,j,l)*Sens_MRE(l,k),l) + mydEdTheta(i,j,k);
-	
-    // JH: Total derivative of E*E^T WRT Theta
+    // Total derivative of E*E^T WRT Theta (3rd order Tensor)
 	static MA3 dEEdTheta_tot(nvar,nvar,npar);
 	dEEdTheta_tot = sum( mydEEdPhi(i,j,l)*Sens_MRE(l,k),l) + mydEEdTheta(i,j,k);
 
@@ -1072,10 +1064,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	Sens_Var_dot += sum(A(i,l)*Sens_Var(l,j,k),l);
 	Sens_Var_dot += sum(Sens_Var(i,l,k)*A(j,l),l);
 	Sens_Var_dot += sum(V(i,l)*dAdTheta_tot(j,l,k),l);
-	Sens_Var_dot += dEEdTheta_tot(i,j,k); // JH
-	//Sens_Var_dot += sum(dEdTheta_tot(i,l,k)*E(j,l),l);
-	//Sens_Var_dot += sum(E(i,l)*dEdTheta_tot(j,l,k),l);
-	//
+	Sens_Var_dot += dEEdTheta_tot(i,j,k);
 
 	/* Sensitivities of the fundamental matrix */
 	static MA3 Xi_dot(nvar,nvar,npar);
