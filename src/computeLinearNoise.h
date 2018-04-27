@@ -63,9 +63,9 @@ public:
         dEEdPhi_mem             = new double[nvar*npar*nvar]; // JH
 		dEEdTheta_mem           = new double[nvar*nvar*npar]; // JH
 
-//		d2EEdPhi2_mem 			= new double[nvar*npar*nvar*nvar];
-//		d2EEdPhidTheta_mem 		= new double[nvar*nvar*nvar*npar];
-//		d2EEdThetadPhi_mem		= new double[nvar*nvar*npar*nvar];
+		d2EEdPhi2_mem 			= new double[nvar*npar*nvar*nvar];
+		d2EEdPhidTheta_mem 		= new double[nvar*nvar*nvar*npar];
+		d2EEdThetadPhi_mem		= new double[nvar*nvar*npar*nvar];
 		d2EEdTheta2_mem			= new double[nvar*nvar*npar*npar];
 		// jacobian
 		int RHS_SIZE = nvar + (nvar*(nvar+1)/2) + nvar*nvar;
@@ -115,9 +115,9 @@ public:
 
         delete[] dEEdPhi_mem;
         delete[] dEEdTheta_mem;
-//		delete[] d2EEdPhi2_mem;
-//		delete[] d2EEdPhidTheta_mem;
-//		delete[] d2EEdThetadPhi_mem;
+		delete[] d2EEdPhi2_mem;
+		delete[] d2EEdPhidTheta_mem;
+		delete[] d2EEdThetadPhi_mem;
 		delete[] d2EEdTheta2_mem;
 
 //		printf("Destroyed LNA object\n");
@@ -195,13 +195,14 @@ public:
 	double *d2EdThetadPhi_mem;
 	double *d2EdPhidTheta_mem;
 
-//	double *d2EEdPhi2_mem;
-//	double *d2EEdPhidTheta_mem;
-//	double *d2EEdThetadPhi_mem;
-
     double *dEEdPhi_mem;
     double *dEEdTheta_mem;
+
     double *d2EEdTheta2_mem;
+	double *d2EEdPhi2_mem;
+
+	double *d2EEdThetadPhi_mem;
+	double *d2EEdPhidTheta_mem;
 
 	double *jac_mem;
 
