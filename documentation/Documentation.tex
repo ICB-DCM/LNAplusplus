@@ -268,7 +268,10 @@ where $\Sigma'_k$ and $\bs\phi'_k$ are computed using the forward sensitivity eq
 	\bb{V}'_k \bb A^T + \bb V {\bb{A}'_k}^T +
 	(\bb{E} \bb{E}^T)'_k \label{eq:Variance_sensitivity 2}
 \end{eqnarray}
-with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bb{\phi}} \bb{\phi}'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k}.$$ Note that \eqref{eq:Variance_sensitivity} and \eqref{eq:Variance_sensitivity 2} are alternative formulations. \eqref{eq:Variance_sensitivity 2} is more suited for numerical implementations as it avoids fractions with state variables (which might be zero) in the denominator.
+with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \frac{d}{d \theta_j} \left( \sum_\ell \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_\ell} (\bs{\phi}_\ell)'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k}\right),$$
+and $\bs{\phi}_\ell$ denoting the $\ell$-th element of $\bs{\phi}$ and $(\bs{\phi}_\ell)'_k$ its total derivative with respect to $\theta_k$.
+
+Note that \eqref{eq:Variance_sensitivity} and \eqref{eq:Variance_sensitivity 2} are alternative formulations. \eqref{eq:Variance_sensitivity 2} is more suited for numerical implementations as it avoids fractions with state variables (which might be zero) in the denominator.
 
 \subsubsection{Finite difference approximation}
 \label{sec:FirstOrderFD}
@@ -325,8 +328,21 @@ and
 From \eqref{eq:Variance_sensitivity} we find
 \begin{align}
 \dot{\bb{V}''_{ij}} &= \frac{d}{d \theta_j}\dot{\bb{V}'_i} \nonumber \\
-	&= \bb{A}''_{ij} \bb V + \bb{A}'_i \bb{V}'_j + \bb{A}'_j \bb{V}'_i + \bb A \bb{V}''_{ij} + \bb{V}''_{ij} \bb A^T + \bb{V}'_i \bb{A}'_j  \nonumber \\
-	& \qquad + \bb{V}'_j {\bb{A}'_i}^T + \bb V  (\bb{A}''_{ij})^T +  \bb{E}''_{ij} (\bb{E})^T + \bb{E}'_i (\bb{E}'_j)^T + \bb{E}'_j (\bb{E}'_i)^T + \bb E (\bb{E}''_{ij})^T \\
+	%&= \bb{A}''_{ij} \bb V + \bb{A}'_i \bb{V}'_j + \bb{A}'_j \bb{V}'_i + \bb A \bb{V}''_{ij} + \bb{V}''_{ij} \bb A^T + \bb{V}'_i \bb{A}'_j  \nonumber \\
+	%& \qquad + \bb{V}'_j {\bb{A}'_i}^T + \bb V  (\bb{A}''_{ij})^T +  \bb{E}''_{ij} (\bb{E})^T + \bb{E}'_i (\bb{E}'_j)^T + \bb{E}'_j (\bb{E}'_i)^T + \bb E (\bb{E}''_{ij})^T \\
+	&= \bb{A}''_{ij} \bb V + \bb{A}'_i \bb{V}'_j + \bb{A}'_j \bb{V}'_i + \bb A \bb{V}''_{ij} + \bb{V}''_{ij} \bb A^T + \bb{V}'_i \bb{A}'_j + \bb{V}'_j {\bb{A}'_i}^T + \bb V  (\bb{A}''_{ij})^T +   (\bb{E} \bb{E}^T)''_{ij}
+\end{align}
+with
+\begin{align}
+	(\bb{E} \bb{E}^T)''_{ij}
+	&:= \frac{d^2 (\bb{E} \bb{E}^T)}{d \theta_i d \theta_j} = \frac{d (\bb{E} \bb{E}^T)'_i}{d \theta_j} 
+	= \frac{d}{d \theta_j} \left( \sum_k \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_k} (\bs{\phi}_k)'_i +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_i}\right) \\
+	&= \sum_k \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_k} (\bs{\phi}_k)''_{ij}
+	  + \sum_{k_1,k_2} \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_{k_1} \partial \bs{\phi}_{k_2}} (\bs{\phi}_{k_1})'_{i} (\bs{\phi}_{k_2})'_{j} \nonumber \\
+	&\qquad + \sum_k \left(\frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_j \partial \bs{\phi}_k} (\bs{\phi}_k)'_i + \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_i \partial \bs{\phi}_k} (\bs{\phi}_k)'_j \right) +  \frac{\partial^2 (\bb{E} \bb{E}^T)}{\partial \theta_i \partial \theta_j}
+\end{align}
+and
+\begin{align}
 \bb{A}''_{ij} &= \frac{d}{d\theta_j} \left( \frac{\partial\bb{A}}{\partial \bs \phi} \bs\phi'_i + \frac{\partial \bb{A}}{\partial \theta_i} \right) \nonumber \\
 	&= \left( \frac{\partial^2 \bb{A}}{\partial \bs{\phi}^2} \bs{\phi}'_j + \frac{\partial^2 \bb{A}}{\partial \theta_j \partial \bs{\phi}} \right) \bs{\phi}'_i
 	+ \frac{\partial \bb{A}}{\partial \bs{\phi}} \phi''_{ij} 
