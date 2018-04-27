@@ -263,10 +263,12 @@ where $\Sigma'_k$ and $\bs\phi'_k$ are computed using the forward sensitivity eq
 \frac{d}{d \theta_k} \cov \left(\mathbf x(s), \mathbf x(t)\right) &=& \bb{V}'_k  \bb{G}(s,t)^T + \bb V(s) \bb{G}'_k(s,t)^T \label{eq:Var_sensitivity} \\
 \dot{\bb{V}}'_k &=& \frac{d}{d\theta_k} \dot{\bb V}(t) = \bb{A}'_k \bb V + \bb A \bb{V}'_k +
 	\bb{V}'_k \bb A^T + \bb V {\bb{A}'_k}^T +
-	\bb{E}'_k \bb E^T + \bb E {\bb{E}'_k}^T \label{eq:Variance_sensitivity}
+	\bb{E}'_k \bb E^T + \bb E {\bb{E}'_k}^T \label{eq:Variance_sensitivity} \\
+	&=& \frac{d}{d\theta_k} \dot{\bb V}(t) = \bb{A}'_k \bb V + \bb A \bb{V}'_k +
+	\bb{V}'_k \bb A^T + \bb V {\bb{A}'_k}^T +
+	(\bb{E} \bb{E}^T)'_k \label{eq:Variance_sensitivity 2}
 \end{eqnarray}
-
-The partial derivatives $\frac{\partial V(s)}{\partial \theta_k}$ and $\frac{\partial \bb{G}(s,t)}{\partial \theta_k}$ are computed by differentiating Equations \ref{eq:variance} and \ref{eq:fund_RE}, respectively, with respect to $\theta_k$, and numerically integrating the ODE system for $\frac{d}{dt} \frac{\partial V}{\partial \theta_k}$, $\frac{d}{dt} \frac{\partial \bb{G}}{\partial \theta_k}. $ 
+with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bb{\phi}} \bb{\phi}'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k}.$$ Note that \eqref{eq:Variance_sensitivity} and \eqref{eq:Variance_sensitivity 2} are alternative formulations. \eqref{eq:Variance_sensitivity 2} is more suited for numerical implementations as it avoids fractions with state variables (which might be zero) in the denominator.
 
 \subsubsection{Finite difference approximation}
 \label{sec:FirstOrderFD}
