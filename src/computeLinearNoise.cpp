@@ -1202,23 +1202,23 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 
 		// total second derivative of E
 		// compute dPhidTheta' * d2EdPhi2 * dPhidTheta
-		vvvvp 			= Sens_MRE(k,m)*myd2EdPhi2(i,j,k,l);
-		vvvp 			= sum(vvvvp(i,j,m,k,l),m);
-		vvvpp 			= vvvp(i,j,k,l)*Sens_MRE(k,m);
-		vvpp 			= sum(vvvpp(i,j,m,k,l),m);
+//		vvvvp 			= Sens_MRE(k,m)*myd2EdPhi2(i,j,k,l);
+//		vvvp 			= sum(vvvvp(i,j,m,k,l),m);
+//		vvvpp 			= vvvp(i,j,k,l)*Sens_MRE(k,m);
+//		vvpp 			= sum(vvvpp(i,j,m,k,l),m);
 
-		d2EdTheta2_tot 	= vvpp;
-		vvvpp			= myd2EdPhidTheta(i,j,k,m)*Sens_MRE(k,l);
-		vvpp			= sum(vvvpp(i,j,m,k,l), m);
-
-		d2EdTheta2_tot +=	vvpp;
-		vvvpp 			=	mydEdPhi(i,j,k)*Sens2_MRE(k,l,m);
-
-		d2EdTheta2_tot += 	sum(vvvpp(i,j,m,k,l), m);
-
-		vvvpp 			=	myd2EdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
-		d2EdTheta2_tot += 	sum(vvvpp(i,j,m,k,l),m);
-		d2EdTheta2_tot +=	myd2EdTheta2(i,j,k,l);
+//		d2EdTheta2_tot 	= vvpp;
+//		vvvpp			= myd2EdPhidTheta(i,j,k,m)*Sens_MRE(k,l);
+//		vvpp			= sum(vvvpp(i,j,m,k,l), m);
+//
+//		d2EdTheta2_tot +=	vvpp;
+//		vvvpp 			=	mydEdPhi(i,j,k)*Sens2_MRE(k,l,m);
+//
+//		d2EdTheta2_tot += 	sum(vvvpp(i,j,m,k,l), m);
+//
+//		vvvpp 			=	myd2EdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
+//		d2EdTheta2_tot += 	sum(vvvpp(i,j,m,k,l),m);
+//		d2EdTheta2_tot +=	myd2EdTheta2(i,j,k,l);
 
 		// total second derivative of E*E'
 
