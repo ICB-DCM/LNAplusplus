@@ -268,7 +268,7 @@ where $\Sigma'_k$ and $\bs\phi'_k$ are computed using the forward sensitivity eq
 	\bb{V}'_k \bb A^T + \bb V {\bb{A}'_k}^T +
 	(\bb{E} \bb{E}^T)'_k \label{eq:Variance_sensitivity 2}
 \end{eqnarray}
-with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \frac{d}{d \theta_j} \left( \sum_\ell \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_\ell} (\bs{\phi}_\ell)'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k}\right),$$
+with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \sum_\ell \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_\ell} (\bs{\phi}_\ell)'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k},$$
 and $\bs{\phi}_\ell$ denoting the $\ell$-th element of $\bs{\phi}$ and $(\bs{\phi}_\ell)'_k$ its total derivative with respect to $\theta_k$.
 
 Note that \eqref{eq:Variance_sensitivity} and \eqref{eq:Variance_sensitivity 2} are alternative formulations. \eqref{eq:Variance_sensitivity 2} is more suited for numerical implementations as it avoids fractions with state variables (which might be zero) in the denominator.
