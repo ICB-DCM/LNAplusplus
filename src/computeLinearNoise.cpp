@@ -988,11 +988,6 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 	double *dAdTheta_mem = par->lna->dAdTheta_mem;
 	dAdTheta(phi, t, Theta, dAdTheta_mem);
 	MA3 mydAdTheta( dAdTheta_mem, shape(nvar,nvar,npar), neverDeleteData, ColumnMajorArray<3>());
-
-	// dEdTheta
-	double *dEdTheta_mem = par->lna->dEdTheta_mem;
-	dEdTheta(phi,t,Theta,dEdTheta_mem);
-	MA3 mydEdTheta(dEdTheta_mem, shape(nvar, Nreact, npar), neverDeleteData, ColumnMajorArray<3>());
 	
 	// E
 	double *E_mem = par->lna->E_sens_mem;
@@ -1189,29 +1184,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		d2AdTheta2_tot += 	sum(vvvpp(i,j,m,k,l),m);		// d2AdTheta_idPhi*dPhidTheta_j
 		d2AdTheta2_tot +=	myd2AdTheta2(i,j,k,l);			// d2AdTheta_i_j
 
-		// total second derivative of E
-		// compute dPhidTheta' * d2EdPhi2 * dPhidTheta
-//		vvvvp 			= Sens_MRE(k,m)*myd2EdPhi2(i,j,k,l);
-//		vvvp 			= sum(vvvvp(i,j,m,k,l),m);
-//		vvvpp 			= vvvp(i,j,k,l)*Sens_MRE(k,m);
-//		vvpp 			= sum(vvvpp(i,j,m,k,l),m);
-
-//		d2EdTheta2_tot 	= vvpp;
-//		vvvpp			= myd2EdPhidTheta(i,j,k,m)*Sens_MRE(k,l);
-//		vvpp			= sum(vvvpp(i,j,m,k,l), m);
-//
-//		d2EdTheta2_tot +=	vvpp;
-//		vvvpp 			=	mydEdPhi(i,j,k)*Sens2_MRE(k,l,m);
-//
-//		d2EdTheta2_tot += 	sum(vvvpp(i,j,m,k,l), m);
-//
-//		vvvpp 			=	myd2EdThetadPhi(i,j,l,k)*Sens_MRE(k,m);
-//		d2EdTheta2_tot += 	sum(vvvpp(i,j,m,k,l),m);
-//		d2EdTheta2_tot +=	myd2EdTheta2(i,j,k,l);
-
 		// total second derivative of E*E'
-
-		// total second derivative of E
 		vvvvp 			= Sens_MRE(k,m)*myd2EEdPhi2(i,j,k,l);
 		vvvp 			= sum(vvvvp(i,j,m,k,l),m);
 		vvvpp 			= vvvp(i,j,k,l)*Sens_MRE(k,m);
@@ -1276,18 +1249,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		vvvpp = V(i,k)*d2AdTheta2_tot(j,k,l,m);
 		Sens2_Var_dot 	+=	sum(vvvpp(i,j,m,k,l),m);	// V*d2A'dTheta_i_j
 
-		/* terms related to the second derivative of E*E' -- numeric product */
-//		vvvpp = d2EdTheta2_tot(i,k,l,m)*E(j,k);
-//		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// d2EdTheta_i_j*E'
-//		vvvpp = dEdTheta_tot(i,k,l)*dEdTheta_tot(j,k,m);
-//		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// dEdTheta_i*dEdTheta_j'
-//		vvvpp = dEdTheta_tot(i,k,m)*dEdTheta_tot(j,k,l);
-//		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m); 	// dEdTheta_j*dEdTheta_i'
-//		vvvpp = E(i,k)*d2EdTheta2_tot(j,k,l,m);
-//		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// E*d2EdTheta_i_j'
-
 		/* terms related to the second derivative of E*E' -- analytical */
-
 		Sens2_Var_dot 	+= d2EEdTheta2_tot;
 
 
