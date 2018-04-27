@@ -321,23 +321,16 @@ and
 	\bb{V}'_i(s) {\bb{G}'_j}^T(s,t) + \bb{V}'_j(s) {\bb{G}'_i}^T(s,t) + \bb V(s) {\bb{G}''_{ij}}^T(s,t) .
 \end{equation}
 From \eqref{eq:Variance_sensitivity} we find
-\begin{eqnarray}
-\dot{\bb{V}''}_{ij}(t) &= & \frac{d}{d \theta_j}\dot{\bb{V}'}_i \nonumber \\
-	&=& 
-	\begin{aligned} 
-		& \bb{A}''_{ij} \bb V + \bb{A}'_i \bb{V}'_j + \bb{A}'_j \bb{V}'_i + \bb A \bb{V}''_{ij}   
-		+ \bb{V}''_{ij} \bb A^T + \bb{V}'_i \bb{A}'_j  \\
-		& + \bb{V}'_j {\bb{A}'_i}^T + \bb V
-		 (\bb{A}''_{ij})^T +  \bb{E}''_{ij} \bb E^T
-		 + \bb{E}'_i + {\bb{E}'_j}^T + \bb{E}'_j
-		 (\bb{E}'_i)^T + \bb E (\bb{E}''_{ij})^T 
-	\end{aligned} \\
-\bb{A}''_{ij} &=& \frac{d}{d\theta_j} \left( \frac{\partial\bb{A}}{\partial \bs \phi} \bs\phi'_i + \frac{\partial \bb{A}}{\partial \theta_i} \right) \nonumber \\
-	&=& \left( \frac{\partial^2 \bb{A}}{\partial \bs{\phi}^2} \bs{\phi}'_j + \frac{\partial^2 \bb{A}}{\partial \theta_j \partial \bs{\phi}} \right) \bs{\phi}'_i
+\begin{align}
+\dot{\bb{V}''_{ij}} &= \frac{d}{d \theta_j}\dot{\bb{V}'_i} \nonumber \\
+	&= \bb{A}''_{ij} \bb V + \bb{A}'_i \bb{V}'_j + \bb{A}'_j \bb{V}'_i + \bb A \bb{V}''_{ij} + \bb{V}''_{ij} \bb A^T + \bb{V}'_i \bb{A}'_j  \nonumber \\
+	& \qquad + \bb{V}'_j {\bb{A}'_i}^T + \bb V  (\bb{A}''_{ij})^T +  \bb{E}''_{ij} (\bb{E})^T + \bb{E}'_i (\bb{E}'_j)^T + \bb{E}'_j (\bb{E}'_i)^T + \bb E (\bb{E}''_{ij})^T \\
+\bb{A}''_{ij} &= \frac{d}{d\theta_j} \left( \frac{\partial\bb{A}}{\partial \bs \phi} \bs\phi'_i + \frac{\partial \bb{A}}{\partial \theta_i} \right) \nonumber \\
+	&= \left( \frac{\partial^2 \bb{A}}{\partial \bs{\phi}^2} \bs{\phi}'_j + \frac{\partial^2 \bb{A}}{\partial \theta_j \partial \bs{\phi}} \right) \bs{\phi}'_i
 	+ \frac{\partial \bb{A}}{\partial \bs{\phi}} \phi''_{ij} 
 	+ \frac{\partial}{\partial \bs{\phi}} \frac{\partial \bb{A}}{\partial \theta_i} \frac{\partial \bs{\phi}}{\partial \theta_j}
 	+ \frac{\partial^2 \bb{A}}{\partial \theta_j \partial \theta_i}.
-\end{eqnarray}
+\end{align}
 The sensitivities of the fundamental matrix $\bb{G}$ are computed using \eqref{eq:CovarianceODE}:
 \begin{eqnarray}
 \dot {\bb{G}}'_i(s,t)  &=& \bb{A}'_i(t) \bb{G}(s, t) + \bb A(t) \bb{G}'_i(s,t) \\
