@@ -1246,7 +1246,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 //		cout << "tmp5 j=0" << endl << tmp5(all,all,all,all,0) << endl;
 		Sens2_Var_dot 	=	sum(vvvpp(i,j,m,k,l),m);			// d2AdTheta_l_m * V
 //		cout << "d2AdTheta_l_m * V" << endl;
-		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
+		//cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 
 		vvvpp = dAdTheta_tot(i,k,l)*Sens_Var(k,j,m);
 		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);			// dAdTheta_l * dVdTheta_m
@@ -1266,7 +1266,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 //		cout << "A" << endl << A << endl;
 //		cout << "Sens2_Var" << endl << Sens2_Var << endl;
 //		cout << "A*d2VdTheta_l_m" << endl;
-		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
+	//	cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 		vvvpp = Sens2_Var(i,k,l,m)*A(j,k);
 		Sens2_Var_dot 	+= 	sum(vvvpp(i,j,m,k,l),m);	// d2VdTheta_l_m*A'
 
@@ -1276,7 +1276,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		vvvpp = Sens_Var(i,k,l)*dAdTheta_tot(j,k,m);
 		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// dVdTheta_i*dA'dTheta_j
 //		cout << "dVdTheta_i*dA\'dTheta_j" << endl;
-		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
+//		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 
 		vvvpp = Sens_Var(i,k,m)*dAdTheta_tot(j,k,l);
 		Sens2_Var_dot	+= 	sum(vvvpp(i,j,m,k,l),m);	// dVdTheta_j*dA'dTheta_i
@@ -1298,7 +1298,7 @@ int LNA::sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 		Sens2_Var_dot 	+= d2EEdTheta2_tot;
 
 
-		cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
+		//cout << "Sens2_Var_dot " << endl << Sens2_Var_dot << endl;
 
 		// Fundamental matrix
 		vvvpp 			= d2AdTheta2_tot(i,k,l,m)*Phi(k,j);
@@ -1728,9 +1728,9 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 //	void *tmp = &((CVodeMem)cvode_mem)->cv_user_data;
 
 //	// Use the Dense Linear Solver
-//	flag = CVDense(cvode_mem, RHS_SIZE);
-//	if (check_flag(&flag, "CVDense", 1))
-//		throw runtime_error("CVDense");
+	flag = CVDense(cvode_mem, RHS_SIZE);
+	if (check_flag(&flag, "CVDense", 1))
+		throw runtime_error("CVDense");
 //
 //	// Specify the Jacobian function
 //	flag = CVDlsSetDenseJacFn(cvode_mem, &Jac);
@@ -1738,7 +1738,7 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 //		throw runtime_error("CVDlsSetDenseJacFn");
 
 	/* Use the Krylov subspace GMRES method */
-	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
+//	flag = CVSpgmr(cvode_mem, PREC_LEFT, 0); // 0=default dimension 5  of subspace
 //	flag = CVSpgmr(cvode_mem, PREC_NONE, 0); // 0=default dimension 5  of subspace
 
 	if (check_flag(&flag, "CVSpgmr", 1))
@@ -1749,10 +1749,10 @@ void LNA::setupCVODES(const double t0, const parameters &pars) {
 //	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
 //		throw runtime_error("CVSpilsSetPreconditioner");
 
-	// preconditioner using diag. approx to Jacobian
-	flag = CVSpilsSetPreconditioner(cvode_mem, NULL, Preconditioner_diag);
-	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
-		throw runtime_error("CVSpilsSetPreconditioner");
+//	// preconditioner using diag. approx to Jacobian
+//	flag = CVSpilsSetPreconditioner(cvode_mem, NULL, Preconditioner_diag);
+//	if (check_flag(&flag, "CVSpilsSetPreconditioner", 1))
+//		throw runtime_error("CVSpilsSetPreconditioner");
 
 	/* check if the state of the sensitivity computations changed
 	 * since the last time the solver was called.

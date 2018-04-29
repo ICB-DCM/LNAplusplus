@@ -46,8 +46,8 @@ int main(int argc, char **argv ) {
 
 	double Theta[] = {0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1};
 
-//	double y0[] = {20.0, 1.0, 1.0, 1.0, 1.0}; // initial conditions (WORKS)
-	double y0[] = {20.0, 0.0, 0.0, 0.0, 0.0}; // initial conditions (THROWS EXCEPTION)
+	double y0[] = {20.0, 1.0, 1.0, 1.0, 1.0}; // initial conditions (WORKS)
+//	double y0[] = {20.0, 0.0, 0.0, 0.0, 0.0}; // initial conditions (THROWS EXCEPTION)
 	double v0[15]; //  5*(5+1)/2 covariance terms
 
 	for (int i=0; i<15; i++) {
