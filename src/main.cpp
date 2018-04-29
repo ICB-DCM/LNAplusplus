@@ -16,6 +16,7 @@
 #include "cvodes/cvodes.h"
 #include "nvector/nvector_serial.h"
 #include "blitz/array.h"
+#include "MODEL_DEF.h"
 
 using namespace std;
 using namespace blitz;
@@ -24,29 +25,39 @@ int main(int argc, char **argv ) {
 
 	outputStruct os;
 
-	int NvarObs = 2;
-	Array<int,1> varObs(2);
+	int NvarObs = NVAR;
+	Array<int,1> varObs(NVAR);
 	varObs(0) = 0;
-	varObs(1) = 1;
+	varObs(1) = 0;
+	varObs(2) = 0;
+	varObs(3) = 0;
+	varObs(4) = 0;
 
 
-	double merr[] = {0., 0.}; // measurement error
+	double merr[] = {0.0, 0.0, 0.0, 0.0, 0.0}; // measurement error
 
-	int N = 2;
+	int N = 10;
+	double tFinal = 1.0;
+
 	Vector tspan(N);
 
 	for (int i=0; i<N; i++)
-		tspan(i) =i*0.1;
+		tspan(i) = (double)i*tFinal/(double)N;
 
-	double Theta[] = { 20., 25., 10., 1., 2., 200.};
-	double y0[] = {20.,200.}; // initial conditions
-	double v0[] = {2.,5.,150.};
+	double Theta[] = {0.1, 0.7, 0.35, 0.3, 0.1, 0.9, 0.2, 0.1};
 
-	MA2 S(2,4);
-	S = 	1, -1, 0, 0,
-			0, 0, 1, -1;
+//	double y0[] = {20.0, 1.0, 1.0, 1.0, 1.0}; // initial conditions (WORKS)
+	double y0[] = {20.0, 0.0, 0.0, 0.0, 0.0}; // initial conditions (THROWS EXCEPTION)
+	double v0[15]; //  5*(5+1)/2 covariance terms
 
-	int npar=6, nvar=2;
+	for (int i=0; i<15; i++) {
+		v0[i] = 0.0;
+	}
+
+	MA2 S(NVAR,NREACT);
+	S = 	STOICH_MAT;
+
+	int npar=NPAR, nvar=NVAR;
 
 	os.Y 			= new MA2(NvarObs,N);
 	os.traj_deriv	= new MA3(NvarObs, npar, N);
@@ -65,7 +76,7 @@ int main(int argc, char **argv ) {
 	(*os.Sens2_MRE)=0;
 	(*os.Sens2_Var)=0;
 
-	LNA lna(2,6,S);
+	LNA lna(nvar,npar,S);
 
 //	LNA::SS_FLAG SS = LNA::SS_BOTH;
 //	LNA::SS_FLAG SS = LNA::SS_V0;
