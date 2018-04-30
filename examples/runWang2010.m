@@ -74,18 +74,18 @@ imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta)
 colorbar
 title('finite differences');
 subplot(1,3,2)
-imagesc(sVar(:,:,k1,k2,i))
+imagesc(sVar(:,:,i,k1,k2))
 colorbar
 title('analytical sensitivities');
 subplot(1,3,3)
-imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta - sVar(:,:,k1,k2,i))
+imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta - sVar(:,:,i,k1,k2))
 colorbar
 title('error');
 
 %% 2nd order test - diagonal
 figure
 subplot(1,3,1)
-imagesc(squeeze((sVar_per(1,1,:,:,j)-sVar(1,1,:,:,j))./eps_theta))
+imagesc(squeeze((sVar_per(1,1,j,:,:)-sVar(1,1,j,:,:))./eps_theta))
 colorbar
 title('finite differences');
 subplot(1,3,2)
@@ -93,14 +93,14 @@ imagesc(squeeze(s2Var(1,1,i,j,:,:)))
 colorbar
 title('analytical sensitivities');
 subplot(1,3,3)
-imagesc(squeeze((sVar_per(1,1,:,:,j)-sVar(1,1,:,:,j))./eps_theta) - squeeze(s2Var(1,1,i,j,:,:)))
+imagesc(squeeze((sVar_per(1,1,j,:,:)-sVar(1,1,j,:,:))./eps_theta) - squeeze(s2Var(1,1,i,j,:,:)))
 colorbar
 title('error');
 
 %% 2nd order test - off-diagonal
 figure
 subplot(1,3,1)
-imagesc((sVar_per(:,:,k1,k2,j)-sVar(:,:,k1,k2,j))./eps_theta)
+imagesc((sVar_per(:,:,j,k1,k2)-sVar(:,:,j,k1,k2))./eps_theta)
 colorbar
 title('finite differences');
 subplot(1,3,2)
@@ -108,7 +108,7 @@ imagesc(s2Var(:,:,i,j,k1,k2))
 colorbar
 title('analytical sensitivities');
 subplot(1,3,3)
-imagesc((sVar_per(:,:,k1,k2,j)-sVar(:,:,k1,k2,j))./eps_theta - s2Var(:,:,i,j,k1,k2))
+imagesc((sVar_per(:,:,j,k1,k2)-sVar(:,:,j,k1,k2))./eps_theta - s2Var(:,:,i,j,k1,k2))
 colorbar
 title('error');
 

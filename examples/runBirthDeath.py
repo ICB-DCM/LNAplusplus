@@ -207,7 +207,7 @@ for i in range(len(Theta)):
     ax1.set_ylabel('Sensitivity of mean')
     ax1.set_title(parameterNames[i])
     # Sensitivity of auto-covariance of protein
-    ax2.matshow(Sens_Var[0, 0, :, :, i], extent=[np.min(tspan), np.max(tspan), np.max(tspan), np.min(tspan)])
+    ax2.matshow(Sens_Var[0, 0, i, :, :], extent=[np.min(tspan), np.max(tspan), np.max(tspan), np.min(tspan)])
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Sensitivity of autocovariance')
     ax2.set_title(parameterNames[i])
