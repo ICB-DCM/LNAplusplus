@@ -268,7 +268,7 @@ where $\Sigma'_k$ and $\bs\phi'_k$ are computed using the forward sensitivity eq
 	\bb{V}'_k \bb A^T + \bb V {\bb{A}'_k}^T +
 	(\bb{E} \bb{E}^T)'_k \label{eq:Variance_sensitivity 2}
 \end{eqnarray}
-with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \frac{d}{d \theta_j} \left( \sum_\ell \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_\ell} (\bs{\phi}_\ell)'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k}\right),$$
+with $$(\bb{E} \bb{E}^T)'_k := \frac{d (\bb{E} \bb{E}^T)}{d \theta_k} = \sum_\ell \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_\ell} (\bs{\phi}_\ell)'_k +  \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_k},$$
 and $\bs{\phi}_\ell$ denoting the $\ell$-th element of $\bs{\phi}$ and $(\bs{\phi}_\ell)'_k$ its total derivative with respect to $\theta_k$.
 
 Note that \eqref{eq:Variance_sensitivity} and \eqref{eq:Variance_sensitivity 2} are alternative formulations. \eqref{eq:Variance_sensitivity 2} is more suited for numerical implementations as it avoids fractions with state variables (which might be zero) in the denominator.
@@ -341,15 +341,7 @@ with
 	  + \sum_{k_1,k_2} \frac{\partial (\bb{E} \bb{E}^T)}{\partial \bs{\phi}_{k_1} \partial \bs{\phi}_{k_2}} (\bs{\phi}_{k_1})'_{i} (\bs{\phi}_{k_2})'_{j} \nonumber \\
 	&\qquad + \sum_k \left(\frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_j \partial \bs{\phi}_k} (\bs{\phi}_k)'_i + \frac{\partial (\bb{E} \bb{E}^T)}{\partial \theta_i \partial \bs{\phi}_k} (\bs{\phi}_k)'_j \right) +  \frac{\partial^2 (\bb{E} \bb{E}^T)}{\partial \theta_i \partial \theta_j}
 \end{align}
-and
-\begin{align}
-\bb{A}''_{ij} &= \frac{d}{d\theta_j} \left( \frac{\partial\bb{A}}{\partial \bs \phi} \bs\phi'_i + \frac{\partial \bb{A}}{\partial \theta_i} \right) \nonumber \\
-	&= \left( \frac{\partial^2 \bb{A}}{\partial \bs{\phi}^2} \bs{\phi}'_j + \frac{\partial^2 \bb{A}}{\partial \theta_j \partial \bs{\phi}} \right) \bs{\phi}'_i
-	+ \frac{\partial \bb{A}}{\partial \bs{\phi}} \phi''_{ij} 
-	+ \frac{\partial}{\partial \bs{\phi}} \frac{\partial \bb{A}}{\partial \theta_i} \frac{\partial \bs{\phi}}{\partial \theta_j}
-	+ \frac{\partial^2 \bb{A}}{\partial \theta_j \partial \theta_i}.
-\end{align}
-The sensitivities of the fundamental matrix $\bb{G}$ are computed using \eqref{eq:CovarianceODE}:
+and same for $\bb{A}''_{ij}$. The sensitivities of the fundamental matrix $\bb{G}$ are computed using \eqref{eq:CovarianceODE}:
 \begin{eqnarray}
 \dot {\bb{G}}'_i(s,t)  &=& \bb{A}'_i(t) \bb{G}(s, t) + \bb A(t) \bb{G}'_i(s,t) \\
 \dot{\bb{G}}''_{ij}(s,t)  &=&\bb{A}''_{ij}(t) 

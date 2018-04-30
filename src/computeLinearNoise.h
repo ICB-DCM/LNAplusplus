@@ -45,28 +45,22 @@ public:
 		A_sens_mem 				= new double[nvar*nvar];
 		dFdTheta_mem 			= new double[Nreact*npar];
 		dAdTheta_mem 			= new double[nvar*nvar*npar];
-		dEdTheta_mem 			= new double[nvar*Nreact*npar];
 		E_sens_mem 				= new double[nvar*Nreact];
 		dAdPhi_mem 				= new double[nvar*nvar*nvar];
-		dEdPhi_mem 				= new double[nvar*Nreact*nvar];
 		d2fdTheta2_mem 			= new double[Nreact*npar*npar];
 
 		d2AdTheta2_mem 			= new double[nvar*nvar*npar*npar];
 		d2AdPhi2_mem 			= new double[nvar*nvar*nvar*nvar];
 		d2AdThetadPhi_mem 		= new double[nvar*nvar*npar*nvar];
 		d2AdPhidTheta_mem 		= new double[nvar*nvar*nvar*npar];
-		d2EdTheta2_mem 			= new double[nvar*Nreact*npar*npar];
-		d2EdPhi2_mem 			= new double[nvar*Nreact*nvar*nvar];
-		d2EdThetadPhi_mem 		= new double[nvar*Nreact*npar*nvar];
-		d2EdPhidTheta_mem		= new double[nvar*Nreact*nvar*npar];
 
-        dEEdPhi_mem             = new double[nvar*npar*nvar]; // JH
-		dEEdTheta_mem           = new double[nvar*nvar*npar]; // JH
-
+        dEEdPhi_mem             = new double[nvar*npar*nvar];
+		dEEdTheta_mem           = new double[nvar*nvar*npar];
 		d2EEdPhi2_mem 			= new double[nvar*npar*nvar*nvar];
 		d2EEdPhidTheta_mem 		= new double[nvar*nvar*nvar*npar];
 		d2EEdThetadPhi_mem		= new double[nvar*nvar*npar*nvar];
 		d2EEdTheta2_mem			= new double[nvar*nvar*npar*npar];
+        
 		// jacobian
 		int RHS_SIZE = nvar + (nvar*(nvar+1)/2) + nvar*nvar;
 
@@ -96,22 +90,14 @@ public:
 
 		delete[] dFdTheta_mem;
 		delete[] dAdTheta_mem;
-		delete[] dEdTheta_mem;
-//
 		delete[] A_sens_mem;
 		delete[] E_sens_mem;
 		delete[] dAdPhi_mem;
-		delete[] dEdPhi_mem;
 		delete[] d2fdTheta2_mem;
 		delete[] d2AdTheta2_mem;
 		delete[] d2AdPhi2_mem;
 		delete[] d2AdThetadPhi_mem;
 		delete[] d2AdPhidTheta_mem;
-		delete[] d2EdTheta2_mem;
-		delete[] d2EdPhi2_mem;
-		delete[] d2EdThetadPhi_mem;
-		delete[] d2EdPhidTheta_mem;
-
 
         delete[] dEEdPhi_mem;
         delete[] dEEdTheta_mem;
@@ -142,16 +128,8 @@ public:
 
 	// CVODEs function types must be static!
 	static int fundRHS(realtype t, N_Vector yIn, N_Vector ydot, void *user_data);
-//	static int Jac(long int N, realtype t,
-//			N_Vector y, N_Vector fy, DlsMat J, void *user_data,
-//			N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
-//	static int Preconditioner(realtype t, N_Vector y, N_Vector fg, N_Vector r, N_Vector z,
-//			realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp);
 	static int Preconditioner_diag(realtype t, N_Vector y, N_Vector fg, N_Vector r, N_Vector z,
 			realtype gamma, realtype delta, int lr, void *user_data, N_Vector tmp);
-
-//	static int PreconditionerSetup(realtype t, N_Vector y, N_Vector fy, int jok, int *jcurPtr,
-//			realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
 
 	static int sensRhs(int Ns, realtype t, N_Vector y, N_Vector ydot,
 			N_Vector *yS, N_Vector *yS_dot,
@@ -181,26 +159,18 @@ public:
 	double *E_sens_mem;
 	double *dFdTheta_mem;
 	double *dAdTheta_mem;
-	double *dEdTheta_mem;
 	double *dAdPhi_mem;
-	double *dEdPhi_mem;
 	double *d2fdTheta2_mem;
 
 	double *d2AdTheta2_mem;
 	double *d2AdPhi2_mem;
 	double *d2AdThetadPhi_mem;
 	double *d2AdPhidTheta_mem;
-	double *d2EdTheta2_mem;
-	double *d2EdPhi2_mem;
-	double *d2EdThetadPhi_mem;
-	double *d2EdPhidTheta_mem;
 
     double *dEEdPhi_mem;
     double *dEEdTheta_mem;
-
     double *d2EEdTheta2_mem;
 	double *d2EEdPhi2_mem;
-
 	double *d2EEdThetadPhi_mem;
 	double *d2EEdPhidTheta_mem;
 
@@ -226,12 +196,9 @@ private:
 	 	 *ySout_2;
 
 	 int flag, iout; //flagr,
-//	 int rootsfound[2];
 	 realtype reltol; //, tout;
 	 realtype *abstol_vec, *abstol_vec1, *abstol_vec2;
 
 };
-
-
 
 #endif /* COMPUTELINEARNOISE_H_ */
