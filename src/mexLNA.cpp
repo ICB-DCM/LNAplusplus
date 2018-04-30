@@ -247,7 +247,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	MA2 *Y 		= new MA2(nObsVar,N,ColumnMajorArray<2>());
 	MA4 *Sigma 	= new MA4(nObsVar, nObsVar, N, N, ColumnMajorArray<4>());
 	MA3 *traj_deriv = new MA3(nObsVar, npar, N,ColumnMajorArray<3>());
-	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, N, N, npar,ColumnMajorArray<5>());
+//	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, N, N, npar,ColumnMajorArray<5>());
+	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, npar, N, N, ColumnMajorArray<5>());
 
 	// second order sens.
 	MA4 *Sens2_MRE = new MA4(nObsVar, npar, npar, N, ColumnMajorArray<4>());
@@ -329,9 +330,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
     if (nlhs > 3) {
                 const mwSize dims[] = {static_cast<mwSize>(nObsVar),
                                        static_cast<mwSize>(nObsVar),
-                                       static_cast<mwSize>(N),
-                                       static_cast<mwSize>(N),
-                                       static_cast<mwSize>(npar)};
+									   static_cast<mwSize>(npar),
+									   static_cast<mwSize>(N),
+                                       static_cast<mwSize>(N)
+                                       };
 		plhs[3] = mxCreateNumericArray((mwSize)5, dims, mxDOUBLE_CLASS, mxREAL);
 		if (plhs[3]==0)
 		    	mexErrMsgTxt("Error allocation output 3");

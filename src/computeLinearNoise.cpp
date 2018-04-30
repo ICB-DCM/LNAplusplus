@@ -567,9 +567,9 @@ int LNA::computeLinearNoise(const double* _y0, const double *_v0,
 				for (int i=0; i<N; i++)
 					// loop over cols of big covariance
 					for (int ii=i; ii<N; ii++) {
-						dSigma(lVar1, lVar2, i, ii, all) 	= dSigmaBlocks(var1, var2, i, ii, all);
+						dSigma(lVar1, lVar2, all, i, ii) 	= dSigmaBlocks(var1, var2, i, ii, all);
 						if (ii>i)
-							dSigma(lVar1, lVar2, ii, i, all) = dSigmaBlocks(var1, var2, i, ii, all);  // Symmetry in block cov. matrix
+							dSigma(lVar1, lVar2, all, ii, i) = dSigmaBlocks(var1, var2, i, ii, all);  // Symmetry in block cov. matrix
 					}
 			}
 

@@ -340,7 +340,8 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 	MA2 *Y 		= new MA2(nObsVar,N);
 	MA4 *Sigma 	= new MA4(nObsVar, nObsVar, N, N);
 	MA3 *traj_deriv	= new MA3(nObsVar, npar, N);
-	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, N, N, npar);
+//	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, N, N, npar);
+	MA5 *dSigma 	= new MA5(nObsVar, nObsVar, npar, N, N);
 
 	// second order sens.
 	MA4 *Sens2_MRE	= new MA4(nObsVar, npar, npar, N);
@@ -455,7 +456,7 @@ LNA_LNA(PyObject *self, PyObject *args, PyObject *kwds)
 		dMRE_out = PyArray_SimpleNew(3, dims_dMRE, NPY_DOUBLE);
 		copyOut(dMRE_out, traj_deriv);
 
-		long int dims_dSigma[] = {nObsVar, nObsVar, N, N, npar};
+		long int dims_dSigma[] = {nObsVar, nObsVar, npar, N, N};
 		dSigma_out = PyArray_SimpleNew(5, dims_dSigma, NPY_DOUBLE);
 		copyOut(dSigma_out, dSigma);
 	}
