@@ -320,7 +320,7 @@ def generateModule(model, S, modelDir = '.', include_dirs=[], lib_dirs=[]):
     modFile.close()
 
     '''Create the python setup script'''
-    f = open(lnaRootDir + "/python/setupTemplate.py", 'r')
+    f = open(lnaRootDir + "/python/setup.py.template", 'r')
     src = f.readlines()
     f.close()
 
