@@ -19,7 +19,7 @@ LNA++ uses the standard C++ libraries, the CVODES Sundials library for numerical
 - For Matlab interface: Matlab (tested with R2017b)
 
 ## Getting started
-After the successful installation of Blitz++ and CVODES, we suggest to have a look at the exmaples (in the folder ./examples). runBirthDeath provide an overview about the functionality of LNA++. runLinearChain and runWang2010 provide additional examples (with a longer run time).
+After the successful installation of Blitz++ and CVODES, we suggest to have a look at the exmaples (in the folder ./examples). runBirthDeath provide an overview over the functionality of LNA++. runLinearChain and runWang2010 provide additional examples (with a longer run time).
 
 ## Contacts
 - Justin Feigelman: JustinFeigelmanPhD@gmail.com
