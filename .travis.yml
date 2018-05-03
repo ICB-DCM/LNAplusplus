@@ -59,7 +59,7 @@ script:
     - cd $BASE_DIR
     - misc/runCI.sh
     # test if all result plots have been generated
-    - test `ls $BASE_DIR/BirthDeath*pdf | wc -l` = 7
+    #- test `ls $BASE_DIR/BirthDeath*pdf | wc -l` = 7
     
 after_failure:
     - ls -alR
