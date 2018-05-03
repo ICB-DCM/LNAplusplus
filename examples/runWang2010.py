@@ -77,12 +77,12 @@ j = 4
 eps_theta = 1e-3;
 Theta_per = Theta[:] 
 Theta_per[i] += eps_theta
-#[MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = Wang2010LNA.LNA(Theta_per, tspan, merr=0.0, Y0=MRE0, V0=Var0, computeSens2=True)
 [MRE_per,Var_per,sMRE_per,sVar_per] = Wang2010LNA.LNA(Theta_per, tspan, merr=0.0, Y0=MRE0, V0=Var0, computeSens=True)
 
 k1 = 50-1;
 k2 = 100-1;
 
+# 1st order sensitivity matrix
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 im = ax1.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta)
 ax1.set_title('finite differences')
@@ -95,7 +95,7 @@ ax3.set_title('error')
 fig.colorbar(im, ax=ax3)
 plt.show()
 
-# 2nd order test - diagonal
+# 2nd order sensitivity matrix for temporal cross-covariance for species 1
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 im = ax1.imshow(np.squeeze((sVar_per[1, 1, j, :, :] - sVar[1, 1, j, :, :]) / eps_theta))
 ax1.set_title('finite differences')
@@ -108,7 +108,7 @@ ax3.set_title('error')
 fig.colorbar(im, ax=ax3)
 plt.show()
 
-# 2nd order test - off-diagonal
+# 2nd order sensitivity matrix for temporal cross-covariance of two time points
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 im = ax1.imshow((sVar_per[:, :, j, k1, k2] - sVar[:, :, j, k1, k2]) / eps_theta)
 ax1.set_title('finite differences')

@@ -95,8 +95,6 @@ ax4.matshow(Var[1, 1, :, :], extent=[np.min(tspan), np.max(tspan), np.max(tspan)
 ax4.set_xlabel('Time')
 ax4.set_ylabel('Time')
 ax4.set_title('Autocovariance of protein')
-plot(plotToFile, 'BirthDeath1.pdf')
-
 
 
 # Simulate: IC = steady state; observable = mRNA and protein
@@ -131,8 +129,6 @@ ax4.matshow(Var[1, 1, :, :], extent=[np.min(tspan), np.max(tspan), np.max(tspan)
 ax4.set_xlabel('Time')
 ax4.set_ylabel('Time')
 ax4.set_title('Autocovariance of protein')
-plot(plotToFile, 'BirthDeath2.pdf')
-
 
 
 # Simulate: IC = steady state; observable = protein
@@ -157,8 +153,6 @@ ax2.matshow(Var[0, 0, :, :], extent=[np.min(tspan), np.max(tspan), np.max(tspan)
 ax2.set_xlabel('Time')
 ax2.set_ylabel('Time')
 ax2.set_title('Autocovariance of protein')
-plot(plotToFile, 'BirthDeath3.pdf')
-
 
 
 # Simulate: IC = no steady state; observable = protein
@@ -187,8 +181,6 @@ ax2.matshow(Var[0, 0, :, :], extent=[np.min(tspan), np.max(tspan), np.max(tspan)
 ax2.set_xlabel('Time')
 ax2.set_ylabel('Time')
 ax2.set_title('Autocovariance of protein')
-plot(plotToFile, 'BirthDeath4.pdf')
-
 
 
 # Simulate: IC = no steady state; observable = protein; sensitivity = 1st order
@@ -211,8 +203,6 @@ for i in range(len(Theta)):
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Sensitivity of autocovariance')
     ax2.set_title(parameterNames[i])
-plot(plotToFile, 'BirthDeath5.pdf')
-
 
 
 # Simulate: IC = no steady state; observable = protein; sensitivity = 1st & 2nd order
@@ -231,7 +221,6 @@ for i in range(len(Theta)):
         ax1.set_xlabel('Time')
         ax1.set_ylabel('Sensitivity of mean')
         ax1.set_title('(%s, %s)' % (parameterNames[i], parameterNames[j]))
-plot(plotToFile, 'BirthDeath6.pdf')
 
 fig, axs = plt.subplots(len(Theta), len(Theta))
 fig.suptitle('Simulation of autocovariance: IC = no steady state; observable = protein; sensitivity = 1st & 2nd order')
@@ -243,5 +232,54 @@ for i in range(len(Theta)):
         ax1.set_xlabel('Time')
         ax1.set_ylabel('Time')
         ax1.set_title('(%s, %s)' % (parameterNames[i], parameterNames[j]))
-plot(plotToFile, 'BirthDeath7.pdf')
 
+# Test of cross-species sensitivities
+i = 4-1;
+j = 4-1;
+eps_theta = 1e-4;
+Theta_per = Theta[:] 
+Theta_per[i] += eps_theta
+[MRE,Var,sMRE,sVar,s2MRE,s2Var] = BirthDeathLNA.LNA(Theta, tspan, Y0=MRE0, V0=Var0, computeSens2=True);
+[MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = BirthDeathLNA.LNA(Theta_per, tspan, Y0=MRE0, V0=Var0, computeSens2=True);
+
+k1 = 50-1;
+k2 = 100-1;
+
+# 1st order sensitivity matrix
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+im = ax1.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta)
+ax1.set_title('finite differences')
+fig.colorbar(im, ax=ax1)
+im = ax2.imshow(sVar[:, :, i, k1, k2])
+ax2.set_title('analytical sensitivities')
+fig.colorbar(im, ax=ax2)
+im = ax3.imshow((Var_per[:, :, k1, k2] - Var[:, :, k1, k2]) / eps_theta - sVar[:, :, i, k1, k2])
+ax3.set_title('error')
+fig.colorbar(im, ax=ax3)
+plt.show()
+
+# 2nd order sensitivity matrix for temporal cross-covariance of protein (species 2) abundance
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+im = ax1.imshow(np.squeeze((sVar_per[1, 1, j, :, :] - sVar[1, 1, j, :, :]) / eps_theta))
+ax1.set_title('finite differences')
+fig.colorbar(im, ax=ax1)
+im = ax2.imshow(np.squeeze(s2Var[1, 1, i, j, :, :]))
+ax2.set_title('analytical sensitivities')
+fig.colorbar(im, ax=ax2)
+im = ax3.imshow(np.squeeze((sVar_per[1, 1, j, :, :] - sVar[1, 1, j, :, :]) / eps_theta) - np.squeeze(s2Var[1, 1, i, j, :, :]))
+ax3.set_title('error')
+fig.colorbar(im, ax=ax3)
+plt.show()
+
+# 2nd order sensitivity matrix for temporal cross-covariance of two time points
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+im = ax1.imshow((sVar_per[:, :, j, k1, k2] - sVar[:, :, j, k1, k2]) / eps_theta)
+ax1.set_title('finite differences')
+fig.colorbar(im, ax=ax1)
+im = ax2.imshow(s2Var[:, :, i, j, k1, k2])
+ax2.set_title('analytical sensitivities')
+fig.colorbar(im, ax=ax2)
+im = ax3.imshow((sVar_per[:, :, j, k1, k2] - sVar[:, :, j, k1, k2]) / eps_theta - s2Var[:, :, i, j, k1, k2])
+ax3.set_title('error')
+fig.colorbar(im, ax=ax3)
+plt.show()

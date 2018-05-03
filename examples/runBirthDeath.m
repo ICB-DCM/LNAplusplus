@@ -200,49 +200,49 @@ end
 
 
 %% Test of cross-species sensitivities
-i = 1;
-j = 1;
-eps_theta = 1e-3;
+i = 4;
+j = 4;
+eps_theta = 1e-4;
 [MRE,Var,sMRE,sVar,s2MRE,s2Var] = BirthDeath_LNA(Theta,tspan);
 [MRE_per,Var_per,sMRE_per,sVar_per,s2MRE_per,s2Var_per] = BirthDeath_LNA(Theta+[0*[1:i-1],1,0*[i+1:4]]*eps_theta,tspan);
 
 k1 = 50;
 k2 = 100;
 
-%
-figure
+% 1st order sensitivity matrix
+figure('Name','Test of 1st order sensitivity matrix')
 subplot(1,3,1)
 imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta)
 colorbar
 title('finite differences');
 subplot(1,3,2)
-imagesc(sVar(:,:,k1,k2,i))
+imagesc(sVar(:,:,i,k1,k2))
 colorbar
 title('analytical sensitivities');
 subplot(1,3,3)
-imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta - sVar(:,:,k1,k2,i))
+imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta - sVar(:,:,i,k1,k2))
 colorbar
 title('error');
 
-% 2nd order test - diagonal
-figure
+% 2nd order sensitivity matrix for temporal cross-covariance of protein (species 2) abundance
+figure('Name','Test of 2nd order sensitivity matrix for temporal cross-covariance of protein abundance')
 subplot(1,3,1)
-imagesc(squeeze((sVar_per(1,1,:,:,j)-sVar(1,1,:,:,j))./eps_theta))
+imagesc(squeeze((sVar_per(2,2,j,:,:)-sVar(2,2,j,:,:))./eps_theta))
 colorbar
 title('finite differences');
 subplot(1,3,2)
-imagesc(squeeze(s2Var(1,1,i,j,:,:)))
+imagesc(squeeze(s2Var(2,2,i,j,:,:)))
 colorbar
 title('analytical sensitivities');
 subplot(1,3,3)
-imagesc(squeeze((sVar_per(1,1,:,:,j)-sVar(1,1,:,:,j))./eps_theta) - squeeze(s2Var(1,1,i,j,:,:)))
+imagesc(squeeze((sVar_per(2,2,j,:,:)-sVar(2,2,j,:,:))./eps_theta) - squeeze(s2Var(2,2,i,j,:,:)))
 colorbar
 title('error');
 
-% 2nd order test - off-diagonal
-figure
+% 2nd order sensitivity matrix for temporal cross-covariance of two time points
+figure('Name','Test of 2nd order sensitivity matrix for temporal cross-covariance of two time points')
 subplot(1,3,1)
-imagesc((sVar_per(:,:,k1,k2,j)-sVar(:,:,k1,k2,j))./eps_theta)
+imagesc((sVar_per(:,:,j,k1,k2)-sVar(:,:,j,k1,k2))./eps_theta)
 colorbar
 title('finite differences');
 subplot(1,3,2)
@@ -250,7 +250,7 @@ imagesc(s2Var(:,:,i,j,k1,k2))
 colorbar
 title('analytical sensitivities');
 subplot(1,3,3)
-imagesc((sVar_per(:,:,k1,k2,j)-sVar(:,:,k1,k2,j))./eps_theta - s2Var(:,:,i,j,k1,k2))
+imagesc((sVar_per(:,:,j,k1,k2)-sVar(:,:,j,k1,k2))./eps_theta - s2Var(:,:,i,j,k1,k2))
 colorbar
 title('error');
 

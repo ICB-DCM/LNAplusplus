@@ -67,8 +67,8 @@ eps_theta = 1e-3;
 k1 = 50;
 k2 = 100;
 
-%%
-figure
+% 1st order sensitivity matrix
+figure('Name','Test of 1st order sensitivity matrix')
 subplot(1,3,1)
 imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta)
 colorbar
@@ -82,8 +82,8 @@ imagesc((Var_per(:,:,k1,k2)-Var(:,:,k1,k2))./eps_theta - sVar(:,:,i,k1,k2))
 colorbar
 title('error');
 
-%% 2nd order test - diagonal
-figure
+% 2nd order sensitivity matrix for temporal cross-covariance for species 1
+figure('Name','Test of 2nd order sensitivity matrix for temporal cross-covariance of protein abundance')
 subplot(1,3,1)
 imagesc(squeeze((sVar_per(1,1,j,:,:)-sVar(1,1,j,:,:))./eps_theta))
 colorbar
@@ -97,8 +97,8 @@ imagesc(squeeze((sVar_per(1,1,j,:,:)-sVar(1,1,j,:,:))./eps_theta) - squeeze(s2Va
 colorbar
 title('error');
 
-%% 2nd order test - off-diagonal
-figure
+% 2nd order sensitivity matrix for temporal cross-covariance of two time points
+figure('Name','Test of 2nd order sensitivity matrix for temporal cross-covariance of two time points')
 subplot(1,3,1)
 imagesc((sVar_per(:,:,j,k1,k2)-sVar(:,:,j,k1,k2))./eps_theta)
 colorbar
