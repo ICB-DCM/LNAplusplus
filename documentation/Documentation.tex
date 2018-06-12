@@ -78,7 +78,7 @@
 }
 {}
 
-\usepackage{todonotes}
+%\usepackage{todonotes}
 
 
 % Absatz Format: (kein Einruecken)
@@ -137,7 +137,7 @@ Garching, Germany}
 
 LNA++ is a tool designed to efficiently compute the linear noise approximation to a chemical reaction network, along with the first and second order sensitivities of the mean, covariance and temporal cross-covariance matrix. Furthermore, LNA++ facilitates parameter inference on time series data by providing first and second order sensitivities of the log-likelihood with respect to model parameters. To ensure computational efficiency, the numerical simulation is implemented in C/C++.  LNA++ can be either be integrated into a C++ project, or used in conjunction with Matlab or Python for parameter inference in chemical reaction networks.  
 
-This document provides the mathematical background and describes the library requirements, the installation and the usage of LNA++.
+This document provides the mathematical background and describes the library requirements, the installation and the usage of LNA++. LNA++ is available at \url{https://github.com/ICB-DCM/LNAplusplus}.
 
 \section{Mathematical background}
 \subsection{Notation}
@@ -385,29 +385,53 @@ Confidence intervals can be computed using the maximum likelihood estimator (MLE
 %
 \section{LNA++ installation and requirements}
 \subsection{Installation}
-Unpack the LNA++ archive or clone the LNA++ repository which contains all the necessary scripts and source code for building LNA++ Python modules or Matlab executable files. No further building or installation of LNA++ itself is necessary until the creation of the model executables, as described below.
+Download and unpack the LNA++ archive from \url{https://github.com/ICB-DCM/LNAplusplus} or use \texttt{git} to clone the LNA++ repository which contains all the necessary scripts and source code for building LNA++ Python modules or Matlab executable files. We refer to this folder as \texttt{\$\{LNAplusplus\_ROOT\}} in the instructions below (replace ``\$\{LNAplusplus\_ROOT\}'' with your respective path of the LNA++ root directory below). No further building or installation of LNA++ itself is necessary until the creation of the model executables, which is described below.
+
+\subsubsection*{Quick installation}
+
+This is the quick installation guide for LNA++ dependencies, more details are provided in the following sections. Change into the downloaded LNA++ folder and run in your shell:
+
+\begin{verbatim}
+LNAplusplus_ROOT=$(pwd)
+cd ${LNAplusplus_ROOT}/libraries
+tar -xzf blitz-1.0.1.tar.gz
+cd blitz-1.0.1 && ./configure --with-pic --prefix=$(pwd)/../install/blitz-1.0.1
+make install
+cd ${LNAplusplus_ROOT}/libraries
+tar -xzf cvodes-2.7.0.tar.gz
+cd cvodes-2.7.0 && ./configure --with-pic --prefix=$(pwd)/../install/cvodes-2.7.0
+make && make install
+cd ${LNAplusplus_ROOT}
+
+# only for LNA++ python users
+pip3 install --user numpy sympy python-libsbml ipdb
+# run LNA++ python example to verify functionality
+examples/runBirthDeath.py
+\end{verbatim}
 
 \subsection{Requirements}
 LNA++ uses the standard C(++) libraries, the CVODES Sundials library for numerical integration of ODEs and forward sensitivities, and the Blitz++ library for fast, templatized tensor operations. 
 
 \subsubsection*{Compiler}
-Compilation of C/C++ source code for use as a standalone executable, or with Matlab or Python requires the use of a suitable compiler such as \texttt{gcc/g++} or \texttt{clang}.
+For building LNA++ Matlab or Python modules from C/C++ source code, LNA++ requires a suitable compiler such as \texttt{gcc/g++} or \texttt{clang}. A list of Matlab-compatible compilers is available at \url{https://de.mathworks.com/support/compilers.html}.
 
 \subsubsection*{Blitz++}
-Blitz++ version 1.0.1 is required. This version is included in the \texttt{./libraries} folder. Alternatively, Blitz++ can be downloaded from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}. It is also available via macports on mac OS. 
+Blitz++ version 1.0.1 is required. This version is included in the \texttt{\$\{LNAplusplus\_ROOT\}/libraries} folder. Alternatively, Blitz++ can be downloaded from \href{https://github.com/blitzpp/blitz}{https://github.com/blitzpp/blitz}. It is also available via macports on macOS. 
 
-When using the provided source archive, extract it to \texttt{../libraries/blitz-1.0.1}, change to this folder and run:\\
-\texttt{./configure --with-pic --prefix=`pwd`/../install/blitz-1.0.1 \&\& make install}
+When using the provided source archive, extract it to \texttt{\$\{LNAplusplus\_ROOT\}/libraries/blitz-1.0.1}, change to this folder and run:\\
+\begin{verbatim}
+./configure --with-pic --prefix=$(pwd)/../install/blitz-1.0.1 && make install
+\end{verbatim}
 
 For other versions of Blitz++ in non-default locations you need to adapt \texttt{include\_dirs} and \texttt{library\_dirs} in
 \texttt{python/setup.py.template} or the respective lines in \texttt{matlab/compileLNA.m}.
 
 \subsubsection*{CVODES}
-Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{./libraries}, and is also available from \href{http://computation.llnl.gov/casc/sundials}{http://computation.llnl.gov/casc/sundials}.
+Numerical integration is computed using the CVODES Sundials package.  Source code is included in \texttt{\$\{LNAplusplus\_ROOT\}/libraries/cvodes-2.7.0.tar.gz}, and is also available from \href{http://computation.llnl.gov/casc/sundials}{http://computation.llnl.gov/casc/sundials}.
 To setup CVODES, unzip the source archive, change to the source directory and run:
 
 \begin{verbatim}
-./configure --with-pic --prefix=`pwd`/../install/cvodes-2.7.0
+./configure --with-pic --prefix=$(pwd)/../install/cvodes-2.7.0
 make && make install
 \end{verbatim}
 
@@ -415,12 +439,14 @@ make && make install
 
 \subsubsection*{Python}
 
-In order to use LNA++ with Python, ensure you have installed the necessary scientific computing modules as listed below. Python libraries can be installed using package managers such as apt on Ubuntu, or macports/homebrew on Mac OS, or using the \texttt{pip3} Python package manager.
+In order to use LNA++ with Python, ensure you have installed the necessary scientific computing modules as listed below. LNA++ is compatible with Python 3.0 or later. All libraries must thus be the Python3-compatible version. Python libraries can be installed using package managers such as apt on Ubuntu, or macports/homebrew on macOS, or using the \texttt{pip3} Python package manager.
 
-LNA++ is compatible with Python 3.0 or later.  All libraries must thus be the Python3-compatible version.
+\begin{verbatim}
+pip3 install --user numpy sympy python-libsbml ipdb
+\end{verbatim}
 
-\textit{Note for Ubuntu Users:} The necessary Python packages can be installed using the command\\
-\texttt{sudo apt install python3-numpy python3-sympy libsbml5-python python3-ipdb}
+
+
 
 \begin{description}
  \item[numpy] 
@@ -443,9 +469,6 @@ In order to use LNA++ with Matlab, the Matlab \textit{Symbolic Math Toolbox} is 
 %\paragraph{If you do not have the \textit{Symbolic Math Toolbox} available:}
 %Both the Python and Matlab implementations of LNA++ generate the same C code for the analytical components of the LNA and its sensitivities. It is therefore possible to generate the C code using the Python scripts, through the \texttt{generateLNAComponents} step, as described below. The Matlab executable is then generated in the normal way, resuming with the \texttt{compileLNA} step.
 
-%
-%
-%
 \section{Usage}
 
 In this section we describe how to use LNA++ to create Matlab executable models and Python modules. More application examples are available in the \texttt{examples/} directory.
@@ -512,7 +535,7 @@ For convenience, the function \texttt{toLinear} is provided as a Matlab script, 
 \end{enumerate}
 
 \paragraph{Outputs:}
-If only 2 output arguments are specified, the computation engine does not compute sensitivities, which can be substantially faster.  If 3 or 4 outputs are specified, first order sensitivities are computed.  If 5 or 6 outputs are specified, first and second order sensitivities are computed which can take longer. In the following $N$ is the number of observed variables (\texttt{obsVar}), $T$ is the number of time points specified by \texttt{Time}, and $d$ is the number of model parameters + the number of species \todo{check meaning of $d$}. Note that LNA++ computes sensitivities with respect to model parameters and the initial conditions of the \texttt{MRE}, but not currently with respect to the initial variances.
+If only 2 output arguments are specified, the computation engine does not compute sensitivities, which can be substantially faster.  If 3 or 4 outputs are specified, first order sensitivities are computed.  If 5 or 6 outputs are specified, first and second order sensitivities are computed which can take longer. In the following $N$ is the number of observed variables (\texttt{obsVar}), $T$ is the number of time points specified by \texttt{Time}, and $d$ is the number of model parameters + the number of species. Note that LNA++ computes sensitivities with respect to model parameters and the initial conditions of the \texttt{MRE}, but not currently with respect to the initial variances.
 \begin{enumerate}
 \item \texttt{MRE}: a $N \times T$ matrix corresponding to the solution of the macroscopic rate equation for all observed variables.  
 \item \texttt{Sigma}: a $N \times N \times T$ array corresponding to the temporal cross-covariance of all observed species at all time points. 
@@ -674,7 +697,7 @@ To test the performance of LNA++, we implemented a simple birth-death process in
 \begin{figure}[htb!]
 \begin{center}
 \includegraphics[width=0.8\textwidth]{Figures/S1.pdf}
-\caption{\textbf{LNA accurately approximates a simple Birth-death model.} (A) mRNA and proteins are produced and degraded in a simple birth-death model.  (B) The protein autocovariance matrix, $\cov(P(s),P(t))$, estimated from empirical data. (C) Comparison of the LNA estimate and the empirical protein autocovariance at three time points. Estimates derived from SSA shown as circles, LNA as lines. }
+\caption{\textbf{LNA accurately approximates a simple Birth-death model.} (A) mRNA and proteins are produced and degraded in a simple birth-death model. (B) The protein autocovariance matrix, $\cov(P(s),P(t))$, estimated from empirical data. (C) Comparison of the LNA estimate and the empirical protein autocovariance at three time points. Estimates derived from 500 simulated SSA trajectories shown as circles, LNA as lines.}
 \label{fig:birth-death-model}
 \end{center}
 \end{figure}
@@ -694,7 +717,7 @@ $\mathcal{R}_4:$ & Protein & $\overset{\gamma_p} \longrightarrow $ & $\emptyset$
 \end{table}
 
 
-We performed exact simulation of the stochastic process and used LNA++ to compute the mean and temporal autocovariance of the proteins using the same model parameters.  For simplicity, and to replicate a typical fluorescence microscopy setup, only protein abundance is considered to be known.  The system size is set to $\Omega=1$ so that we can identify molecule numbers with molecular concentrations. For this simple system, the LNA agrees well with the exact stochastic simulations in terms of mean and variance (Figure~\ref{fig:birth-death-model}B) and the autocovariance (i.e.\ the cross-covariance of the protein only; Figures~\ref{fig:birth-death-model}C and~\ref{fig:birth-death-model}D). The autocovariance is shown at three sampled time points $(t=1.0, t=2.0, t=5.0)$, showing good qualitative agreement between the empirical covariance derived from 500 simulated SSA trajectories (Figure~\ref{fig:birth-death-model}E  circles), and from the LNA (Figure~\ref{fig:birth-death-model}E lines)\todo{Check missing subfigures D,E}.  In each case, the autocovariance is peaked at zero time lag, and decreases to zero in both directions, i.e. the correlation of fluctuations at a particular time point with future or past fluctuations decreases with increasing absolute time lag.
+We performed exact simulation of the stochastic process and used LNA++ to compute the mean and temporal autocovariance of the proteins using the same model parameters.  For simplicity, and to replicate a typical fluorescence microscopy setup, only protein abundance is considered to be known.  The system size is set to $\Omega=1$ so that we can identify molecule numbers with molecular concentrations. For this simple system, the LNA agrees well with the exact stochastic simulations in terms of mean and variance (Figure~\ref{fig:birth-death-model}B) and the autocovariance (i.e.\ the cross-covariance of the protein only; Figure~\ref{fig:birth-death-model}C). The autocovariance is shown at three sampled time points $(t=1.0, t=2.0, t=5.0)$, showing good qualitative agreement between the empirical covariance derived from 500 simulated SSA trajectories, and from the LNA (Figure~\ref{fig:birth-death-model}C).  In each case, the autocovariance is peaked at zero time lag, and decreases to zero in both directions, i.e. the correlation of fluctuations at a particular time point with future or past fluctuations decreases with increasing absolute time lag.
 
 Next, we compute sensitivities of the mean protein copy number with respect to the model parameters using LNA++, and compare the computed results to a finite difference approximation.  We find that the sensitivity of the mean agrees exactly with a finite difference approximation for both first and second order sensitivities, see Figures~\ref{fig:mean-first-order-sensitivities} and~\ref{fig:mean-second-order-sensitivities}, respectively.  The first order sensitivity of the autocovariance also shows excellent agreement between the finite difference approximation and the analytical result from LNA++ (Figure~\ref{fig:autocovariance-first-order-sensitivities}).  Lastly, the second order sensitivities are difficult to compute robustly using finite differences, for example due to limited accuracy of the ODE solver. While this is generally the case, for this simple model the finite difference approximation still agrees reasonably well with the analytically computed sensitivities from LNA++ (Figure~\ref{fig:autocovariance-second-order-sensitivities}).
 

@@ -10,11 +10,6 @@ matrix:
         apt:
           packages:
             - gfortran
-            - python3-numpy 
-            - python3-sympy
-            - libsbml5-python
-            - python3-ipdb 
-            - python3-matplotlib
     - os: linux  
       dist: xenial
       compiler: clang
